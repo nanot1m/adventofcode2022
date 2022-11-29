@@ -128,5 +128,5 @@ export function* map(iterable, f) {
  * @template T
  */
 export function toArray(iterable) {
-  return [...iterable]
+  return Array.from(iterable)
 }
