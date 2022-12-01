@@ -1,6 +1,15 @@
 // @ts-check
 
 /**
+ * @param {T} x
+ * @returns T
+ * @template T
+ */
+export function id(x) {
+  return x
+}
+
+/**
  * @param {T[]} xs
  * @param {(arg: T) => string | number} fn
  *
@@ -11,10 +20,27 @@ export function minBy(xs, fn) {
 }
 
 /**
+ * @param {T[]} xs
+ * @param {(arg: T) => string | number} fn
+ *
+ * @template T
+ */
+export function maxBy(xs, fn) {
+  return xs.reduce((a, b) => (fn(a) > fn(b) ? a : b))
+}
+
+/**
  * @param {number[]} xs
  */
 export function min(xs) {
-  return minBy(xs, (x) => x)
+  return minBy(xs, id)
+}
+
+/**
+ * @param {number[]} xs
+ */
+export function max(xs) {
+  return maxBy(xs, id)
 }
 
 /**
