@@ -24,5 +24,5 @@ npm run solve 1
 To create the template for the day 2, run the following command:
 
 ```
-npm run prepare 2.js
+npm run tpl 2.js
 ```
