@@ -8,6 +8,7 @@ const right = (/** @type {number} */ i) => (i + 1) << 1
 
 /**
  * @template T
+ * @implements {Iterable<T>}
  */
 export class PriorityQueue {
   /**
@@ -20,6 +21,18 @@ export class PriorityQueue {
     /** @private */
     this._comparator = comparator
   }
+
+  [Symbol.iterator]() {
+    return {
+      next: () => {
+        if (this.size() > 1) {
+          return { value: this.pop(), done: false }
+        }
+        return { done: true, value: this.pop() }
+      },
+    }
+  }
+
   size() {
     return this._heap.length
   }

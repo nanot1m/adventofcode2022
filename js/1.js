@@ -1,5 +1,7 @@
 // @ts-check
-import { max, readBlocks, readLines, sum } from "./lib.js"
+import { first, take, toArray } from "./itertools.js"
+import { readBlocks, readLines, sum } from "./lib.js"
+import { PriorityQueue } from "./priority-queue.js"
 import { solution } from "./solution.js"
 
 solution({
@@ -13,22 +15,20 @@ solution({
  * @param {string} input
  */
 function part1(input) {
-  const minVal = max(
-    readBlocks(input)
-      .map((x) => readLines(x).map(Number))
-      .map(sum),
-  )
-  return minVal
+  const pq = new PriorityQueue((a, b) => b - a)
+  for (const block of readBlocks(input)) {
+    pq.push(sum(readLines(block).map(Number)))
+  }
+  return first(pq)
 }
 
 /**
  * @param {string} input
  */
 function part2(input) {
-  const top3 = readBlocks(input)
-    .map((x) => readLines(x).map(Number))
-    .map(sum)
-    .sort((a, b) => a - b)
-    .slice(-3)
-  return sum(top3)
+  const pq = new PriorityQueue((a, b) => b - a)
+  for (const block of readBlocks(input)) {
+    pq.push(sum(readLines(block).map(Number)))
+  }
+  return sum(toArray(take(pq, 3)))
 }
