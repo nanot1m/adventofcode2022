@@ -175,3 +175,80 @@ export function find(iterable, predicate) {
 export function sum(xs) {
   return last(reduce(xs, add, 0))
 }
+
+/**
+ * @typedef {Object} GenericIt<T>
+ *
+ * @property {() => Iterable<T>} getIterable
+ * @property {<R>(fn: (arg: T) => R) => It<R>} map
+ * @property {(n: number) => It<T[]>} groupsOf
+ * @property {() => T[]} toArray
+ * @property {() => T | undefined} first
+ * @property {() => T | undefined} last
+ * @property {(predicate: (arg: T) => boolean) => T | undefined} find
+ * @property {(n: number) => It<T>} skip
+ * @property {(n: number) => It<T>} take
+ * @property {() => Set<T>} toSet
+ * @property {<R>(reducer: (arg0: R, arg1: T) => R, init: R) => It<R>} reduce
+ * @property {(fn: (arg: T) => void) => void} forEach
+ *
+ * @template T
+ */
+
+/**
+ * @typedef {GenericIt<number> & {
+ *    sum: () => number
+ *    min: () => number
+ *    max: () => number
+ * }} NumIt
+ */
+
+/**
+ * @typedef {T extends number ? NumIt : GenericIt<T>} It
+ * @template T
+ */
+
+/**
+ *
+ * @param {Iterable<T>} iterable
+ * @returns {It<T>}
+ * @template T
+ */
+export const it = (iterable) => {
+  /**
+   * @type {It<any>}
+   */
+  const returnValue = {
+    //#region GenericIt methods
+    getIterable: () => iterable,
+    /** @type {<R>(fn: (arg: T) => R) => It<R>} */
+    map: (fn) => it(map(iterable, fn)),
+    groupsOf: (n) => it(groupsOf(iterable, n)),
+    toArray: () => toArray(iterable),
+    first: () => first(iterable),
+    last: () => last(iterable),
+    /** @type {(predicate: (arg: T) => boolean) => T} */
+    find: (predicate) => find(iterable, predicate),
+    skip: (n) => it(skip(iterable, n)),
+    take: (n) => it(take(iterable, n)),
+    toSet: () => new Set(iterable),
+    /** @type {<R>(reducer: (arg0: R, arg1: T) => R, init: R) => It<R>} */
+    reduce: (reducer, initial) => it(reduce(iterable, reducer, initial)),
+    /** @type {(fn: (arg: T) => void) => void} */
+    forEach: (fn) => {
+      for (const x of iterable) {
+        fn(x)
+      }
+    },
+    //#endregion
+
+    //#region NumIt methods
+    sum: () => sum(/** @type {Iterable<number>} */ (iterable)),
+    min: () =>
+      /** @type {NumIt} */ (returnValue).reduce(Math.min, Infinity).last(),
+    max: () =>
+      /** @type {NumIt} */ (returnValue).reduce(Math.max, -Infinity).last(),
+    //#endregion
+  }
+  return /** @type {It<T>} */ (returnValue)
+}

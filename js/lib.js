@@ -1,7 +1,5 @@
 // @ts-check
 
-import { last, reduce } from "./itertools.js"
-
 /**
  * @param {T} x
  * @returns {T}

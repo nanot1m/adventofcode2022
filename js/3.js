@@ -1,6 +1,6 @@
 // @ts-check
 
-import { find, groupsOf, map, sum } from "./itertools.js"
+import { find, it } from "./itertools.js"
 import { readLines, splitAt } from "./lib.js"
 import { solution } from "./solution.js"
 
@@ -25,13 +25,11 @@ function getPriorities(ch) {
 function part1(input) {
   const lines = readLines(input.trim())
 
-  const priorities = lines.map((line) => {
-    const [left, right] = splitAt(line, line.length / 2)
-    const ch = find(left, (ch) => right.includes(ch))
-    return getPriorities(ch)
-  })
-
-  return sum(priorities)
+  return it(lines)
+    .map((line) => splitAt(line, line.length / 2))
+    .map(([left, right]) => find(left, (ch) => right.includes(ch)))
+    .map(getPriorities)
+    .sum()
 }
 
 /**
@@ -40,10 +38,9 @@ function part1(input) {
 function part2(input) {
   const lines = readLines(input.trim())
 
-  const priorities = map(groupsOf(lines, 3), ([a, b, c]) => {
-    const ch = find(a, (ch) => b.includes(ch) && c.includes(ch))
-    return getPriorities(ch)
-  })
-
-  return sum(priorities)
+  return it(lines)
+    .groupsOf(3)
+    .map(([a, b, c]) => find(a, (ch) => b.includes(ch) && c.includes(ch)))
+    .map(getPriorities)
+    .sum()
 }
