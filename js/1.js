@@ -1,6 +1,6 @@
 // @ts-check
-import { first, take, toArray } from "./itertools.js"
-import { readBlocks, readLines, sum } from "./lib.js"
+import { first, take, sum } from "./itertools.js"
+import { readBlocks, readLines } from "./lib.js"
 import { PriorityQueue } from "./priority-queue.js"
 import { solution } from "./solution.js"
 
@@ -30,5 +30,5 @@ function part2(input) {
   for (const block of readBlocks(input)) {
     pq.push(sum(readLines(block).map(Number)))
   }
-  return sum(toArray(take(pq, 3)))
+  return sum(take(pq, 3))
 }

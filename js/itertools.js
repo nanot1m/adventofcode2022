@@ -1,5 +1,7 @@
 // @ts-check
 
+import { add } from "./lib.js"
+
 /**
  * @param {number} start
  * @param {number} end
@@ -123,10 +125,53 @@ export function* map(iterable, f) {
 }
 
 /**
+ *
+ * @param {Iterable<T>} iterable
+ * @param {number} n
+ *
+ * @template T
+ */
+export function* groupsOf(iterable, n) {
+  let group = []
+  for (const x of iterable) {
+    group.push(x)
+    if (group.length === n) {
+      yield group
+      group = []
+    }
+  }
+  if (group.length > 0) {
+    yield group
+  }
+}
+
+/**
  * @param {Iterable<T>} iterable
  *
  * @template T
  */
 export function toArray(iterable) {
   return Array.from(iterable)
+}
+
+/**
+ * @param {Iterable<T>} iterable
+ * @param {(value: T) => boolean} predicate
+ * @returns {T | undefined}
+ * @template T
+ */
+export function find(iterable, predicate) {
+  for (const x of iterable) {
+    if (predicate(x)) {
+      return x
+    }
+  }
+}
+
+/**
+ * @param {Iterable<number>} xs
+ * @returns
+ */
+export function sum(xs) {
+  return last(reduce(xs, add, 0))
 }

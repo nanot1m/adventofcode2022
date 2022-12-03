@@ -1,8 +1,10 @@
 // @ts-check
 
+import { last, reduce } from "./itertools.js"
+
 /**
  * @param {T} x
- * @returns T
+ * @returns {T}
  * @template T
  */
 export function id(x) {
@@ -122,15 +124,6 @@ export function at(xs, n) {
 
 /**
  *
- * @param {number[]} xs
- * @returns
- */
-export function sum(xs) {
-  return xs.reduce(add, 0)
-}
-
-/**
- *
  * @param {number} a
  * @param {number} b
  * @returns
@@ -159,4 +152,15 @@ export function update(xs, i, fn) {
  */
 export function inc(x) {
   return x + 1
+}
+
+/**
+ * @param {T} xs
+ * @param {number} n
+ * @returns {[T, T]}
+ *
+ * @template {{slice(start: number, end?: number): T}} T
+ */
+export function splitAt(xs, n) {
+  return [xs.slice(0, n), xs.slice(n)]
 }
