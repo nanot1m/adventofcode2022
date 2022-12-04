@@ -177,6 +177,36 @@ export function sum(xs) {
 }
 
 /**
+ * @param {Iterable<T>} iterable
+ * @param {(value: T) => boolean} predicate
+ * @returns {Iterable<T>}
+ * @template T
+ */
+export function* filter(iterable, predicate) {
+  for (const x of iterable) {
+    if (predicate(x)) {
+      yield x
+    }
+  }
+}
+
+/**
+ * @param {Iterable<T>} iterable
+ * @param {(value: T) => boolean} [predicate]
+ * @returns {number}
+ * @template T
+ */
+export function count(iterable, predicate = () => true) {
+  let count = 0
+  for (const x of iterable) {
+    if (predicate(x)) {
+      count += 1
+    }
+  }
+  return count
+}
+
+/**
  * @typedef {Object} GenericIt<T>
  *
  * @property {() => Iterable<T>} getIterable
@@ -191,6 +221,8 @@ export function sum(xs) {
  * @property {() => Set<T>} toSet
  * @property {<R>(reducer: (arg0: R, arg1: T) => R, init: R) => It<R>} reduce
  * @property {(fn: (arg: T) => void) => void} forEach
+ * @property {(predicate?: (arg: T) => boolean) => number} count
+ * @property {(predicate: (arg: T) => boolean) => It<T>} filter
  *
  * @template T
  */
@@ -240,6 +272,10 @@ export const it = (iterable) => {
         fn(x)
       }
     },
+    filter: (/** @type {(arg: T) => boolean} */ predicate) =>
+      it(filter(iterable, predicate)),
+    count: (/** @type {(arg: T) => boolean} */ predicate) =>
+      count(iterable, predicate),
     //#endregion
 
     //#region NumIt methods
