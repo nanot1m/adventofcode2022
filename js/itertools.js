@@ -3,9 +3,9 @@
 import { add } from "./lib.js"
 
 /**
- * @param {number} start
- * @param {number} end
- * @param {number} step
+ * @param {number} [start]
+ * @param {number} [end]
+ * @param {number} [step]
  */
 export function* range(start, end, step = 1) {
   if (start === undefined) {
@@ -207,6 +207,38 @@ export function count(iterable, predicate = () => true) {
 }
 
 /**
+ *
+ * @param {Iterable<T>} iterableA
+ * @param {Iterable<U>} iterableB
+ * @returns {Iterable<[T, U]>}
+ *
+ * @template T, U
+ */
+export function* zip(iterableA, iterableB) {
+  const iterA = iterableA[Symbol.iterator]()
+  const iterB = iterableB[Symbol.iterator]()
+  while (true) {
+    const { value: a, done: doneA } = iterA.next()
+    const { value: b, done: doneB } = iterB.next()
+    if (doneA || doneB) {
+      return
+    }
+    yield [a, b]
+  }
+}
+
+/**
+ *
+ * @param {Iterable<T>} iterable
+ * @returns {Iterable<[number, T]>}
+ *
+ * @template T
+ */
+export function indexed(iterable) {
+  return zip(range(Infinity), iterable)
+}
+
+/**
  * @typedef {Object} GenericIt<T>
  *
  * @property {() => Iterable<T>} getIterable
@@ -223,6 +255,7 @@ export function count(iterable, predicate = () => true) {
  * @property {(fn: (arg: T) => void) => void} forEach
  * @property {(predicate?: (arg: T) => boolean) => number} count
  * @property {(predicate: (arg: T) => boolean) => It<T>} filter
+ * @property {() => It<[number, T]>} indexed
  *
  * @template T
  */
@@ -276,6 +309,7 @@ export const it = (iterable) => {
       it(filter(iterable, predicate)),
     count: (/** @type {(arg: T) => boolean} */ predicate) =>
       count(iterable, predicate),
+    indexed: () => it(indexed(iterable)),
     //#endregion
 
     //#region NumIt methods
