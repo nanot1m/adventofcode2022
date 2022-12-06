@@ -325,6 +325,32 @@ export function* skipLast(iterable, n = 1) {
 }
 
 /**
+ *
+ * @param {Iterable<T>} iterable
+ * @param {number} every
+ * @param {number} [skipInitial]
+ * @returns {Iterable<T>}
+ *
+ * @template T
+ */
+export function* takeEvery(iterable, every, skipInitial = 0) {
+  if (every <= 0) {
+    return
+  }
+  if (skipInitial < 0) {
+    skipInitial = 0
+  }
+
+  for (const x of iterable) {
+    if (skipInitial === 0) {
+      yield x
+      skipInitial = every
+    }
+    skipInitial--
+  }
+}
+
+/**
  * @typedef {Iterable<T> & {
  *    map: <R>(fn: (arg: T) => R) => FluentIterable<R>
  *    groupsOf: (n: number) => FluentIterable<T[]>
@@ -345,6 +371,7 @@ export function* skipLast(iterable, n = 1) {
  *    indexOf : (value: T) => number
  *    flatMap: <R>(f: (arg: T) => Iterable<R>) => FluentIterable<R>
  *    skipLast: (n?: number) => FluentIterable<T>
+ *    takeEvery: (every: number, skipInitial?: number) => FluentIterable<T>
  * }} GenericFluentIterable<T>
  *
  *
@@ -408,6 +435,8 @@ export const i = (iterable) => {
     /** @type {<R>(f: (arg: T) => Iterable<R>) => FluentIterable<R>} */
     flatMap: (f) => i(flatMap(iterable, f)),
     skipLast: (n) => i(skipLast(iterable, n)),
+    takeEvery: (every, skipInitial) =>
+      i(takeEvery(iterable, every, skipInitial)),
     //#endregion
 
     //#region NumFluentIterable methods

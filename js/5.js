@@ -1,7 +1,7 @@
 // @ts-check
 
 import { first, i } from "./itertools.js"
-import { readBlocks, readLines } from "./lib.js"
+import { readBlocks, readLines, rotateStrings2d } from "./lib.js"
 import { solution } from "./solution.js"
 
 solution({
@@ -17,16 +17,10 @@ solution({
 function parseInput(input) {
   const [stacksStr, commandsStr] = readBlocks(input.trimEnd())
 
-  const stacks = i(readLines(stacksStr))
-    .skipLast()
-    .flatMap((line) => i(line).groupsOf(4).indexed())
-    .filter(([, [, crate]]) => crate !== " ")
-    .reduce((acc, [index, [, crate]]) => {
-      acc[index] = acc[index] || []
-      acc[index].push(crate)
-      return acc
-    }, /** @type {string[][]} */ ([]))
-    .last()
+  const stacks = i(rotateStrings2d(readLines(stacksStr)))
+    .takeEvery(4, 1)
+    .map((x) => x.slice(1).split("").reverse())
+    .toArray()
 
   const commands = i(readLines(commandsStr))
     .map((line) => line.split(" "))

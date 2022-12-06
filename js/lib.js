@@ -1,5 +1,7 @@
 // @ts-check
 
+import { i } from "./itertools.js"
+
 /**
  * @param {T} x
  * @returns {T}
@@ -161,4 +163,63 @@ export function inc(x) {
  */
 export function splitAt(xs, n) {
   return [xs.slice(0, n), xs.slice(n)]
+}
+
+/**
+ *
+ * @param {T[][]} arr
+ * @param {boolean} clockwise
+ * @returns {T[][]}
+ *
+ * @template T
+ */
+export function rotate2d(arr, clockwise = true) {
+  const height = arr.length
+  const width = i(arr)
+    .map((line) => line.length)
+    .max()
+
+  const rotated = Array.from({ length: width }, () =>
+    Array.from({ length: height }),
+  )
+
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      const value = arr[y]?.[x]
+      const [i, j] = clockwise ? [x, height - y - 1] : [width - x - 1, y]
+      rotated[i][j] = value
+    }
+  }
+
+  return rotated
+}
+
+/**
+ *
+ * @param {string[]} strings
+ * @param {boolean} clockwise
+ */
+export function rotateStrings2d(strings, clockwise = true) {
+  const rotated = rotate2d(
+    strings.map((str) => str.split("")),
+    clockwise,
+  )
+
+  return rotated.map((line) =>
+    line
+      .map((x) => x ?? " ")
+      .join("")
+      .trimEnd(),
+  )
+}
+
+/**
+ *
+ * @param {string} str
+ * @param {boolean} [clockwise]
+ *
+ * @returns {string}
+ */
+export function rotateString2d(str, clockwise = true) {
+  return rotateStrings2d(str.split("\n"), clockwise).join("\n")
 }
