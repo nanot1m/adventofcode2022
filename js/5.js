@@ -1,7 +1,7 @@
 // @ts-check
 
 import { first, i } from "./itertools.js"
-import { readBlocks, readLines, rotateStrings2d } from "./lib.js"
+import { readBlocks, readLines, rotate } from "./lib.js"
 import { solution } from "./solution.js"
 
 solution({
@@ -17,14 +17,14 @@ solution({
 function parseInput(input) {
   const [stacksStr, commandsStr] = readBlocks(input.trimEnd())
 
-  const stacks = i(rotateStrings2d(readLines(stacksStr)))
+  const stacks = i(rotate(readLines(stacksStr)))
     .takeEvery(4, 1)
     .map((x) => x.slice(1).split("").reverse())
     .toArray()
 
   const commands = i(readLines(commandsStr))
-    .map((line) => line.split(" "))
-    .map(([, count, , from, , to]) => ({ count: +count, from: +from, to: +to }))
+    .map((line) => line.split(" ").map(Number))
+    .map(([, c, , f, , t]) => ({ count: c, from: f - 1, to: t - 1 }))
 
   return { stacks, commands }
 }
@@ -35,12 +35,13 @@ function parseInput(input) {
 function part1(input) {
   const { stacks, commands } = parseInput(input)
 
-  for (const { count, from, to } of commands) {
-    const toMove = stacks[from - 1].splice(0, count).reverse()
-    stacks[to - 1].unshift(...toMove)
-  }
-
-  return stacks.map(first).join("")
+  return commands
+    .reduce((xs, { count, from, to }) => {
+      xs[to].unshift(...xs[from].splice(0, count).reverse())
+      return xs
+    }, stacks)
+    .map(first)
+    .join("")
 }
 
 /**
@@ -49,10 +50,11 @@ function part1(input) {
 function part2(input) {
   const { stacks, commands } = parseInput(input)
 
-  for (const { count, from, to } of commands) {
-    const toMove = stacks[from - 1].splice(0, count)
-    stacks[to - 1].unshift(...toMove)
-  }
-
-  return stacks.map(first).join("")
+  return commands
+    .reduce((xs, { count, from, to }) => {
+      xs[to].unshift(...xs[from].splice(0, count))
+      return xs
+    }, stacks)
+    .map(first)
+    .join("")
 }

@@ -106,7 +106,7 @@ export function functor(value) {
  * @param {number} n
  * @template T
  */
-export function rotate(xs, n) {
+export function cycle(xs, n) {
   return xs.slice(n).concat(xs.slice(0, n))
 }
 
@@ -222,4 +222,23 @@ export function rotateStrings2d(strings, clockwise = true) {
  */
 export function rotateString2d(str, clockwise = true) {
   return rotateStrings2d(str.split("\n"), clockwise).join("\n")
+}
+
+/**
+ * @type {RotateFn}
+ *
+ * @template T
+ */
+// @ts-ignore
+export const rotate = (
+  /** @type {string | string[] | T[][]} */ rotatable,
+  clockwise = true,
+) => {
+  if (typeof rotatable === "string") {
+    return rotateString2d(rotatable, clockwise)
+  }
+  if (typeof rotatable[0] === "string") {
+    return rotateStrings2d(/** @type {string[]} */ (rotatable), clockwise)
+  }
+  return rotate2d(/** @type {T[][]} */ (rotatable), clockwise)
 }

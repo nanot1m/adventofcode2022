@@ -87,12 +87,12 @@ export function last(iterable) {
  * @template T
  * @template R
  */
-export function* reduce(iterable, reducer, initial) {
+export function reduce(iterable, reducer, initial) {
   let acc = initial
   for (const x of iterable) {
     acc = reducer(acc, x)
-    yield acc
   }
+  return acc
 }
 
 /**
@@ -173,7 +173,7 @@ export function find(iterable, predicate) {
  * @returns
  */
 export function sum(xs) {
-  return last(reduce(xs, add, 0))
+  return reduce(xs, add, 0)
 }
 
 /**
@@ -361,7 +361,7 @@ export function* takeEvery(iterable, every, skipInitial = 0) {
  *    skip: (n: number) => FluentIterable<T>
  *    take: (n: number) => FluentIterable<T>
  *    toSet: () => Set<T>
- *    reduce: <R>(reducer: (arg0: R, arg1: T) => R, init: R) => FluentIterable<R>
+ *    reduce: <R>(reducer: (arg0: R, arg1: T) => R, init: R) => R
  *    forEach: (fn: (arg: T) => void) => void
  *    count: (predicate?: (arg: T) => boolean) => number
  *    filter: (predicate: (arg: T) => boolean) => FluentIterable<T>
@@ -415,8 +415,8 @@ export const i = (iterable) => {
     skip: (n) => i(skip(iterable, n)),
     take: (n) => i(take(iterable, n)),
     toSet: () => new Set(iterable),
-    /** @type {<R>(reducer: (arg0: R, arg1: T) => R, init: R) => FluentIterable<R>} */
-    reduce: (reducer, initial) => i(reduce(iterable, reducer, initial)),
+    /** @type {<R>(reducer: (arg0: R, arg1: T) => R, init: R) => R} */
+    reduce: (reducer, initial) => reduce(iterable, reducer, initial),
     /** @type {(fn: (arg: T) => void) => void} */
     forEach: (fn) => {
       for (const x of iterable) {
@@ -442,13 +442,12 @@ export const i = (iterable) => {
     //#region NumFluentIterable methods
     sum: () => sum(/** @type {Iterable<number>} */ (iterable)),
     min: () =>
-      /** @type {NumFluentIterable} */ (returnValue)
-        .reduce(Math.min, Infinity)
-        .last(),
+      /** @type {NumFluentIterable} */ (returnValue).reduce(Math.min, Infinity),
     max: () =>
-      /** @type {NumFluentIterable} */ (returnValue)
-        .reduce(Math.max, -Infinity)
-        .last(),
+      /** @type {NumFluentIterable} */ (returnValue).reduce(
+        Math.max,
+        -Infinity,
+      ),
     //#endregion
   }
   return /** @type {FluentIterable<T>} */ (returnValue)

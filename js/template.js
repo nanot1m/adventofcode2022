@@ -4,10 +4,8 @@ import { solution } from "./solution.js"
 
 solution({
   solve(input) {
-    console.log(input)
     return [() => part1(input), () => part2(input)]
   },
-  submit: { 1: false, 2: false },
 })
 
 /**
