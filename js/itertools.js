@@ -239,66 +239,157 @@ export function indexed(iterable) {
 }
 
 /**
- * @typedef {Object} GenericIt<T>
  *
- * @property {() => Iterable<T>} getIterable
- * @property {<R>(fn: (arg: T) => R) => It<R>} map
- * @property {(n: number) => It<T[]>} groupsOf
- * @property {() => T[]} toArray
- * @property {() => T | undefined} first
- * @property {() => T | undefined} last
- * @property {(predicate: (arg: T) => boolean) => T | undefined} find
- * @property {(n: number) => It<T>} skip
- * @property {(n: number) => It<T>} take
- * @property {() => Set<T>} toSet
- * @property {<R>(reducer: (arg0: R, arg1: T) => R, init: R) => It<R>} reduce
- * @property {(fn: (arg: T) => void) => void} forEach
- * @property {(predicate?: (arg: T) => boolean) => number} count
- * @property {(predicate: (arg: T) => boolean) => It<T>} filter
- * @property {() => It<[number, T]>} indexed
+ * @param {Iterable<T>} iterable
+ * @param {number} n
+ * @returns {Iterable<Iterable<T>>}
+ *
+ * @template T
+ */
+export function* windowed(iterable, n) {
+  const buffer = []
+  for (const x of iterable) {
+    buffer.push(x)
+    if (buffer.length === n) {
+      yield buffer
+      buffer.shift()
+    }
+  }
+}
+
+/**
+ * @param {Iterable<T>} iterable
+ * @param {(value: T) => boolean} predicate
+ * @returns {number}
+ * @template T
+ */
+export function findIndex(iterable, predicate) {
+  let i = 0
+  for (const x of iterable) {
+    if (predicate(x)) {
+      return i
+    }
+    i++
+  }
+  return -1
+}
+
+/**
+ *
+ * @param {Iterable<T>} iterable
+ * @param {T} value
+ * @returns {number}
+ *
+ * @template T
+ */
+export function indexOf(iterable, value) {
+  return findIndex(iterable, (x) => x === value)
+}
+
+/**
+ *
+ * @param {Iterable<T>} iterable
+ * @param {(arg: T) => Iterable<R>} f
+ * @returns {Iterable<R>}
+ *
+ * @template T, R
+ */
+export function* flatMap(iterable, f) {
+  for (const x of iterable) {
+    yield* f(x)
+  }
+}
+
+/**
+ * @param {Iterable<T>} iterable
+ * @param {number} [n]
+ * @returns {Iterable<T>}
+ *
+ * @template T
+ */
+export function* skipLast(iterable, n = 1) {
+  if (n <= 0) {
+    yield* iterable
+    return
+  }
+
+  const buffer = Array(n)
+  let i = 0
+  for (const x of iterable) {
+    if (i >= n) {
+      yield buffer[i % n]
+    }
+    buffer[i % n] = x
+    i++
+  }
+}
+
+/**
+ * @typedef {Iterable<T> & {
+ *    map: <R>(fn: (arg: T) => R) => FluentIterable<R>
+ *    groupsOf: (n: number) => FluentIterable<T[]>
+ *    toArray: () => T[]
+ *    first: () => T | undefined
+ *    last: () => T | undefined
+ *    find: (predicate: (arg: T) => boolean) => T | undefined
+ *    skip: (n: number) => FluentIterable<T>
+ *    take: (n: number) => FluentIterable<T>
+ *    toSet: () => Set<T>
+ *    reduce: <R>(reducer: (arg0: R, arg1: T) => R, init: R) => FluentIterable<R>
+ *    forEach: (fn: (arg: T) => void) => void
+ *    count: (predicate?: (arg: T) => boolean) => number
+ *    filter: (predicate: (arg: T) => boolean) => FluentIterable<T>
+ *    indexed: () => FluentIterable<[number, T]>
+ *    windowed: (n: number) => FluentIterable<Iterable<T>>
+ *    findIndex: (predicate: (arg: T) => boolean) => number
+ *    indexOf : (value: T) => number
+ *    flatMap: <R>(f: (arg: T) => Iterable<R>) => FluentIterable<R>
+ *    skipLast: (n?: number) => FluentIterable<T>
+ * }} GenericFluentIterable<T>
+ *
  *
  * @template T
  */
 
 /**
- * @typedef {GenericIt<number> & {
+ * @typedef {GenericFluentIterable<number> & {
  *    sum: () => number
  *    min: () => number
  *    max: () => number
- * }} NumIt
+ * }} NumFluentIterable
  */
 
 /**
- * @typedef {T extends number ? NumIt : GenericIt<T>} It
+ * @typedef {T extends number ? NumFluentIterable : GenericFluentIterable<T>} FluentIterable
  * @template T
  */
 
 /**
  *
  * @param {Iterable<T>} iterable
- * @returns {It<T>}
+ * @returns {FluentIterable<T>}
  * @template T
  */
-export const it = (iterable) => {
+export const i = (iterable) => {
   /**
-   * @type {It<any>}
+   * @type {FluentIterable<any>}
    */
   const returnValue = {
-    //#region GenericIt methods
-    getIterable: () => iterable,
-    /** @type {<R>(fn: (arg: T) => R) => It<R>} */
-    map: (fn) => it(map(iterable, fn)),
-    groupsOf: (n) => it(groupsOf(iterable, n)),
+    //#region GenericFluentIterable methods
+    [Symbol.iterator]: () => iterable[Symbol.iterator](),
+    /** @type {<R>(fn: (arg: T) => R) => FluentIterable<R>} */
+    map: (fn) => i(map(iterable, fn)),
+    groupsOf: (n) => i(groupsOf(iterable, n)),
     toArray: () => toArray(iterable),
     first: () => first(iterable),
     last: () => last(iterable),
     /** @type {(predicate: (arg: T) => boolean) => T} */
     find: (predicate) => find(iterable, predicate),
-    skip: (n) => it(skip(iterable, n)),
-    take: (n) => it(take(iterable, n)),
+    skip: (n) => i(skip(iterable, n)),
+    take: (n) => i(take(iterable, n)),
     toSet: () => new Set(iterable),
-    /** @type {<R>(reducer: (arg0: R, arg1: T) => R, init: R) => It<R>} */
-    reduce: (reducer, initial) => it(reduce(iterable, reducer, initial)),
+    /** @type {<R>(reducer: (arg0: R, arg1: T) => R, init: R) => FluentIterable<R>} */
+    reduce: (reducer, initial) => i(reduce(iterable, reducer, initial)),
     /** @type {(fn: (arg: T) => void) => void} */
     forEach: (fn) => {
       for (const x of iterable) {
@@ -306,19 +397,30 @@ export const it = (iterable) => {
       }
     },
     filter: (/** @type {(arg: T) => boolean} */ predicate) =>
-      it(filter(iterable, predicate)),
+      i(filter(iterable, predicate)),
     count: (/** @type {(arg: T) => boolean} */ predicate) =>
       count(iterable, predicate),
-    indexed: () => it(indexed(iterable)),
+    indexed: () => i(indexed(iterable)),
+    windowed: (n) => i(windowed(iterable, n)),
+    findIndex: (/** @type {(arg: T) => boolean} */ predicate) =>
+      findIndex(iterable, predicate),
+    indexOf: (/** @type {T} */ value) => indexOf(iterable, value),
+    /** @type {<R>(f: (arg: T) => Iterable<R>) => FluentIterable<R>} */
+    flatMap: (f) => i(flatMap(iterable, f)),
+    skipLast: (n) => i(skipLast(iterable, n)),
     //#endregion
 
-    //#region NumIt methods
+    //#region NumFluentIterable methods
     sum: () => sum(/** @type {Iterable<number>} */ (iterable)),
     min: () =>
-      /** @type {NumIt} */ (returnValue).reduce(Math.min, Infinity).last(),
+      /** @type {NumFluentIterable} */ (returnValue)
+        .reduce(Math.min, Infinity)
+        .last(),
     max: () =>
-      /** @type {NumIt} */ (returnValue).reduce(Math.max, -Infinity).last(),
+      /** @type {NumFluentIterable} */ (returnValue)
+        .reduce(Math.max, -Infinity)
+        .last(),
     //#endregion
   }
-  return /** @type {It<T>} */ (returnValue)
+  return /** @type {FluentIterable<T>} */ (returnValue)
 }

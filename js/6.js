@@ -1,5 +1,6 @@
 // @ts-check
 
+import { i } from "./itertools.js"
 import { solution } from "./solution.js"
 
 solution({
@@ -15,14 +16,12 @@ solution({
 function part1(input) {
   const distinctN = 4
 
-  for (let i = 0; i < input.length - distinctN; i++) {
-    const set = new Set(input.slice(i, i + distinctN))
-    if (set.size === distinctN) {
-      return i + distinctN
-    }
-  }
+  const index = i(input)
+    .windowed(distinctN)
+    .map((window) => new Set(window).size)
+    .indexOf(distinctN)
 
-  return null
+  return index + distinctN
 }
 
 /**
@@ -31,12 +30,10 @@ function part1(input) {
 function part2(input) {
   const distinctN = 14
 
-  for (let i = 0; i < input.length - distinctN; i++) {
-    const set = new Set(input.slice(i, i + distinctN))
-    if (set.size === distinctN) {
-      return i + distinctN
-    }
-  }
+  const index = i(input)
+    .windowed(distinctN)
+    .map((window) => new Set(window).size)
+    .indexOf(distinctN)
 
-  return null
+  return index + distinctN
 }

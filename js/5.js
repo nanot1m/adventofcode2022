@@ -1,6 +1,6 @@
 // @ts-check
 
-import { first, groupsOf, indexed, it } from "./itertools.js"
+import { first, i } from "./itertools.js"
 import { readBlocks, readLines } from "./lib.js"
 import { solution } from "./solution.js"
 
@@ -15,23 +15,22 @@ solution({
  * @param {string} input
  */
 function parseInput(input) {
-  const [stacksStr, commandsStr] = readBlocks(input)
+  const [stacksStr, commandsStr] = readBlocks(input.trimEnd())
 
-  /** @type {string[][]} */
-  const stacks = Array.from(Array(9), () => [])
+  const stacks = i(readLines(stacksStr))
+    .skipLast()
+    .flatMap((line) => i(line).groupsOf(4).indexed())
+    .filter(([, [, crate]]) => crate !== " ")
+    .reduce((acc, [index, [, crate]]) => {
+      acc[index] = acc[index] || []
+      acc[index].push(crate)
+      return acc
+    }, /** @type {string[][]} */ ([]))
+    .last()
 
-  for (const line of readLines(stacksStr).slice(0, -1)) {
-    for (const [i, [, crate]] of indexed(groupsOf(line, 4))) {
-      if (crate !== " ") {
-        stacks[i].push(crate)
-      }
-    }
-  }
-
-  const commands = readLines(commandsStr.trim()).map((command) => {
-    const [, count, , from, , to] = command.split(" ").map(Number)
-    return { count, from, to }
-  })
+  const commands = i(readLines(commandsStr))
+    .map((line) => line.split(" "))
+    .map(([, count, , from, , to]) => ({ count: +count, from: +from, to: +to }))
 
   return { stacks, commands }
 }
