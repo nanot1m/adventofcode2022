@@ -351,6 +351,51 @@ export function* takeEvery(iterable, every, skipInitial = 0) {
 }
 
 /**
+ * @param {Iterable<T>} iterable
+ * @param {(value: T) => boolean} predicate
+ * @returns {Iterable<T>}
+ * @template T
+ */
+export function* takeWhile(iterable, predicate) {
+  for (const x of iterable) {
+    if (!predicate(x)) {
+      return
+    }
+    yield x
+  }
+}
+
+/**
+ * @param {Iterable<T>} iterable
+ * @param {(value: T) => boolean} predicate
+ * @returns {Iterable<T>}
+ * @template T
+ */
+export function* takeUntil(iterable, predicate) {
+  for (const x of iterable) {
+    if (predicate(x)) {
+      return
+    }
+    yield x
+  }
+}
+
+/**
+ * @param {Iterable<T>} iterable
+ * @param {(value: T) => boolean} predicate
+ * @returns {boolean}
+ * @template T
+ */
+export function every(iterable, predicate) {
+  for (const x of iterable) {
+    if (!predicate(x)) {
+      return false
+    }
+  }
+  return true
+}
+
+/**
  * @typedef {Iterable<T> & {
  *    map: <R>(fn: (arg: T) => R) => FluentIterable<R>
  *    groupsOf: (n: number) => FluentIterable<T[]>
@@ -372,6 +417,9 @@ export function* takeEvery(iterable, every, skipInitial = 0) {
  *    flatMap: <R>(f: (arg: T) => Iterable<R>) => FluentIterable<R>
  *    skipLast: (n?: number) => FluentIterable<T>
  *    takeEvery: (every: number, skipInitial?: number) => FluentIterable<T>
+ *    takeWhile: (predicate: (arg: T) => boolean) => FluentIterable<T>
+ *    takeUntil: (predicate: (arg: T) => boolean) => FluentIterable<T>
+ *    every: (predicate: (arg: T) => boolean) => boolean
  * }} GenericFluentIterable<T>
  *
  *
@@ -387,7 +435,11 @@ export function* takeEvery(iterable, every, skipInitial = 0) {
  */
 
 /**
- * @typedef {T extends number ? NumFluentIterable : GenericFluentIterable<T>} FluentIterable
+ * @typedef {T extends number
+ *    ? NumFluentIterable
+ *    : T extends boolean
+ *    ? GenericFluentIterable<boolean>
+ *    : GenericFluentIterable<T>} FluentIterable
  * @template T
  */
 
@@ -437,6 +489,12 @@ export const i = (iterable) => {
     skipLast: (n) => i(skipLast(iterable, n)),
     takeEvery: (every, skipInitial) =>
       i(takeEvery(iterable, every, skipInitial)),
+    takeWhile: (/** @type {(arg: T) => boolean} */ predicate) =>
+      i(takeWhile(iterable, predicate)),
+    takeUntil: (/** @type {(arg: T) => boolean} */ predicate) =>
+      i(takeUntil(iterable, predicate)),
+    every: (/** @type {(arg: T) => boolean} */ predicate) =>
+      every(iterable, predicate),
     //#endregion
 
     //#region NumFluentIterable methods
