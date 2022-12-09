@@ -1,6 +1,6 @@
 // @ts-check
 
-import { i } from "./itertools.js"
+import { $ } from "./itertools.js"
 
 /**
  * @param {T} x
@@ -175,7 +175,7 @@ export function splitAt(xs, n) {
  */
 export function rotate2d(arr, clockwise = true) {
   const height = arr.length
-  const width = i(arr)
+  const width = $(arr)
     .map((line) => line.length)
     .max()
 

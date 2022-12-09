@@ -396,6 +396,38 @@ export function every(iterable, predicate) {
 }
 
 /**
+ *
+ * @param {Iterable<T>} iterable
+ * @param {number} index
+ * @param {(arg: T) => T} fn
+ *
+ * @template T
+ */
+export function* updateAt(iterable, index, fn) {
+  let i = 0
+  for (const x of iterable) {
+    if (i === index) {
+      yield fn(x)
+    } else {
+      yield x
+    }
+    i++
+  }
+}
+
+/**
+ *
+ * @param {Iterable<T>} iterable
+ * @param  {T[]} values
+ *
+ * @template T
+ */
+export function* unshift(iterable, ...values) {
+  yield* values
+  yield* iterable
+}
+
+/**
  * @typedef {Iterable<T> & {
  *    map: <R>(fn: (arg: T) => R) => FluentIterable<R>
  *    groupsOf: (n: number) => FluentIterable<T[]>
@@ -420,6 +452,8 @@ export function every(iterable, predicate) {
  *    takeWhile: (predicate: (arg: T) => boolean) => FluentIterable<T>
  *    takeUntil: (predicate: (arg: T) => boolean) => FluentIterable<T>
  *    every: (predicate: (arg: T) => boolean) => boolean
+ *    updateAt: (index: number, fn: (arg: T) => T) => FluentIterable<T>
+ *    unshift: (...values: T[]) => FluentIterable<T>
  * }} GenericFluentIterable<T>
  *
  *
@@ -449,7 +483,7 @@ export function every(iterable, predicate) {
  * @returns {FluentIterable<T>}
  * @template T
  */
-export const i = (iterable) => {
+export const $ = (iterable) => {
   /**
    * @type {FluentIterable<any>}
    */
@@ -457,15 +491,15 @@ export const i = (iterable) => {
     //#region GenericFluentIterable methods
     [Symbol.iterator]: () => iterable[Symbol.iterator](),
     /** @type {<R>(fn: (arg: T) => R) => FluentIterable<R>} */
-    map: (fn) => i(map(iterable, fn)),
-    groupsOf: (n) => i(groupsOf(iterable, n)),
+    map: (fn) => $(map(iterable, fn)),
+    groupsOf: (n) => $(groupsOf(iterable, n)),
     toArray: () => toArray(iterable),
     first: () => first(iterable),
     last: () => last(iterable),
     /** @type {(predicate: (arg: T) => boolean) => T} */
     find: (predicate) => find(iterable, predicate),
-    skip: (n) => i(skip(iterable, n)),
-    take: (n) => i(take(iterable, n)),
+    skip: (n) => $(skip(iterable, n)),
+    take: (n) => $(take(iterable, n)),
     toSet: () => new Set(iterable),
     /** @type {<R>(reducer: (arg0: R, arg1: T) => R, init: R) => R} */
     reduce: (reducer, initial) => reduce(iterable, reducer, initial),
@@ -476,25 +510,28 @@ export const i = (iterable) => {
       }
     },
     filter: (/** @type {(arg: T) => boolean} */ predicate) =>
-      i(filter(iterable, predicate)),
+      $(filter(iterable, predicate)),
     count: (/** @type {(arg: T) => boolean} */ predicate) =>
       count(iterable, predicate),
-    indexed: () => i(indexed(iterable)),
-    windowed: (n) => i(windowed(iterable, n)),
+    indexed: () => $(indexed(iterable)),
+    windowed: (n) => $(windowed(iterable, n)),
     findIndex: (/** @type {(arg: T) => boolean} */ predicate) =>
       findIndex(iterable, predicate),
     indexOf: (/** @type {T} */ value) => indexOf(iterable, value),
     /** @type {<R>(f: (arg: T) => Iterable<R>) => FluentIterable<R>} */
-    flatMap: (f) => i(flatMap(iterable, f)),
-    skipLast: (n) => i(skipLast(iterable, n)),
+    flatMap: (f) => $(flatMap(iterable, f)),
+    skipLast: (n) => $(skipLast(iterable, n)),
     takeEvery: (every, skipInitial) =>
-      i(takeEvery(iterable, every, skipInitial)),
+      $(takeEvery(iterable, every, skipInitial)),
     takeWhile: (/** @type {(arg: T) => boolean} */ predicate) =>
-      i(takeWhile(iterable, predicate)),
+      $(takeWhile(iterable, predicate)),
     takeUntil: (/** @type {(arg: T) => boolean} */ predicate) =>
-      i(takeUntil(iterable, predicate)),
+      $(takeUntil(iterable, predicate)),
     every: (/** @type {(arg: T) => boolean} */ predicate) =>
       every(iterable, predicate),
+    updateAt: (/** @type {number} */ index, /** @type {(arg: T) => T} */ fn) =>
+      $(updateAt(iterable, index, fn)),
+    unshift: (/** @type {T[]} */ ...values) => $(unshift(iterable, ...values)),
     //#endregion
 
     //#region NumFluentIterable methods

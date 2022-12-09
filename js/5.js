@@ -1,6 +1,6 @@
 // @ts-check
 
-import { first, i } from "./itertools.js"
+import { first, $ } from "./itertools.js"
 import { readBlocks, readLines, rotate } from "./lib.js"
 import { solution } from "./solution.js"
 
@@ -17,12 +17,12 @@ solution({
 function parseInput(input) {
   const [stacksStr, commandsStr] = readBlocks(input.trimEnd())
 
-  const stacks = i(rotate(readLines(stacksStr)))
+  const stacks = $(rotate(readLines(stacksStr)))
     .takeEvery(4, 1)
     .map((x) => x.slice(1).split("").reverse())
     .toArray()
 
-  const commands = i(readLines(commandsStr))
+  const commands = $(readLines(commandsStr))
     .map((line) => line.split(" ").map(Number))
     .map(([, c, , f, , t]) => ({ count: c, from: f - 1, to: t - 1 }))
 

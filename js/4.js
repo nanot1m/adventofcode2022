@@ -1,6 +1,6 @@
 // @ts-check
 
-import { i } from "./itertools.js"
+import { $ } from "./itertools.js"
 import { readLines } from "./lib.js"
 import { solution } from "./solution.js"
 
@@ -26,7 +26,7 @@ function parseInput(input) {
 function part1(input) {
   const lines = parseInput(input)
 
-  return i(lines).count(
+  return $(lines).count(
     ([lRange, rRange]) =>
       (lRange[0] <= rRange[0] && rRange[1] <= lRange[1]) ||
       (rRange[0] <= lRange[0] && lRange[1] <= rRange[1]),
@@ -39,7 +39,7 @@ function part1(input) {
 function part2(input) {
   const lines = parseInput(input)
 
-  return i(lines)
+  return $(lines)
     .map((ranges) => ranges.sort((a, b) => a[0] - b[0]))
     .count(([lRange, rRange]) => rRange[0] <= lRange[1])
 }

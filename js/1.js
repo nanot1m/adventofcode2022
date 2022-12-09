@@ -1,5 +1,5 @@
 // @ts-check
-import { i } from "./itertools.js"
+import { $ } from "./itertools.js"
 import { readBlocks, readLines } from "./lib.js"
 import { PriorityQueue } from "./priority-queue.js"
 import { solution } from "./solution.js"
@@ -15,8 +15,8 @@ solution({
  * @param {string} input
  */
 function part1(input) {
-  return i(readBlocks(input))
-    .map((block) => i(readLines(block)).map(Number).sum())
+  return $(readBlocks(input))
+    .map((block) => $(readLines(block)).map(Number).sum())
     .max()
 }
 
@@ -27,9 +27,9 @@ function part2(input) {
   /** @type {PriorityQueue<number>} */
   const pq = new PriorityQueue((a, b) => b - a)
 
-  i(readBlocks(input))
-    .map((block) => i(readLines(block)).map(Number).sum())
+  $(readBlocks(input))
+    .map((block) => $(readLines(block)).map(Number).sum())
     .forEach((x) => pq.push(x))
 
-  return i(pq).take(3).sum()
+  return $(pq).take(3).sum()
 }

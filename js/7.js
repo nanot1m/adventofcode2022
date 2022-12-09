@@ -1,6 +1,6 @@
 // @ts-check
 
-import { i } from "./itertools.js"
+import { $ } from "./itertools.js"
 import { readLines } from "./lib.js"
 import { solution } from "./solution.js"
 
@@ -137,7 +137,7 @@ function part1(input) {
   const fs = parseInput(input)
   const dirSizes = getDirSizes(fs)
 
-  return i(Object.values(dirSizes))
+  return $(Object.values(dirSizes))
     .filter((x) => x <= 100_000)
     .sum()
 }
@@ -155,7 +155,7 @@ function part2(input) {
   const reqFreeSize = 30_000_000
   const delta = reqFreeSize - curFreeSize
 
-  return i(Object.values(dirSizes))
+  return $(Object.values(dirSizes))
     .filter((x) => x >= delta)
     .min()
 }
