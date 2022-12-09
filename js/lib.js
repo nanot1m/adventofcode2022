@@ -225,6 +225,17 @@ export function rotateString2d(str, clockwise = true) {
 }
 
 /**
+ *
+ * @param  {T} args
+ * @returns {T}
+ *
+ * @template {unknown[]} T
+ */
+export function tuple(...args) {
+  return args
+}
+
+/**
  * @type {RotateFn}
  *
  * @template T
