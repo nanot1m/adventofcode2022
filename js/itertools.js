@@ -473,6 +473,8 @@ export function* unshift(iterable, ...values) {
  *    ? NumFluentIterable
  *    : T extends boolean
  *    ? GenericFluentIterable<boolean>
+ *    : T extends string
+ *    ? GenericFluentIterable<string>
  *    : GenericFluentIterable<T>} FluentIterable
  * @template T
  */

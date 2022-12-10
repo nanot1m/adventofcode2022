@@ -1,19 +1,15 @@
 // @ts-check
 
 /**
- * @typedef {Readonly<[x: number, y: number]>} Vec2d
+ * @typedef {[x: number, y: number]} Vec2d
  */
-
-export const DIR_TO_VEC = /** @type {const} */ ({
-  U: [0, 1],
-  R: [1, 0],
-  D: [0, -1],
-  L: [-1, 0],
-})
 
 /**
- * @typedef {keyof typeof DIR_TO_VEC} Dir
+ * @typedef {"U" | "R"| "D" | "L"} Dir
  */
+
+/** @type {Record<Dir, Vec2d>} */
+export const DIR_TO_VEC = { U: [0, 1], R: [1, 0], D: [0, -1], L: [-1, 0] }
 
 /**
  *
