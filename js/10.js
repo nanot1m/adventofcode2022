@@ -50,13 +50,11 @@ function part2(input) {
 
   const image = $(p)
     .map((c) => [c.cycle, c.x + 40 * Math.floor(c.cycle / 40)])
-    .map(([cycle, x]) => (cycle >= x - 1 && cycle <= x + 1 ? "█" : "◻️"))
+    .map(([cycle, x]) => (cycle >= x - 1 && cycle <= x + 1 ? "█" : " "))
     .groupsOf(40)
     .map((row) => row.join(""))
     .toArray()
     .join("\n")
 
-  setTimeout(() => console.log(image))
-
-  return "Answer is in the console."
+  return "\n" + image + "\n"
 }

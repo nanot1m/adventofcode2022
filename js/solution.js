@@ -53,7 +53,13 @@ export async function solution({
             results.push(result)
             drawText(`Part ${idx + 1}`)
             drawText("")
-            drawText(`Result: ${result}`)
+            const lines = result.toString().split("\n")
+            if (lines.length > 1) {
+              drawText("Result:")
+              lines.forEach((/** @type {string} */ line) => drawText(line))
+            } else {
+              drawText(`Result: ${result}`)
+            }
             drawText(`  Time: ${(performance.now() - now).toFixed(0)}ms`)
             drawLine(idx === solutions.length - 1 ? 2 : 0)
           })
