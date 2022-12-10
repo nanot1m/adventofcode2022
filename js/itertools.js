@@ -461,6 +461,12 @@ export function* unshift(iterable, ...values) {
  */
 
 /**
+ * @typedef {GenericFluentIterable<string> & {
+ *    join: (separator?: string) => string
+ * }} StrFluentIterable
+ */
+
+/**
  * @typedef {GenericFluentIterable<number> & {
  *    sum: () => number
  *    min: () => number
@@ -474,7 +480,7 @@ export function* unshift(iterable, ...values) {
  *    : T extends boolean
  *    ? GenericFluentIterable<boolean>
  *    : T extends string
- *    ? GenericFluentIterable<string>
+ *    ? StrFluentIterable
  *    : GenericFluentIterable<T>} FluentIterable
  * @template T
  */
@@ -545,6 +551,10 @@ export const $ = (iterable) => {
         Math.max,
         -Infinity,
       ),
+    //#endregion
+
+    //#region StrFluentIterable methods
+    join: (separator = ",") => toArray(iterable).join(separator),
     //#endregion
   }
   return /** @type {FluentIterable<T>} */ (returnValue)

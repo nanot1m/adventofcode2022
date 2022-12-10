@@ -15,16 +15,12 @@ solution({
  */
 function* prepareProgram(lines) {
   let x = 1
-  let cycles = 0
 
   for (const line of lines) {
     const tokens = line.split(" ")
-    if (tokens[0] === "noop") {
-      yield { cycle: cycles++, x }
-    }
+    yield x
     if (tokens[0] === "addx") {
-      yield { cycle: cycles++, x }
-      yield { cycle: cycles++, x }
+      yield x
       x += Number(tokens[1])
     }
   }
@@ -37,8 +33,9 @@ function part1(input) {
   const p = prepareProgram(readLines(input.trimEnd()))
 
   return $(p)
+    .indexed()
     .takeEvery(40, 19)
-    .map((c) => c.x * c.cycle)
+    .map(([cycle, x]) => (cycle + 1) * x)
     .sum()
 }
 
@@ -49,11 +46,9 @@ function part2(input) {
   const p = prepareProgram(readLines(input.trimEnd()))
 
   const image = $(p)
-    .map((c) => [c.cycle, c.x + 40 * Math.floor(c.cycle / 40)])
-    .map(([cycle, x]) => (cycle >= x - 1 && cycle <= x + 1 ? "█" : " "))
     .groupsOf(40)
-    .map((row) => row.join(""))
-    .toArray()
+    .map((xs) => xs.map((x, i) => (Math.abs((i % 40) - x) <= 1 ? "█" : " ")))
+    .map((xs) => xs.join(""))
     .join("\n")
 
   return "\n" + image + "\n"
