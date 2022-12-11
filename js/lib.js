@@ -253,3 +253,26 @@ export const rotate = (
   }
   return rotate2d(/** @type {T[][]} */ (rotatable), clockwise)
 }
+
+/**
+ * @param {TemplateStringsArray} strings
+ * @param  {T} keys
+ *
+ * @template {string[]} T
+ */
+export function tpl(strings, ...keys) {
+  return (/** @type {string} */ input) => {
+    const model = /** @type {Record<T[number], string>} */ ({})
+    let lastIndex = 0
+    for (let i = 0; i < keys.length; i++) {
+      const key = keys[i]
+      const start = strings[i].length + lastIndex
+      const end = strings[i + 1]
+        ? input.indexOf(strings[i + 1], start)
+        : input.length
+      model[key] = input.slice(start, end)
+      lastIndex = end
+    }
+    return model
+  }
+}

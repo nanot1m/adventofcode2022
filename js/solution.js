@@ -53,7 +53,7 @@ export async function solution({
             results.push(result)
             drawText(`Part ${idx + 1}`)
             drawText("")
-            const lines = result.toString().split("\n")
+            const lines = (result ?? "").toString().split("\n")
             if (lines.length > 1) {
               drawText("Result:")
               lines.forEach((/** @type {string} */ line) => drawText(line))
