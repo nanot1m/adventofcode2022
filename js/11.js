@@ -1,7 +1,7 @@
 // @ts-check
 
 import { range } from "./itertools.js"
-import { readBlocks, readIntArr, tpl } from "./lib.js"
+import { readBlocks, tpl } from "./lib.js"
 import { solution } from "./solution.js"
 
 solution({
@@ -10,23 +10,23 @@ solution({
   },
 })
 
-const monkeyTpl = tpl`Monkey ${"index|int"}:
+const ops = {
+  "+": (/** @type {number} */ a, /** @type {number} */ b) => a + b,
+  "*": (/** @type {number} */ a, /** @type {number} */ b) => a * b,
+}
+
+const monkeyTpl = tpl`\
+Monkey ${"index|int"}:
   Starting items: ${"items|int[]"}
   Operation: new = old ${"op"} ${"arg|int"}
   Test: divisible by ${"divisibleBy|int"}
     If true: throw to monkey ${"ifTrue|int"}
-    If false: throw to monkey ${"ifFalse|int"}`.map((m) => {
-  return {
-    index: m.index,
-    items: m.items,
-    divisibleBy: m.divisibleBy,
-    targets: { true: m.ifTrue, false: m.ifFalse },
-    op(/** @type {number} */ old) {
-      const right = isNaN(m.arg) ? old : m.arg
-      return m.op === "+" ? old + right : old * right
-    },
-  }
-})
+    If false: throw to monkey ${"ifFalse|int"}\
+`.map(({ ifFalse, ifTrue, arg, op, ...rest }) => ({
+  ...rest,
+  target: (/** @type {boolean} */ result) => (result ? ifTrue : ifFalse),
+  op: (/** @type {number} */ old) => ops[op](old, isNaN(arg) ? old : arg),
+}))
 
 /**
  * @param {string} input
@@ -50,9 +50,9 @@ function solve(monkeys, rounds, worry) {
   for (const _ of range(rounds)) {
     for (const m of monkeys) {
       while (m.items.length > 0) {
-        const old = m.items.shift()
-        const next = worry ? Math.floor(m.op(old) / 3) : m.op(old) % d
-        const target = m.targets[next % m.divisibleBy === 0]
+        const item = m.op(m.items.shift())
+        const next = worry ? Math.floor(item / 3) : item % d
+        const target = m.target(next % m.divisibleBy === 0)
         monkeys[target].items.push(next)
         stats[m.index]++
       }
