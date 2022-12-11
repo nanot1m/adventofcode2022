@@ -1,7 +1,7 @@
 // @ts-check
 
 import { $, range } from "./itertools.js"
-import { readLines } from "./lib.js"
+import { add, mul, readLines } from "./lib.js"
 import { solution } from "./solution.js"
 
 solution({
@@ -73,9 +73,9 @@ function part1(input) {
    */
   const vis = (dx, dy, x, y, v) => $(ray(dx, dy, x, y)).every((n) => n < v)
 
-  return (
-    perimeter +
-    $(traverse()).count((pos) => directions.some((dir) => vis(...dir, ...pos)))
+  return add(
+    perimeter,
+    $(traverse()).count((pos) => directions.some((dir) => vis(...dir, ...pos))),
   )
 }
 
@@ -103,6 +103,6 @@ function part2(input) {
 
   return $(traverse())
     .map((pos) => directions.map((dir) => score(...dir, ...pos)))
-    .map((scores) => scores.reduce((a, b) => a * b, 1))
+    .map((scores) => scores.reduce(mul, 1))
     .max()
 }

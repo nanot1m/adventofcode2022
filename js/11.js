@@ -1,7 +1,7 @@
 // @ts-check
 
 import { range } from "./itertools.js"
-import { readBlocks, tpl } from "./lib.js"
+import { add, compareDesc, mul, readBlocks, tpl } from "./lib.js"
 import { solution } from "./solution.js"
 
 solution({
@@ -10,10 +10,7 @@ solution({
   },
 })
 
-const ops = {
-  "+": (/** @type {number} */ a, /** @type {number} */ b) => a + b,
-  "*": (/** @type {number} */ a, /** @type {number} */ b) => a * b,
-}
+const ops = { "+": add, "*": mul }
 
 const monkeyTpl = tpl`\
 Monkey ${"index|int"}:
@@ -59,10 +56,7 @@ function solve(monkeys, rounds, worry) {
     }
   }
 
-  return stats
-    .sort((a, b) => b - a)
-    .slice(0, 2)
-    .reduce((a, b) => a * b)
+  return stats.sort(compareDesc).slice(0, 2).reduce(mul)
 }
 
 /**

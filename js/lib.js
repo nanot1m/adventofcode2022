@@ -139,13 +139,39 @@ export function at(xs, n) {
 }
 
 /**
- *
  * @param {number} a
  * @param {number} b
  * @returns
  */
 export function add(a, b) {
   return a + b
+}
+
+/**
+ * @param {number} a
+ * @param {number} b
+ * @returns
+ */
+export function mul(a, b) {
+  return a * b
+}
+
+/**
+ * @param {number} a
+ * @param {number} b
+ * @returns
+ */
+export function compareAsc(a, b) {
+  return a - b
+}
+
+/**
+ * @param {number} a
+ * @param {number} b
+ * @returns
+ */
+export function compareDesc(a, b) {
+  return b - a
 }
 
 /**
