@@ -23,6 +23,20 @@ declare global {
     : T extends { type: "tuple"; items: ParserType[]; separator?: string }
     ? { [K in keyof T["items"]]: ParserTypeValue<T["items"][K]> }
     : never
+
+  type TemplateKey<T> = T extends `${infer K}|${infer _}` ? K : T
+
+  type TemplateValue<T> = T extends `${infer _}|${infer V}`
+    ? TemplateValueHelper<V>
+    : string
 }
+
+type TemplateValueHelper<V> = V extends "int"
+  ? number
+  : V extends "str"
+  ? string
+  : V extends `${infer U}[]`
+  ? TemplateValueHelper<U>[]
+  : never
 
 export {}

@@ -277,22 +277,60 @@ export const rotate = (
  * @template {string[]} T
  */
 export function tpl(strings, ...keys) {
+  /**
+   * @param {string} strVal
+   */
+  function tryGetSeparator(strVal) {
+    const separators = [", ", ",", " - ", "-", " "]
+    for (const separator of separators) {
+      if (strVal.includes(separator)) {
+        return separator
+      }
+    }
+    return null
+  }
+
+  /**
+   * @param {string} strVal
+   * @param {string} type
+   */
+  function parseValue(strVal, type) {
+    if (!type) {
+      return strVal
+    }
+    if (type === "int") {
+      return parseInt(strVal, 10)
+    }
+    if (type.endsWith("[]")) {
+      const separator = tryGetSeparator(strVal)
+      if (!separator) {
+        return [parseValue(strVal, type.slice(0, -2))]
+      }
+      const childType = type.slice(0, -2)
+      return strVal.split(separator).map((x) => parseValue(x, childType))
+    }
+    return strVal
+  }
+
   function parse(/** @type {string} */ input) {
-    const model = /** @type {Record<T[number], string>} */ ({})
+    const model =
+      /** @type {{[P in T[number] as TemplateKey<P>]: TemplateValue<P> }} */ ({})
     let lastIndex = 0
     for (let i = 0; i < keys.length; i++) {
       const start = strings[i].length + lastIndex
       const end = strings[i + 1]
         ? input.indexOf(strings[i + 1], start)
         : input.length
-      model[keys[i]] = input.slice(start, end)
+      const strVal = input.slice(start, end)
+      const [key, type] = keys[i].split("|")
+      model[key] = parseValue(strVal, type)
       lastIndex = end
     }
     return model
   }
 
   /**
-   * @param {(arg: Record<T[number], string>) => R} fn
+   * @param {(arg: ReturnType<typeof parse>) => R} fn
    * @template R
    */
   parse.map = (fn) => (/** @type {string} */ input) => fn(parse(input))

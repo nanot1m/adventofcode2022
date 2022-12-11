@@ -11,11 +11,7 @@ solution({
   submit: { 1: false, 2: false },
 })
 
-const commandTpl = tpl`move ${"count"} from ${"from"} to ${"to"}`.map((m) => ({
-  count: Number(m.count),
-  from: Number(m.from) - 1,
-  to: Number(m.to) - 1,
-}))
+const commandTpl = tpl`move ${"count|int"} from ${"from|int"} to ${"to|int"}`
 
 /**
  * @param {string} input
@@ -41,7 +37,7 @@ function part1(input) {
 
   return commands
     .reduce((xs, { count, from, to }) => {
-      xs[to].unshift(...xs[from].splice(0, count).reverse())
+      xs[to - 1].unshift(...xs[from - 1].splice(0, count).reverse())
       return xs
     }, stacks)
     .map(first)
@@ -56,7 +52,7 @@ function part2(input) {
 
   return commands
     .reduce((xs, { count, from, to }) => {
-      xs[to].unshift(...xs[from].splice(0, count))
+      xs[to - 1].unshift(...xs[from - 1].splice(0, count))
       return xs
     }, stacks)
     .map(first)

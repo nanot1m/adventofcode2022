@@ -11,10 +11,7 @@ solution({
   submit: { 1: false, 2: false },
 })
 
-const lineTpl = tpl`${"x1"}-${"x2"},${"y1"}-${"y2"}`.map((m) => [
-  [+m.x1, +m.x2],
-  [+m.y1, +m.y2],
-])
+const lineTpl = tpl`${"pair|int[][]"}`.map((m) => m.pair)
 
 /**
  * @param {string} input

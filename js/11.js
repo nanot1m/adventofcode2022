@@ -10,19 +10,19 @@ solution({
   },
 })
 
-const monkeyTpl = tpl`Monkey ${"index"}:
-  Starting items: ${"items"}
-  Operation: new = old ${"op"} ${"arg"}
-  Test: divisible by ${"divisibleBy"}
-    If true: throw to monkey ${"ifTrue"}
-    If false: throw to monkey ${"ifFalse"}`.map((m) => {
+const monkeyTpl = tpl`Monkey ${"index|int"}:
+  Starting items: ${"items|int[]"}
+  Operation: new = old ${"op"} ${"arg|int"}
+  Test: divisible by ${"divisibleBy|int"}
+    If true: throw to monkey ${"ifTrue|int"}
+    If false: throw to monkey ${"ifFalse|int"}`.map((m) => {
   return {
-    index: Number(m.index),
-    items: readIntArr(m.items),
-    divisibleBy: Number(m.divisibleBy),
-    targets: { true: Number(m.ifTrue), false: Number(m.ifFalse) },
+    index: m.index,
+    items: m.items,
+    divisibleBy: m.divisibleBy,
+    targets: { true: m.ifTrue, false: m.ifFalse },
     op(/** @type {number} */ old) {
-      const right = m.arg === "old" ? old : Number(m.arg)
+      const right = isNaN(m.arg) ? old : m.arg
       return m.op === "+" ? old + right : old * right
     },
   }
