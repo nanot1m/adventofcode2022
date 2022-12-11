@@ -1,7 +1,7 @@
 // @ts-check
 
 import { first, $ } from "./itertools.js"
-import { readBlocks, readLines, rotate } from "./lib.js"
+import { readBlocks, readLines, rotate, tpl } from "./lib.js"
 import { solution } from "./solution.js"
 
 solution({
@@ -10,6 +10,12 @@ solution({
   },
   submit: { 1: false, 2: false },
 })
+
+const commandTpl = tpl`move ${"count"} from ${"from"} to ${"to"}`.map((m) => ({
+  count: Number(m.count),
+  from: Number(m.from) - 1,
+  to: Number(m.to) - 1,
+}))
 
 /**
  * @param {string} input
@@ -22,9 +28,7 @@ function parseInput(input) {
     .map((x) => x.slice(1).split("").reverse())
     .toArray()
 
-  const commands = $(readLines(commandsStr))
-    .map((line) => line.split(" ").map(Number))
-    .map(([, c, , f, , t]) => ({ count: c, from: f - 1, to: t - 1 }))
+  const commands = $(readLines(commandsStr)).map(commandTpl)
 
   return { stacks, commands }
 }

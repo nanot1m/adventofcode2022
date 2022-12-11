@@ -1,7 +1,7 @@
 // @ts-check
 
 import { range } from "./itertools.js"
-import { readBlocks, tpl } from "./lib.js"
+import { readBlocks, readIntArr, tpl } from "./lib.js"
 import { solution } from "./solution.js"
 
 solution({
@@ -12,30 +12,28 @@ solution({
 
 const monkeyTpl = tpl`Monkey ${"index"}:
   Starting items: ${"items"}
-  Operation: new = ${"lOp"} ${"op"} ${"rOp"}
+  Operation: new = old ${"op"} ${"arg"}
   Test: divisible by ${"divisibleBy"}
     If true: throw to monkey ${"ifTrue"}
-    If false: throw to monkey ${"ifFalse"}`
+    If false: throw to monkey ${"ifFalse"}`.map((m) => {
+  return {
+    index: Number(m.index),
+    items: readIntArr(m.items),
+    divisibleBy: Number(m.divisibleBy),
+    targets: { true: Number(m.ifTrue), false: Number(m.ifFalse) },
+    op(/** @type {number} */ old) {
+      const right = m.arg === "old" ? old : Number(m.arg)
+      return m.op === "+" ? old + right : old * right
+    },
+  }
+})
 
 /**
  * @param {string} input
  * @returns
  */
 function parseInput(input) {
-  return readBlocks(input.trimEnd())
-    .map(monkeyTpl)
-    .map((m) => ({
-      index: Number(m.index),
-      items: m.items.split(", ").map(Number),
-      divisibleBy: Number(m.divisibleBy),
-      targets: { true: Number(m.ifTrue), false: Number(m.ifFalse) },
-      op(/** @type {number} */ old) {
-        const left = m.lOp === "old" ? old : Number(m.lOp)
-        const right = m.rOp === "old" ? old : Number(m.rOp)
-        if (m.op === "+") return left + right
-        return left * right
-      },
-    }))
+  return readBlocks(input.trimEnd()).map(monkeyTpl)
 }
 
 /**

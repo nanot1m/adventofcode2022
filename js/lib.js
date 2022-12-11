@@ -81,6 +81,22 @@ export function readBlocks(input) {
 }
 
 /**
+ * @param {string} input
+ * @returns
+ */
+export function readIntLines(input) {
+  return readLines(input).map(Number)
+}
+
+/**
+ * @param {string} input
+ * @param {string} [separator]
+ */
+export function readIntArr(input, separator = ",") {
+  return input.split(separator).map(Number)
+}
+
+/**
  *
  * @param {T} value
  * @template T
@@ -261,18 +277,25 @@ export const rotate = (
  * @template {string[]} T
  */
 export function tpl(strings, ...keys) {
-  return (/** @type {string} */ input) => {
+  function parse(/** @type {string} */ input) {
     const model = /** @type {Record<T[number], string>} */ ({})
     let lastIndex = 0
     for (let i = 0; i < keys.length; i++) {
-      const key = keys[i]
       const start = strings[i].length + lastIndex
       const end = strings[i + 1]
         ? input.indexOf(strings[i + 1], start)
         : input.length
-      model[key] = input.slice(start, end)
+      model[keys[i]] = input.slice(start, end)
       lastIndex = end
     }
     return model
   }
+
+  /**
+   * @param {(arg: Record<T[number], string>) => R} fn
+   * @template R
+   */
+  parse.map = (fn) => (/** @type {string} */ input) => fn(parse(input))
+
+  return parse
 }

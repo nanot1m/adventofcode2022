@@ -1,7 +1,7 @@
 // @ts-check
 
 import { $ } from "./itertools.js"
-import { readLines } from "./lib.js"
+import { readLines, tpl } from "./lib.js"
 import { solution } from "./solution.js"
 
 solution({
@@ -11,13 +11,16 @@ solution({
   submit: { 1: false, 2: false },
 })
 
+const lineTpl = tpl`${"x1"}-${"x2"},${"y1"}-${"y2"}`.map((m) => [
+  [+m.x1, +m.x2],
+  [+m.y1, +m.y2],
+])
+
 /**
  * @param {string} input
  */
 function parseInput(input) {
-  return readLines(input.trim()).map((x) =>
-    x.split(",").map((x) => x.split("-").map(Number)),
-  )
+  return readLines(input.trim()).map(lineTpl)
 }
 
 /**
@@ -27,9 +30,7 @@ function part1(input) {
   const lines = parseInput(input)
 
   return $(lines).count(
-    ([lRange, rRange]) =>
-      (lRange[0] <= rRange[0] && rRange[1] <= lRange[1]) ||
-      (rRange[0] <= lRange[0] && lRange[1] <= rRange[1]),
+    ([[x1, x2], [y1, y2]]) => (x1 <= y1 && y2 <= x2) || (y1 <= x1 && x2 <= y2),
   )
 }
 
@@ -41,5 +42,5 @@ function part2(input) {
 
   return $(lines)
     .map((ranges) => ranges.sort((a, b) => a[0] - b[0]))
-    .count(([lRange, rRange]) => rRange[0] <= lRange[1])
+    .count(([[, x2], [y1]]) => y1 <= x2)
 }
