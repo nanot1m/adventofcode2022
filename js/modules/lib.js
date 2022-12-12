@@ -1,6 +1,6 @@
 // @ts-check
 
-import { $ } from "./itertools.js"
+import { it } from "./itertools.js"
 
 /**
  * @param {T} x
@@ -217,7 +217,7 @@ export function splitAt(xs, n) {
  */
 export function rotate2d(arr, clockwise = true) {
   const height = arr.length
-  const width = $(arr)
+  const width = it(arr)
     .map((line) => line.length)
     .max()
 
@@ -278,7 +278,7 @@ export function tuple(...args) {
 }
 
 /**
- * @type {RotateFn}
+ * @type {import("./types.js").RotateFn}
  *
  * @template T
  */
@@ -340,7 +340,7 @@ export function tpl(strings, ...keys) {
 
   function parse(/** @type {string} */ input) {
     const model =
-      /** @type {{[P in T[number] as TemplateKey<P>]: TemplateValue<P> }} */ ({})
+      /** @type {{[P in T[number] as import("./types.js").TemplateKey<P>]: import("./types.js").TemplateValue<P> }} */ ({})
     let lastIndex = 0
     for (let i = 0; i < keys.length; i++) {
       const start = strings[i].length + lastIndex

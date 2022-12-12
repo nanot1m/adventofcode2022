@@ -1,6 +1,6 @@
 // @ts-check
 
-import { readLines } from "./lib.js"
+import { readLines } from "./modules/lib.js"
 import { solution } from "./solution.js"
 
 solution({

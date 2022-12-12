@@ -1,6 +1,6 @@
 // @ts-check
 
-import { $ } from "./itertools.js"
+import { it } from "./modules/itertools.js"
 import { solution } from "./solution.js"
 
 solution({
@@ -16,7 +16,7 @@ solution({
 function part1(input) {
   const distinctN = 4
 
-  const index = $(input)
+  const index = it(input)
     .windowed(distinctN)
     .map((window) => new Set(window).size)
     .indexOf(distinctN)
@@ -30,7 +30,7 @@ function part1(input) {
 function part2(input) {
   const distinctN = 14
 
-  const index = $(input)
+  const index = it(input)
     .windowed(distinctN)
     .map((window) => new Set(window).size)
     .indexOf(distinctN)

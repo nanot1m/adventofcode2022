@@ -1,8 +1,8 @@
 // @ts-check
 
-import { readLines, tuple } from "./lib.js"
+import { readLines, tuple } from "./modules/lib.js"
 import { solution } from "./solution.js"
-import * as V from "./vec.js"
+import * as V from "./modules/vec.js"
 
 solution({
   solve(input) {

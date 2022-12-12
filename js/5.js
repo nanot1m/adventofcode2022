@@ -1,7 +1,7 @@
 // @ts-check
 
-import { first, $ } from "./itertools.js"
-import { readBlocks, readLines, rotate, tpl } from "./lib.js"
+import { first, it } from "./modules/itertools.js"
+import { readBlocks, readLines, rotate, tpl } from "./modules/lib.js"
 import { solution } from "./solution.js"
 
 solution({
@@ -19,12 +19,12 @@ const commandTpl = tpl`move ${"count|int"} from ${"from|int"} to ${"to|int"}`
 function parseInput(input) {
   const [stacksStr, commandsStr] = readBlocks(input.trimEnd())
 
-  const stacks = $(rotate(readLines(stacksStr)))
+  const stacks = it(rotate(readLines(stacksStr)))
     .takeEvery(4, 1)
     .map((x) => x.slice(1).split("").reverse())
     .toArray()
 
-  const commands = $(readLines(commandsStr)).map(commandTpl)
+  const commands = it(readLines(commandsStr)).map(commandTpl)
 
   return { stacks, commands }
 }

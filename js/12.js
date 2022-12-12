@@ -1,8 +1,8 @@
 // @ts-check
-import { $ } from "./itertools.js"
-import { bfs, parseMap2d } from "./map2d.js"
+import { V } from "./modules/index.js"
+import { it } from "./modules/itertools.js"
+import { parseMap2d } from "./modules/map2d.js"
 import { solution } from "./solution.js"
-import * as V from "./vec.js"
 
 solution({
   solve(input) {
@@ -21,14 +21,14 @@ const z = "z".charCodeAt(0)
 function part1(input) {
   const map2d = parseMap2d(input).map((x) => x.charCodeAt(0))
 
-  const start = $(map2d).find((x) => x.value === S).pos
-  const end = $(map2d).find((x) => x.value === E).pos
+  const start = it(map2d).find((x) => x.value === S).pos
+  const end = it(map2d).find((x) => x.value === E).pos
 
   map2d.set(start, a)
   map2d.set(end, z)
 
-  const mapBfs = bfs(map2d, (a, b) => a.value - b.value <= 1, start)
-  const result = $(mapBfs).find((x) => V.eq(x.pos, end)).distance
+  const mapBfs = map2d.bfs((a, b) => b.value - a.value <= 1, start)
+  const result = it(mapBfs).find((x) => V.eq(x.pos, end)).distance
 
   return result
 }
@@ -39,19 +39,18 @@ function part1(input) {
 function part2(input) {
   const map2d = parseMap2d(input).map((x) => x.charCodeAt(0))
 
-  const start = $(map2d).find((x) => x.value === S).pos
-  const end = $(map2d).find((x) => x.value === E).pos
+  const start = it(map2d).find((x) => x.value === S).pos
+  const end = it(map2d).find((x) => x.value === E).pos
 
   map2d.set(start, a)
   map2d.set(end, z)
 
-  const starts = $(map2d)
+  const starts = it(map2d)
     .filter((x) => x.value === a)
     .map((x) => x.pos)
 
-  const mapBfs = bfs(map2d, (a, b) => a.value - b.value <= 1, starts)
-
-  const result = $(mapBfs).find((x) => V.eq(x.pos, end)).distance
+  const mapBfs = map2d.bfs((a, b) => b.value - a.value <= 1, starts)
+  const result = it(mapBfs).find((x) => V.eq(x.pos, end)).distance
 
   return result
 }

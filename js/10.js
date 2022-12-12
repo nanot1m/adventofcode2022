@@ -1,7 +1,7 @@
 // @ts-check
 
-import { $ } from "./itertools.js"
-import { readLines } from "./lib.js"
+import { it } from "./modules/itertools.js"
+import { readLines } from "./modules/lib.js"
 import { solution } from "./solution.js"
 
 solution({
@@ -32,7 +32,7 @@ function* prepareProgram(lines) {
 function part1(input) {
   const p = prepareProgram(readLines(input.trimEnd()))
 
-  return $(p)
+  return it(p)
     .indexed()
     .takeEvery(40, 19)
     .map(([cycle, x]) => (cycle + 1) * x)
@@ -45,7 +45,7 @@ function part1(input) {
 function part2(input) {
   const p = prepareProgram(readLines(input.trimEnd()))
 
-  const image = $(p)
+  const image = it(p)
     .groupsOf(40)
     .map((xs) => xs.map((x, i) => (Math.abs((i % 40) - x) <= 1 ? "█" : " ")))
     .map((xs) => xs.join(""))

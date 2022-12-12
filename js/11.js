@@ -1,7 +1,7 @@
 // @ts-check
 
-import { range } from "./itertools.js"
-import { add, compareDesc, mul, readBlocks, tpl } from "./lib.js"
+import { range } from "./modules/itertools.js"
+import { add, compareDesc, mul, readBlocks, tpl } from "./modules/lib.js"
 import { solution } from "./solution.js"
 
 solution({

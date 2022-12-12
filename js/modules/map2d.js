@@ -15,12 +15,12 @@ import * as V from "./vec.js"
 /**
  *
  * @param {Map2d<T>} map2d
- * @param {(next: BfsPos<T>, current: BfsPos<T>) => boolean} canGo
+ * @param {(from: BfsPos<T>, to: BfsPos<T>) => boolean} canGoFromTo
  * @param {V.Vec2d | Iterable<V.Vec2d>} start
  *
  * @template T
  */
-export function* bfs(map2d, canGo, start) {
+export function* bfs(map2d, canGoFromTo, start) {
   /** @type {BfsPos<T>[]} */
   const queue = []
 
@@ -69,7 +69,7 @@ export function* bfs(map2d, canGo, start) {
         parent: current,
       }
 
-      if (canGo(nextBfs, current)) {
+      if (canGoFromTo(current, nextBfs)) {
         queue.push(nextBfs)
       }
     }
@@ -83,6 +83,7 @@ export function* bfs(map2d, canGo, start) {
  *    get: (vec: V.Vec2d) => T,
  *    set: (vec: V.Vec2d, value: T) => Map2d<T>,
  *    map: <R>(mapFn: (arg0: T, arg1: V.Vec2d) => R) => Map2d<R>,
+ *    bfs: (canGo: (from: BfsPos<T>, to: BfsPos<T>) => boolean, start: V.Vec2d | Iterable<V.Vec2d>) => Iterable<BfsPos<T>>,
  * }} Map2d
  *
  * @template T
@@ -114,6 +115,9 @@ export function toMap2d(raw) {
         row.map((value, x) => mapFn(value, V.vec(x, y))),
       )
       return toMap2d(next)
+    },
+    bfs(canGo, start) {
+      return bfs(map, canGo, start)
     },
     [Symbol.iterator]() {
       return toIterable(raw)
