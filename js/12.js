@@ -45,12 +45,8 @@ function part2(input) {
   map2d.set(start, a)
   map2d.set(end, z)
 
-  const starts = it(map2d)
-    .filter((x) => x.value === a)
-    .map((x) => x.pos)
-
-  const mapBfs = map2d.bfs((a, b) => b.value - a.value <= 1, starts)
-  const result = it(mapBfs).find((x) => V.eq(x.pos, end)).distance
+  const mapBfs = map2d.bfs((a, b) => a.value - b.value <= 1, end)
+  const result = it(mapBfs).find((x) => x.value === a).distance
 
   return result
 }
