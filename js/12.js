@@ -1,7 +1,8 @@
 // @ts-check
-
-import { readLines } from "./lib.js"
+import { $ } from "./itertools.js"
+import { bfs, parseMap2d } from "./map2d.js"
 import { solution } from "./solution.js"
+import * as V from "./vec.js"
 
 solution({
   solve(input) {
@@ -9,17 +10,48 @@ solution({
   },
 })
 
+const S = "S".charCodeAt(0)
+const E = "E".charCodeAt(0)
+const a = "a".charCodeAt(0)
+const z = "z".charCodeAt(0)
+
 /**
  * @param {string} input
  */
 function part1(input) {
-  const lines = readLines(input.trimEnd())
-  return null
+  const map2d = parseMap2d(input).map((x) => x.charCodeAt(0))
+
+  const start = $(map2d).find((x) => x.value === S).pos
+  const end = $(map2d).find((x) => x.value === E).pos
+
+  map2d.set(start, a)
+  map2d.set(end, z)
+
+  const mapBfs = bfs(map2d, (a, b) => a.value - b.value <= 1, start)
+  const result = $(mapBfs).find((x) => V.eq(x.pos, end)).distance
+
+  return result
 }
 
 /**
  * @param {string} input
  */
 function part2(input) {
-  return null
+  const map2d = parseMap2d(input).map((x) => x.charCodeAt(0))
+
+  const start = $(map2d).find((x) => x.value === S).pos
+  const end = $(map2d).find((x) => x.value === E).pos
+
+  map2d.set(start, a)
+  map2d.set(end, z)
+
+  const starts = $(map2d)
+    .filter((x) => x.value === a)
+    .map((x) => x.pos)
+
+  const mapBfs = bfs(map2d, (a, b) => a.value - b.value <= 1, starts)
+
+  const result = $(mapBfs).find((x) => V.eq(x.pos, end)).distance
+
+  return result
 }
