@@ -12,21 +12,24 @@ solution({
 })
 
 /**
- * @param {import("./modules/types.js").NestedArray<number>} left
- * @param {import("./modules/types.js").NestedArray<number>} right
+ * @typedef {import("./modules/types.js").NestedArray<number>} NestedNumArray
+ */
+
+/**
+ * @param {NestedNumArray} left
+ * @param {NestedNumArray} right
+ *
+ * @returns {number}
  */
 function compare(left, right, indent = 0) {
-  if (left === undefined || right === undefined) {
-    return 1
+  if (!Array.isArray(left) && !Array.isArray(right)) {
+    return left - right < 0 ? -1 : left - right > 0 ? 1 : 0
   }
   if (Array.isArray(left) && !Array.isArray(right)) {
     return compare(left, [right], indent + 1)
   }
   if (!Array.isArray(left) && Array.isArray(right)) {
     return compare([left], right, indent + 1)
-  }
-  if (!Array.isArray(left) && !Array.isArray(right)) {
-    return left - right < 0 ? -1 : left - right > 0 ? 1 : 0
   }
   if (Array.isArray(left) && Array.isArray(right)) {
     let i = 0
@@ -45,6 +48,7 @@ function compare(left, right, indent = 0) {
 
     return compare(left.length, right.length, indent + 1)
   }
+  return 0
 }
 
 /**
@@ -73,7 +77,7 @@ const RIGHT_DIV = [[6]]
 function part2(input) {
   const blocks = readBlocks(input.trim())
 
-  /** @type {PriorityQueue<any>} */
+  /** @type {PriorityQueue<NestedNumArray>} */
   const pq = new PriorityQueue(compare)
 
   it(blocks)

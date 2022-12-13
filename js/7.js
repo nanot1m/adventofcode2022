@@ -29,6 +29,7 @@ solution({
 
 /**
  * @param {string} input
+ * @returns {Dir}
  */
 function parseInput(input) {
   const lines = readLines(input.trim())
@@ -36,42 +37,37 @@ function parseInput(input) {
   /** @type {Dir} */
   const fs = { name: "/", parent: null, children: [] }
 
-  /** @type {Dir} */
+  /** @type {Dir | null} */
   let currentDir = null
-
-  /**
-   * @param {string} name
-   */
-  function cd(name) {
-    if (name === "/") {
-      currentDir = fs
-      return
-    }
-
-    if (name === "..") {
-      if (currentDir == null) {
-        throw new Error("Cannot go up from root")
-      }
-      currentDir = currentDir.parent
-      return
-    }
-
-    if (currentDir == null) {
-      throw new Error("Current dir is not set")
-    }
-    const dir = currentDir.children.find((x) => x.name === name)
-    if (dir == null) {
-      throw new Error(`Cannot find dir ${name}`)
-    }
-    if (!("children" in dir)) {
-      throw new Error("Expected dir, got file")
-    }
-    currentDir = dir
-  }
 
   for (const line of lines) {
     if (line.startsWith("$ cd")) {
-      cd(line.split(" ")[2])
+      const name = line.split(" ")[2]
+      if (name === "/") {
+        currentDir = fs
+        continue
+      }
+
+      if (name === "..") {
+        if (currentDir == null) {
+          throw new Error("Cannot go up from root")
+        }
+        currentDir = currentDir.parent
+        continue
+      }
+
+      if (currentDir == null) {
+        throw new Error("Current dir is not set")
+      }
+
+      const dir = currentDir.children.find((x) => x.name === name)
+      if (dir == null) {
+        throw new Error(`Cannot find dir ${name}`)
+      }
+      if (!("children" in dir)) {
+        throw new Error("Expected dir, got file")
+      }
+      currentDir = dir
       continue
     }
 
@@ -81,13 +77,14 @@ function parseInput(input) {
 
     if (line.startsWith("dir")) {
       const name = line.split(" ")[1]
+      /** @type {Dir} */
       const dir = { name, parent: currentDir, children: [] }
-      currentDir.children.push(dir)
+      currentDir?.children.push(dir)
     } else {
       const [sizeStr, name] = line.split(" ")
       const size = Number(sizeStr)
       const file = { name, size }
-      currentDir.children.push(file)
+      currentDir?.children.push(file)
     }
   }
 

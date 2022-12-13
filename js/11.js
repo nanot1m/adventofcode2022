@@ -22,7 +22,8 @@ Monkey ${"index|int"}:
 `.map(({ ifFalse, ifTrue, arg, op, ...rest }) => ({
   ...rest,
   target: (/** @type {boolean} */ result) => (result ? ifTrue : ifFalse),
-  op: (/** @type {number} */ old) => ops[op](old, isNaN(arg) ? old : arg),
+  op: (/** @type {number} */ old) =>
+    ops[/** @type {"+" | "*"} */ (op)](old, isNaN(arg) ? old : arg),
 }))
 
 /**
@@ -47,7 +48,7 @@ function solve(monkeys, rounds, worry) {
   for (const _ of range(rounds)) {
     for (const m of monkeys) {
       while (m.items.length > 0) {
-        const item = m.op(m.items.shift())
+        const item = m.op(/** @type {number} */ (m.items.shift()))
         const next = worry ? Math.floor(item / 3) : item % d
         const target = m.target(next % m.divisibleBy === 0)
         monkeys[target].items.push(next)

@@ -70,8 +70,8 @@ export function fetchFromAoC(dayN, trim = true) {
           text += chunk
         })
         res.on("end", () => {
-          if (res.statusCode > 399) {
-            reject(new HttpError(res.statusCode, res.statusMessage, text))
+          if (res.statusCode && res.statusCode > 399) {
+            reject(new HttpError(res.statusCode, res.statusMessage ?? "", text))
             return
           }
           resolve(trim ? text.trim() : text)
@@ -109,7 +109,7 @@ export async function cachedFetchFromAoC(dayN, trim = false) {
 
 /**
  * @param {number} dayN
- * @param {1 | 2} level
+ * @param {number} level
  * @param {string|number} result
  */
 export function submit(dayN, level, result) {
@@ -143,8 +143,8 @@ export function submit(dayN, level, result) {
           text += chunk
         })
         res.on("end", () => {
-          if (res.statusCode > 399) {
-            reject(new HttpError(res.statusCode, res.statusMessage, text))
+          if (res.statusCode && res.statusCode > 399) {
+            reject(new HttpError(res.statusCode, res.statusMessage ?? "", text))
             return
           }
           resolve(text)
@@ -161,7 +161,7 @@ export function submit(dayN, level, result) {
 /**
  *
  * @param {number} dayN
- * @param {1|2} level
+ * @param {number} level
  * @param {string|number} result
  */
 export function submitAndLog(dayN, level, result) {

@@ -41,6 +41,7 @@ export async function solution({
     })
     .then(solve)
     .then(async (solutions) => {
+      /** @type {Array<any>} */
       const results = []
       await solutions.reduce((acc, solution, idx) => {
         let now = 0

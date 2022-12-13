@@ -5,8 +5,7 @@
     "target": "ES2022",
     "moduleResolution": "NodeNext",
 
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true
+    "strict": true,
+    "strictNullChecks": false
   }
 }

@@ -319,6 +319,9 @@ export function tpl(strings, ...keys) {
   /**
    * @param {string} strVal
    * @param {string} type
+   *
+   * @returns {unknown}
+   *
    */
   function parseValue(strVal, type) {
     if (!type) {
@@ -338,9 +341,13 @@ export function tpl(strings, ...keys) {
     return strVal
   }
 
-  function parse(/** @type {string} */ input) {
-    const model =
-      /** @type {{[P in T[number] as import("./types.js").TemplateKey<P>]: import("./types.js").TemplateValue<P> }} */ ({})
+  /**
+   * @param {string} input
+   * @returns {{[P in T[number] as import("./types.js").TemplateKey<P>]: import("./types.js").TemplateValue<P> }}
+   */
+  function parse(input) {
+    /** @type {Record<string, any>} */
+    const model = {}
     let lastIndex = 0
     for (let i = 0; i < keys.length; i++) {
       const start = strings[i].length + lastIndex
@@ -352,7 +359,7 @@ export function tpl(strings, ...keys) {
       model[key] = parseValue(strVal, type)
       lastIndex = end
     }
-    return model
+    return /** @type {any} */ (model)
   }
 
   /**
