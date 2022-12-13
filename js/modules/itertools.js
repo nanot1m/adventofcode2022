@@ -429,65 +429,30 @@ export function* unshift(iterable, ...values) {
 }
 
 /**
- * @typedef {Iterable<T> & {
- *    map: <R>(fn: (arg: T) => R) => FluentIterable<R>
- *    groupsOf: (n: number) => FluentIterable<T[]>
- *    toArray: () => T[]
- *    first: () => T | undefined
- *    last: () => T | undefined
- *    find: (predicate: (arg: T) => boolean) => T | undefined
- *    skip: (n: number) => FluentIterable<T>
- *    take: (n: number) => FluentIterable<T>
- *    toSet: () => Set<T>
- *    reduce: <R>(reducer: (arg0: R, arg1: T) => R, init: R) => R
- *    forEach: (fn: (arg: T) => void) => void
- *    count: (predicate?: (arg: T) => boolean) => number
- *    filter: (predicate: (arg: T) => boolean) => FluentIterable<T>
- *    indexed: () => FluentIterable<[number, T]>
- *    windowed: (n: number) => FluentIterable<Iterable<T>>
- *    findIndex: (predicate: (arg: T) => boolean) => number
- *    indexOf : (value: T) => number
- *    flatMap: <R>(f: (arg: T) => Iterable<R>) => FluentIterable<R>
- *    skipLast: (n?: number) => FluentIterable<T>
- *    takeEvery: (every: number, skipInitial?: number) => FluentIterable<T>
- *    takeWhile: (predicate: (arg: T) => boolean) => FluentIterable<T>
- *    takeUntil: (predicate: (arg: T) => boolean) => FluentIterable<T>
- *    every: (predicate: (arg: T) => boolean) => boolean
- *    updateAt: (index: number, fn: (arg: T) => T) => FluentIterable<T>
- *    unshift: (...values: T[]) => FluentIterable<T>
- * }} GenericFluentIterable<T>
- *
- *
+ * @param {Iterable<T>} iterable
+ * @param {(value: T) => boolean} predicate
+ * @returns {Iterable<T>}
  * @template T
  */
+export function* skipAfter(iterable, predicate) {
+  for (const x of iterable) {
+    yield x
+    if (predicate(x)) {
+      return
+    }
+  }
+}
 
 /**
- * @typedef {GenericFluentIterable<string> & {
- *    join: (separator?: string) => string
- * }} StrFluentIterable
- */
-
-/**
- * @typedef {GenericFluentIterable<number> & {
- *    sum: () => number
- *    min: () => number
- *    max: () => number
- * }} NumFluentIterable
- */
-
-/**
- * @typedef {T extends number
- *    ? NumFluentIterable
- *    : T extends boolean
- *    ? GenericFluentIterable<boolean>
- *    : T extends string
- *    ? StrFluentIterable
- *    : GenericFluentIterable<T>} FluentIterable
  * @template T
+ * @typedef {import("./types.js").FluentIterable<T>} FluentIterable
  */
 
 /**
- *
+ * @typedef {import("./types.js").NumFluentIterable} NumFluentIterable
+ */
+
+/**
  * @param {Iterable<T>} iterable
  * @returns {FluentIterable<T>}
  * @template T
@@ -541,6 +506,8 @@ export const it = (iterable) => {
     updateAt: (/** @type {number} */ index, /** @type {(arg: T) => T} */ fn) =>
       it(updateAt(iterable, index, fn)),
     unshift: (/** @type {T[]} */ ...values) => it(unshift(iterable, ...values)),
+    skipAfter: (/** @type {(arg: T) => boolean} */ predicate) =>
+      it(skipAfter(iterable, predicate)),
     //#endregion
 
     //#region NumFluentIterable methods
