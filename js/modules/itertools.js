@@ -82,7 +82,7 @@ export function last(iterable) {
 
 /**
  * @param {Iterable<T>} iterable
- * @param {(arg0: R, arg1: T) => R} reducer
+ * @param {(arg0: R, arg1: T, index: number) => R} reducer
  * @param {R} initial
  *
  * @template T
@@ -90,8 +90,9 @@ export function last(iterable) {
  */
 export function reduce(iterable, reducer, initial) {
   let acc = initial
+  let idx = 0
   for (const x of iterable) {
-    acc = reducer(acc, x)
+    acc = reducer(acc, x, idx++)
   }
   return acc
 }
@@ -454,7 +455,7 @@ export function* skipAfter(iterable, predicate) {
  *    skip: (n: number) => FluentIterable<T>
  *    take: (n: number) => FluentIterable<T>
  *    toSet: () => Set<T>
- *    reduce: <R>(reducer: (arg0: R, arg1: T) => R, init: R) => R
+ *    reduce: <R>(reducer: (arg0: R, arg1: T, index: number) => R, init: R) => R
  *    forEach: (fn: (arg: T) => void) => void
  *    count: (predicate?: (arg: T) => boolean) => number
  *    filter: (predicate: (arg: T) => boolean) => FluentIterable<T>
@@ -526,7 +527,7 @@ export const it = (iterable) => {
     skip: (n) => it(skip(iterable, n)),
     take: (n) => it(take(iterable, n)),
     toSet: () => new Set(iterable),
-    /** @type {<R>(reducer: (arg0: R, arg1: T) => R, init: R) => R} */
+    /** @type {<R>(reducer: (arg0: R, arg1: T, index: number) => R, init: R) => R} */
     reduce: (reducer, initial) => reduce(iterable, reducer, initial),
     /** @type {(fn: (arg: T) => void) => void} */
     forEach: (fn) => {
