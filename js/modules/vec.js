@@ -5,13 +5,21 @@
  */
 
 /**
- * @typedef {"U" | "R"| "D" | "L"} Dir
+ * @typedef {"U" | "R"| "D" | "L" | "UR" | "UL"} Dir
  */
 
 /** @type {Record<Dir, Vec2>} */
-export const DIR_TO_VEC = { U: [0, 1], R: [1, 0], D: [0, -1], L: [-1, 0] }
+export const DIR_TO_VEC = {
+  U: [0, 1],
+  R: [1, 0],
+  D: [0, -1],
+  L: [-1, 0],
+  UR: [1, 1],
+  UL: [-1, 1],
+}
 
-export const DIRS = [DIR_TO_VEC.U, DIR_TO_VEC.R, DIR_TO_VEC.D, DIR_TO_VEC.L]
+export const DIRS_4 = [DIR_TO_VEC.U, DIR_TO_VEC.R, DIR_TO_VEC.D, DIR_TO_VEC.L]
+export const DIRS_3_TOP = [DIR_TO_VEC.UL, DIR_TO_VEC.U, DIR_TO_VEC.UR]
 
 /**
  *

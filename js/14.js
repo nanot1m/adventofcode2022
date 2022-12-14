@@ -2,7 +2,7 @@
 
 import { V } from "./modules/index.js"
 import { it } from "./modules/itertools.js"
-import { readLines, tuple, typed } from "./modules/lib.js"
+import { readLines, tpl, tuple, typed } from "./modules/lib.js"
 import { Map2d } from "./modules/map2d.js"
 import { solution } from "./solution.js"
 
@@ -12,7 +12,7 @@ solution({
   },
 })
 
-const sandPos = V.vec(500, 0)
+const start = V.vec(500, 0)
 
 /**
  * @param {string} input
@@ -29,7 +29,7 @@ function parseMap(input) {
     )
     .map((pos) => tuple(pos, "#"))
 
-  return new Map2d(points).set(sandPos, "+")
+  return new Map2d(points).set(start, "+")
 }
 
 /**
@@ -98,16 +98,11 @@ function part1(input) {
  * @param {string} input
  */
 function part2(input) {
-  const map2d = parseMap(input)
+  const map = parseMap(input)
 
-  const h = map2d.height + 2
-  const minX = Math.min(map2d.bounds.minX, 500 - h)
-  const maxX = Math.max(map2d.bounds.maxX, 500 + h)
+  const bfs = map
+    .setGetNeighbors((pos) => V.DIRS_3_TOP.map((d) => V.add(pos, d)))
+    .bfs((_, b) => !map.hasPos(b.pos) && b.pos[1] < map.height + 2, start)
 
-  const floor = V.segment(V.vec(minX, h), V.vec(maxX, h))
-  for (const pos of floor) {
-    map2d.set(pos, "~")
-  }
-
-  return it(simulateSand(map2d, V.vec(500, 0))).count() + 1
+  return it(bfs).count()
 }

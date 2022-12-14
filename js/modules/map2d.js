@@ -1,5 +1,6 @@
 // @ts-check
 
+import { it } from "./itertools.js"
 import * as V from "./vec.js"
 
 /**
@@ -17,10 +18,11 @@ import * as V from "./vec.js"
  * @param {Map2d<T>} map2d
  * @param {(from: BfsPos<T>, to: BfsPos<T>) => boolean} canGoFromTo
  * @param {V.Vec2 | Iterable<V.Vec2>} start
+ * @param {(pos: V.Vec2) => Iterable<V.Vec2>} getNeighbors
  *
  * @template T
  */
-export function* bfs(map2d, canGoFromTo, start) {
+export function* bfs(map2d, canGoFromTo, start, getNeighbors) {
   /** @type {BfsPos<T>[]} */
   const queue = []
 
@@ -52,9 +54,7 @@ export function* bfs(map2d, canGoFromTo, start) {
 
     yield current
 
-    for (const next of V.DIRS.map((dir) => V.add(current.pos, dir))) {
-      if (!map2d.hasPos(next)) continue
-
+    for (const next of getNeighbors(current.pos)) {
       const nextBfs = {
         distance: current.distance + 1,
         pos: next,
@@ -87,6 +87,14 @@ export class Map2d {
     })
     return map
   }
+
+  /**
+   *
+   * @param {V.Vec2} pos
+   * @returns {Iterable<V.Vec2>}
+   */
+  #getNeighbors = (pos) =>
+    V.DIRS_4.map((dir) => V.add(pos, dir)).filter((pos) => this.hasPos(pos))
 
   /**
    * @type {Map<number, Map<number, T>>}
@@ -202,7 +210,16 @@ export class Map2d {
    * @returns {Iterable<BfsPos<T>>}
    */
   bfs(canGoFromTo, start) {
-    return bfs(this, canGoFromTo, start)
+    return bfs(this, canGoFromTo, start, this.#getNeighbors)
+  }
+
+  /**
+   *
+   * @param {(arg: V.Vec2) => Iterable<V.Vec2>} getNeighbors
+   */
+  setGetNeighbors(getNeighbors) {
+    this.#getNeighbors = getNeighbors
+    return this
   }
 
   [Symbol.iterator]() {
