@@ -1,0 +1,25 @@
+body {
+  margin: 0;
+}
+
+canvas {
+  background: #fff;
+  border: 1px solid #dfdede;
+  margin: 0;
+  padding: 0;
+}
+
+.container {
+  max-width: 800px;
+  margin: auto;
+  padding: 1em;
+}
+
+.row {
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: .5em;
+  display: flex;
+}
+
+/*# sourceMappingURL=index.69cab3e5.css.map */
