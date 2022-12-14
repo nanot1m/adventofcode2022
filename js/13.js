@@ -1,13 +1,15 @@
 // @ts-check
 
 import { mul, readBlocks, readLines, zip } from "./modules/lib.js"
-import { solution } from "./solution.js"
 
-solution({
-  solve(input) {
-    return [() => part1(input), () => part2(input)]
-  },
-})
+/**
+ * @param {string} input
+ *
+ * @returns {Array<() => any>}
+ */
+export function solve(input) {
+  return [() => part1(input), () => part2(input)]
+}
 
 /**
  * @typedef {import("./modules/types.js").NestedArray<number>} NestedNumArray

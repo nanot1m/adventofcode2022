@@ -2,13 +2,15 @@
 import { V } from "./modules/index.js"
 import { it } from "./modules/itertools.js"
 import { parseMap2d } from "./modules/map2d.js"
-import { solution } from "./solution.js"
 
-solution({
-  solve(input) {
-    return [() => part1(input), () => part2(input)]
-  },
-})
+/**
+ * @param {string} input
+ *
+ * @returns {Array<() => any>}
+ */
+export function solve(input) {
+  return [() => part1(input), () => part2(input)]
+}
 
 const S = "S".charCodeAt(0)
 const E = "E".charCodeAt(0)

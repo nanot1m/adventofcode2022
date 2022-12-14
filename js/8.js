@@ -2,13 +2,15 @@
 
 import { it, range } from "./modules/itertools.js"
 import { add, mul, readLines } from "./modules/lib.js"
-import { solution } from "./solution.js"
 
-solution({
-  solve(input) {
-    return [() => part1(input), () => part2(input)]
-  },
-})
+/**
+ * @param {string} input
+ *
+ * @returns {Array<() => any>}
+ */
+export function solve(input) {
+  return [() => part1(input), () => part2(input)]
+}
 
 /**
  * @type {[number, number][]}

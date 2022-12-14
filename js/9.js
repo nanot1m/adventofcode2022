@@ -1,14 +1,17 @@
 // @ts-check
 
 import { readLines, tuple } from "./modules/lib.js"
-import { solution } from "./solution.js"
+
 import * as V from "./modules/vec.js"
 
-solution({
-  solve(input) {
-    return [() => part1(input), () => part2(input)]
-  },
-})
+/**
+ * @param {string} input
+ *
+ * @returns {Array<() => any>}
+ */
+export function solve(input) {
+  return [() => part1(input), () => part2(input)]
+}
 
 /**
  * @param {string} input
@@ -23,7 +26,7 @@ function parseInput(input) {
  * @param {ReturnType<typeof parseInput>} lines
  * @param {number} len
  */
-function solve(lines, len) {
+function process(lines, len) {
   const visited = new Set()
 
   const rope = Array(len).fill(V.ZERO)
@@ -50,12 +53,12 @@ function solve(lines, len) {
  * @param {string} input
  */
 function part1(input) {
-  return solve(parseInput(input), 2)
+  return process(parseInput(input), 2)
 }
 
 /**
  * @param {string} input
  */
 function part2(input) {
-  return solve(parseInput(input), 10)
+  return process(parseInput(input), 10)
 }

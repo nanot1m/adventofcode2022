@@ -2,14 +2,15 @@
 
 import { it } from "./modules/itertools.js"
 import { readLines, typed } from "./modules/lib.js"
-import { solution } from "./solution.js"
 
-solution({
-  solve(input) {
-    return [() => part1(input), () => part2(input)]
-  },
-  submit: { 1: false, 2: false },
-})
+/**
+ * @param {string} input
+ *
+ * @returns {Array<() => any>}
+ */
+export function solve(input) {
+  return [() => part1(input), () => part2(input)]
+}
 
 /**
  * @param {string} input

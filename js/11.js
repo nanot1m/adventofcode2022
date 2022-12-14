@@ -2,13 +2,15 @@
 
 import { range } from "./modules/itertools.js"
 import { add, compareDesc, mul, readBlocks, tpl } from "./modules/lib.js"
-import { solution } from "./solution.js"
 
-solution({
-  solve(input) {
-    return [() => part1(input), () => part2(input)]
-  },
-})
+/**
+ * @param {string} input
+ *
+ * @returns {Array<() => any>}
+ */
+export function solve(input) {
+  return [() => part1(input), () => part2(input)]
+}
 
 const ops = { "+": add, "*": mul }
 
@@ -40,7 +42,7 @@ function parseInput(input) {
  * @param {number} rounds
  * @param {boolean} worry
  */
-function solve(monkeys, rounds, worry) {
+function process(monkeys, rounds, worry) {
   const stats = Array(monkeys.length).fill(0)
 
   const d = monkeys.reduce((a, b) => a * b.divisibleBy, 1)
@@ -64,12 +66,12 @@ function solve(monkeys, rounds, worry) {
  * @param {string} input
  */
 function part1(input) {
-  return solve(parseInput(input), 20, true)
+  return process(parseInput(input), 20, true)
 }
 
 /**
  * @param {string} input
  */
 function part2(input) {
-  return solve(parseInput(input), 10_000, false)
+  return process(parseInput(input), 10_000, false)
 }
