@@ -34,7 +34,7 @@ function parseMap(input) {
 
 /**
  * @param {Map2d<string>} map2d
- * @param {V.Vec2d} sandPos
+ * @param {V.Vec2} sandPos
  */
 function* simulateSand(map2d, sandPos, maxY = map2d.bounds.maxY) {
   const bot = V.vec(0, 1)
@@ -43,7 +43,7 @@ function* simulateSand(map2d, sandPos, maxY = map2d.bounds.maxY) {
 
   /**
    *
-   * @param {V.Vec2d} startFrom
+   * @param {V.Vec2} startFrom
    * @returns
    */
   function drop(startFrom) {

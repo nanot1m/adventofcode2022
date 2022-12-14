@@ -1,4 +1,4 @@
-import { Vec2d } from "./vec.js"
+import { Vec2 } from "./vec.js"
 
 export interface RotateFn {
   (rotatable: string, clockwise?: boolean): string
@@ -15,7 +15,7 @@ export type TemplateValue<T> = T extends `${infer _}|${infer V}`
 export type TemplateValueReturnType<V> = V extends "int"
   ? number
   : V extends "vec"
-  ? Vec2d
+  ? Vec2
   : V extends "str"
   ? string
   : V extends `${infer U}[]`

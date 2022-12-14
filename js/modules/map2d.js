@@ -4,7 +4,7 @@ import * as V from "./vec.js"
 
 /**
  * @typedef {Object} BfsPos
- * @property {V.Vec2d} pos
+ * @property {V.Vec2} pos
  * @property {number} distance
  * @property {T} value
  * @property {BfsPos<T>} [parent]
@@ -16,7 +16,7 @@ import * as V from "./vec.js"
  *
  * @param {Map2d<T>} map2d
  * @param {(from: BfsPos<T>, to: BfsPos<T>) => boolean} canGoFromTo
- * @param {V.Vec2d | Iterable<V.Vec2d>} start
+ * @param {V.Vec2 | Iterable<V.Vec2>} start
  *
  * @template T
  */
@@ -70,7 +70,7 @@ export function* bfs(map2d, canGoFromTo, start) {
 }
 
 /**
- * @implements {Iterable<{pos: V.Vec2d;value: T;}>}
+ * @implements {Iterable<{pos: V.Vec2;value: T;}>}
  * @template T
  */
 export class Map2d {
@@ -123,7 +123,7 @@ export class Map2d {
   }
 
   /**
-   * @param {Iterable<[V.Vec2d, T]>} [data]
+   * @param {Iterable<[V.Vec2, T]>} [data]
    */
   constructor(data = []) {
     for (const [pos, value] of data) {
@@ -152,7 +152,7 @@ export class Map2d {
   }
 
   /**
-   * @param {V.Vec2d} vec
+   * @param {V.Vec2} vec
    * @returns {T | undefined}
    */
   get([x, y]) {
@@ -160,7 +160,7 @@ export class Map2d {
   }
 
   /**
-   * @param {V.Vec2d} vec
+   * @param {V.Vec2} vec
    * @param {T} value
    * @returns {this}
    */
@@ -175,14 +175,14 @@ export class Map2d {
   }
 
   /**
-   * @param {V.Vec2d} vec
+   * @param {V.Vec2} vec
    */
   hasPos([x, y]) {
     return this.#data.get(x)?.has(y) === true
   }
 
   /**
-   * @param {(arg: T, pos: V.Vec2d) => R} mapFn
+   * @param {(arg: T, pos: V.Vec2) => R} mapFn
    * @returns {Map2d<R>}
    *
    * @template R
@@ -198,7 +198,7 @@ export class Map2d {
   /**
    *
    * @param {(from: BfsPos<T>, to: BfsPos<T>) => boolean} canGoFromTo
-   * @param {V.Vec2d} start
+   * @param {V.Vec2} start
    * @returns {Iterable<BfsPos<T>>}
    */
   bfs(canGoFromTo, start) {
@@ -211,8 +211,8 @@ export class Map2d {
 
   /**
    * @param {Object} params
-   * @param {V.Vec2d} [params.topLeftPos]
-   * @param {V.Vec2d} [params.botRightPos]
+   * @param {V.Vec2} [params.topLeftPos]
+   * @param {V.Vec2} [params.botRightPos]
    * @param {(arg: T | undefined) => string} [params.valToString]
    * @returns
    */
