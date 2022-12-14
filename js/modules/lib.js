@@ -1,5 +1,6 @@
 // @ts-check
 
+import { V } from "./index.js"
 import { it } from "./itertools.js"
 
 /**
@@ -307,7 +308,7 @@ export function tpl(strings, ...keys) {
    * @param {string} strVal
    */
   function tryGetSeparator(strVal) {
-    const separators = [", ", ",", " - ", "-", " "]
+    const separators = [" -> ", ", ", ",", " - ", "-", " "]
     for (const separator of separators) {
       if (strVal.includes(separator)) {
         return separator
@@ -326,6 +327,10 @@ export function tpl(strings, ...keys) {
   function parseValue(strVal, type) {
     if (!type) {
       return strVal
+    }
+    if (type === "vec") {
+      const [x, y] = strVal.split(",").map(Number)
+      return V.vec(x, y)
     }
     if (type === "int") {
       return parseInt(strVal, 10)

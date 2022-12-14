@@ -53,14 +53,7 @@ export function* bfs(map2d, canGoFromTo, start) {
     yield current
 
     for (const next of V.DIRS.map((dir) => V.add(current.pos, dir))) {
-      if (
-        next[0] < 0 ||
-        next[1] < 0 ||
-        next[0] >= map2d.width ||
-        next[1] >= map2d.height
-      ) {
-        continue
-      }
+      if (!map2d.hasPos(next)) continue
 
       const nextBfs = {
         distance: current.distance + 1,
@@ -77,17 +70,171 @@ export function* bfs(map2d, canGoFromTo, start) {
 }
 
 /**
- * @typedef {Iterable<{pos: V.Vec2d;value: T;}> & {
- *    readonly height: number,
- *    readonly width: number,
- *    get: (vec: V.Vec2d) => T,
- *    set: (vec: V.Vec2d, value: T) => Map2d<T>,
- *    map: <R>(mapFn: (arg0: T, arg1: V.Vec2d) => R) => Map2d<R>,
- *    bfs: (canGo: (from: BfsPos<T>, to: BfsPos<T>) => boolean, start: V.Vec2d | Iterable<V.Vec2d>) => Iterable<BfsPos<T>>,
- * }} Map2d
- *
+ * @implements {Iterable<{pos: V.Vec2d;value: T;}>}
  * @template T
  */
+export class Map2d {
+  /**
+   * @param {R[][]} raw
+   * @template R
+   */
+  static fromArray(raw) {
+    const map = new Map2d()
+    raw.forEach((row, y) => {
+      row.forEach((value, x) => {
+        map.set(V.vec(x, y), value)
+      })
+    })
+    return map
+  }
+
+  /**
+   * @type {Map<number, Map<number, T>>}
+   */
+  #data = new Map()
+
+  #minX = Infinity
+  #minY = Infinity
+  #maxX = -Infinity
+  #maxY = -Infinity
+
+  #needRecalculateBounds = false
+
+  get bounds() {
+    if (this.#needRecalculateBounds) {
+      this.#updateBounds()
+    }
+    return {
+      minX: this.#minX,
+      minY: this.#minY,
+      maxX: this.#maxX,
+      maxY: this.#maxY,
+      botRight: V.vec(this.#maxX, this.#maxY),
+      topLeft: V.vec(this.#minX, this.#minY),
+    }
+  }
+
+  get height() {
+    return this.#maxY - this.#minY
+  }
+
+  get width() {
+    return this.#maxX - this.#minX
+  }
+
+  /**
+   * @param {Iterable<[V.Vec2d, T]>} [data]
+   */
+  constructor(data = []) {
+    for (const [pos, value] of data) {
+      this.set(pos, value)
+    }
+  }
+
+  #updateBounds() {
+    this.#data.forEach((row, y) => {
+      row.forEach((_, x) => {
+        this.#extendBounds(x, y)
+      })
+    })
+    this.#needRecalculateBounds = false
+  }
+
+  /**
+   * @param {number} x
+   * @param {number} y
+   */
+  #extendBounds(x, y) {
+    this.#minX = Math.min(this.#minX, x)
+    this.#minY = Math.min(this.#minY, y)
+    this.#maxX = Math.max(this.#maxX, x)
+    this.#maxY = Math.max(this.#maxY, y)
+  }
+
+  /**
+   * @param {V.Vec2d} vec
+   * @returns {T | undefined}
+   */
+  get([x, y]) {
+    return this.#data.get(x)?.get(y)
+  }
+
+  /**
+   * @param {V.Vec2d} vec
+   * @param {T} value
+   * @returns {this}
+   */
+  set([x, y], value) {
+    if (this.#data.has(x) === false) {
+      this.#data.set(x, new Map())
+    }
+    this.#data.get(x).set(y, value)
+
+    this.#extendBounds(x, y)
+    return this
+  }
+
+  /**
+   * @param {V.Vec2d} vec
+   */
+  hasPos([x, y]) {
+    return this.#data.get(x)?.has(y) === true
+  }
+
+  /**
+   * @param {(arg: T, pos: V.Vec2d) => R} mapFn
+   * @returns {Map2d<R>}
+   *
+   * @template R
+   */
+  map(mapFn) {
+    const result = new Map2d()
+    for (const { pos, value } of this) {
+      result.set(pos, mapFn(value, pos))
+    }
+    return result
+  }
+
+  /**
+   *
+   * @param {(from: BfsPos<T>, to: BfsPos<T>) => boolean} canGoFromTo
+   * @param {V.Vec2d} start
+   * @returns {Iterable<BfsPos<T>>}
+   */
+  bfs(canGoFromTo, start) {
+    return bfs(this, canGoFromTo, start)
+  }
+
+  [Symbol.iterator]() {
+    return toIterable(this.#data)
+  }
+
+  /**
+   * @param {Object} params
+   * @param {V.Vec2d} [params.topLeftPos]
+   * @param {V.Vec2d} [params.botRightPos]
+   * @param {(arg: T | undefined) => string} [params.valToString]
+   * @returns
+   */
+  toString({
+    topLeftPos = V.vec(this.#minX, this.#minY),
+    botRightPos = V.vec(this.#maxX, this.#maxY),
+    valToString = (x) => (x ?? ".").toString(),
+  } = {}) {
+    const [minX, minY] = topLeftPos
+    const [maxX, maxY] = botRightPos
+    const result = []
+    for (let y = minY; y <= maxY; y++) {
+      const row = []
+      for (let x = minX; x <= maxX; x++) {
+        const value = this.#data.get(x)?.get(y)
+        row.push(valToString ? valToString(value) : value)
+      }
+      result.push(row.join(" "))
+    }
+    return result.join("\n")
+  }
+}
 
 /**
  * @param {T[][]} raw
@@ -95,35 +242,7 @@ export function* bfs(map2d, canGoFromTo, start) {
  * @template T
  */
 export function toMap2d(raw) {
-  /** @type {Map2d<T>} */
-  const map = {
-    get height() {
-      return raw.length
-    },
-    get width() {
-      return raw[0].length
-    },
-    get(vec) {
-      return raw[vec[1]][vec[0]]
-    },
-    set(vec, value) {
-      raw[vec[1]][vec[0]] = value
-      return map
-    },
-    map(mapFn) {
-      const next = raw.map((row, y) =>
-        row.map((value, x) => mapFn(value, V.vec(x, y))),
-      )
-      return toMap2d(next)
-    },
-    bfs(canGo, start) {
-      return bfs(map, canGo, start)
-    },
-    [Symbol.iterator]() {
-      return toIterable(raw)
-    },
-  }
-  return map
+  return Map2d.fromArray(raw)
 }
 
 /**
@@ -132,18 +251,18 @@ export function toMap2d(raw) {
  */
 export function parseMap2d(input) {
   const raw = input.split("\n").map((line) => line.split(""))
-  return toMap2d(raw)
+  return Map2d.fromArray(raw)
 }
 
 /**
- * @param {T[][]} map2d
+ * @param {Map<number, Map<number, T>>} map2d
  *
  * @template T
  */
-export function* toIterable(map2d) {
-  for (let y = 0; y < map2d.length; y++) {
-    for (let x = 0; x < map2d[y].length; x++) {
-      yield { pos: V.vec(x, y), value: map2d[y][x] }
+function* toIterable(map2d) {
+  for (const x of map2d.keys()) {
+    for (const y of map2d.get(x).keys()) {
+      yield { pos: V.vec(x, y), value: map2d.get(x).get(y) }
     }
   }
 }

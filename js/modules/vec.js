@@ -68,6 +68,16 @@ export const zero = () => [0, 0]
 export const vec = (x, y) => [x, y]
 
 /**
+ * @param {Vec2d} vec
+ */
+export const x = (vec) => vec[0]
+
+/**
+ * @param {Vec2d} vec
+ */
+export const y = (vec) => vec[1]
+
+/**
  * @param {unknown} arg
  * @returns {arg is Vec2d}
  */
@@ -83,6 +93,43 @@ export const isVec = (arg) =>
  * @returns {boolean}
  */
 export const eq = (vecA, vecB) => vecA[0] === vecB[0] && vecA[1] === vecB[1]
+
+/**
+ * @param {Vec2d} vecA
+ * @param {Vec2d} vecB
+ * @returns {Vec2d}
+ */
+export const min = (vecA, vecB) => [
+  Math.min(vecA[0], vecB[0]),
+  Math.min(vecA[1], vecB[1]),
+]
+
+/**
+ * @param {Vec2d} vecA
+ * @param {Vec2d} vecB
+ * @returns {Vec2d}
+ */
+export const max = (vecA, vecB) => [
+  Math.max(vecA[0], vecB[0]),
+  Math.max(vecA[1], vecB[1]),
+]
+
+/**
+ * @param {Vec2d} start
+ * @param {Vec2d} end
+ */
+export function* segment(start, end) {
+  const delta = sub(end, start)
+  const dir = signed(delta)
+  const steps = cLen(start, end)
+
+  let pos = start
+  yield pos
+  for (let i = 0; i < steps; i++) {
+    pos = add(pos, dir)
+    yield pos
+  }
+}
 
 /**
  * @type {Vec2d}

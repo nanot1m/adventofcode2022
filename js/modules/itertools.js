@@ -244,7 +244,7 @@ export function indexed(iterable) {
  *
  * @param {Iterable<T>} iterable
  * @param {number} n
- * @returns {Iterable<Iterable<T>>}
+ * @returns {Iterable<T[]>}
  *
  * @template T
  */
@@ -460,7 +460,7 @@ export function* skipAfter(iterable, predicate) {
  *    count: (predicate?: (arg: T) => boolean) => number
  *    filter: (predicate: (arg: T) => boolean) => FluentIterable<T>
  *    indexed: () => FluentIterable<[number, T]>
- *    windowed: (n: number) => FluentIterable<Iterable<T>>
+ *    windowed: (n: number) => FluentIterable<T[]>
  *    findIndex: (predicate: (arg: T) => boolean) => number
  *    indexOf : (value: T) => number
  *    flatMap: <R>(f: (arg: T) => Iterable<R>) => FluentIterable<R>
