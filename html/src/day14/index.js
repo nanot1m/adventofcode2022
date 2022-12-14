@@ -1,5 +1,5 @@
 // @ts-check
-import { simulateSand, parseMap } from "../../../js/14.js"
+import { parseMap, simulateSand } from "../../../js/solutions/14.js"
 import { V } from "../../../js/modules/index.js"
 
 const canvas = document.getElementById("canvas")

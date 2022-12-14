@@ -1,9 +1,6 @@
 // @ts-check
-import { existsSync, readFileSync } from "fs"
-import { resolve, dirname } from "path"
-import { fileURLToPath } from "url"
-
-const envPath = resolve(dirname(fileURLToPath(import.meta.url)), "../.env")
+import { existsSync, readFileSync } from "node:fs"
+import { config } from "./config.js"
 
 /**
  * @param {string} line
@@ -13,8 +10,8 @@ function trimLine(line) {
   return (commentIndex === -1 ? line : line.substring(0, commentIndex)).trim()
 }
 
-if (existsSync(envPath)) {
-  readFileSync(envPath, "utf8")
+if (existsSync(config.envPath)) {
+  readFileSync(config.envPath, "utf8")
     .split("\n")
     .map(trimLine)
     .filter((line) => line.length > 0)

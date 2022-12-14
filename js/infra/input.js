@@ -1,9 +1,9 @@
 // @ts-check
 import "./env.js"
-import { get, request } from "https"
-import { dirname, join } from "path"
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "fs"
-import { fileURLToPath } from "url"
+import { get, request } from "node:https"
+import { join } from "node:path"
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs"
+import { config } from "./config.js"
 
 const SESSION = process.env.SESSION
 
@@ -14,12 +14,7 @@ const SESSION = process.env.SESSION
  * @returns
  */
 export function readFromFileSystem(dayN, trim = true) {
-  const name = join(
-    dirname(fileURLToPath(import.meta.url)),
-    "..",
-    "input",
-    `day${dayN}.input.txt`,
-  )
+  const name = join(config.inputDir, `day${dayN}.input.txt`)
   let input = readFileSync(name, "utf8")
   if (trim) input = input.trim()
   return input
@@ -91,20 +86,19 @@ export function fetchFromAoC(dayN, trim = true) {
  * @returns
  */
 export async function cachedFetchFromAoC(dayN, trim = false) {
-  const name = join(
-    dirname(fileURLToPath(import.meta.url)),
-    "..",
-    "input",
-    `day${dayN}.input.txt`,
-  )
+  const name = join(config.inputDir, `day${dayN}.input.txt`)
   if (existsSync(name)) {
     return readFromFileSystem(dayN, trim)
   }
 
-  const input = await fetchFromAoC(dayN, trim)
-  mkdirSync(dirname(name), { recursive: true })
-  writeFileSync(name, input)
-  return input
+  try {
+    const input = await fetchFromAoC(dayN, trim)
+    mkdirSync(config.inputDir, { recursive: true })
+    writeFileSync(name, input)
+    return input
+  } catch (e) {
+    throw e
+  }
 }
 
 /**

@@ -1,8 +1,7 @@
 // @ts-check
 
-import { readLines, tuple } from "./modules/lib.js"
-
-import * as V from "./modules/vec.js"
+import { readLines, tuple } from "../modules/lib.js"
+import * as V from "../modules/vec.js"
 
 /**
  * @param {string} input

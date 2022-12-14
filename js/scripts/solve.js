@@ -1,15 +1,14 @@
-import { fork } from "child_process"
-import { promises as fsPromises } from "fs"
-import { dirname } from "path"
-import { fileURLToPath } from "url"
+import { fork } from "node:child_process"
+import { promises as fsPromises } from "node:fs"
+import { config } from "../infra/config.js"
 
 const day = parseInt(process.argv[2], 10)
 
 if (day) {
-  execDay(day).then(console.log)
+  execDay(day).then(console.log, console.error)
 } else {
   fsPromises
-    .readdir(dirname(fileURLToPath(import.meta.url)))
+    .readdir(config.solutionsDir)
     .then((dir) => dir.filter((x) => /^\d+\.js$/.test(x)))
     .then((xs) => xs.map((x) => x.split(".")[0]))
     .then((xs) => xs.sort((a, b) => a - b))
@@ -24,11 +23,12 @@ if (day) {
         }
       })
     })
+    .catch(console.error)
 }
 
 function execDay(day) {
   return new Promise(async (res, rej) => {
-    const worker = fork("./worker.js", { stdio: "pipe" })
+    const worker = fork(config.workerPath, { stdio: "pipe" })
     worker.send({ day: parseInt(day) })
 
     let stdout = ""
@@ -44,16 +44,24 @@ function execDay(day) {
     worker.on("message", (msg) => {
       if (msg === "done") {
         worker.kill()
-        if (stderr) rej(stderr)
-        res(stdout)
+        if (stderr) {
+          rej(stderr)
+        } else {
+          res(stdout)
+        }
       }
     })
 
-    worker.on("error", rej)
+    worker.on("error", (e) => {
+      rej(e)
+    })
 
     worker.on("exit", (code) => {
-      if (code !== 0) rej(stderr)
-      res(stdout)
+      if (code === null || code === 0) {
+        res(stdout)
+      } else {
+        rej(stderr)
+      }
     })
   })
 }

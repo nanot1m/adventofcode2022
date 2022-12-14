@@ -1,7 +1,7 @@
 // @ts-check
 import { performance } from "perf_hooks"
 import { parse } from "path"
-import { cachedFetchFromAoC, submitAndLog } from "./input.js"
+import { cachedFetchFromAoC, HttpError, submitAndLog } from "./input.js"
 
 const currentDay = parse(process.argv[1]).name
 
@@ -81,5 +81,11 @@ export async function solution({
           return submitFn(Number(day), level, result)
         }, Promise.resolve())
     })
-    .catch(console.error)
+    .catch((e) => {
+      if (e instanceof HttpError && e.statusCode === 404) {
+        console.error(`Day ${day} is not available yet`)
+        process.exit(1)
+      }
+      console.error(e)
+    })
 }

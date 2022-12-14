@@ -1,6 +1,6 @@
 // @ts-check
 
-import { mul, readBlocks, readLines, zip } from "./modules/lib.js"
+import { mul, readBlocks, readLines, zip } from "../modules/lib.js"
 
 /**
  * @param {string} input
@@ -12,7 +12,7 @@ export function solve(input) {
 }
 
 /**
- * @typedef {import("./modules/types.js").NestedArray<number>} NestedNumArray
+ * @typedef {import("../modules/types.js").NestedArray<number>} NestedNumArray
  */
 
 /**

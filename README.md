@@ -21,8 +21,20 @@ To run the solution of the day 1, run the following command:
 npm run solve 1
 ```
 
+or
+
+```
+pnpm solve 1
+```
+
 To create the template for the day 2, run the following command:
 
 ```
-npm run tpl 2.js
+npm run prepare 2
+```
+
+or
+
+```
+pnpm prepare 2
 ```

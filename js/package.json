@@ -2,11 +2,11 @@
   "name": "js",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "scripts/solve.js",
   "type": "module",
   "scripts": {
-    "solve": "node index.js",
-    "tpl": "cp template.js"
+    "solve": "node scripts/solve.js",
+    "prepare": "node scripts/prepare.js"
   },
   "keywords": [],
   "author": "",

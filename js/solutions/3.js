@@ -1,7 +1,7 @@
 // @ts-check
 
-import { find, it } from "./modules/itertools.js"
-import { readLines, splitAt } from "./modules/lib.js"
+import { find, it } from "../modules/itertools.js"
+import { readLines, splitAt } from "../modules/lib.js"
 
 /**
  * @param {string} input

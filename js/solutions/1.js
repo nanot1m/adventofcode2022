@@ -1,7 +1,7 @@
 // @ts-check
-import { it } from "./modules/itertools.js"
-import { readBlocks, readLines } from "./modules/lib.js"
-import { PriorityQueue } from "./modules/priority-queue.js"
+import { it } from "../modules/itertools.js"
+import { readBlocks, readLines } from "../modules/lib.js"
+import { PriorityQueue } from "../modules/priority-queue.js"
 
 /**
  * @param {string} input

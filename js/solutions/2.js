@@ -1,6 +1,6 @@
 // @ts-check
 
-import { readLines } from "./modules/lib.js"
+import { readLines } from "../modules/lib.js"
 
 /**
  * @param {string} input
@@ -17,7 +17,7 @@ export function solve(input) {
 function part1(input) {
   const games = readLines(input.trim()).map((x) => x.split(" "))
 
-  /** @type {Record<string, Record<string, number>} */
+  /** @type {Record<string, Record<string, number>>} */
   const scores = {
     A: { X: 3, Y: 6, Z: 0 },
     B: { X: 0, Y: 3, Z: 6 },

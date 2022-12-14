@@ -1,9 +1,9 @@
 // @ts-check
 
-import { V } from "./modules/index.js"
-import { it } from "./modules/itertools.js"
-import { readLines, tuple, typed } from "./modules/lib.js"
-import { Map2d } from "./modules/map2d.js"
+import { V } from "../modules/index.js"
+import { it } from "../modules/itertools.js"
+import { readLines, tuple, typed } from "../modules/lib.js"
+import { Map2d } from "../modules/map2d.js"
 
 /**
  * @param {string} input
