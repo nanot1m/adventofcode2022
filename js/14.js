@@ -2,15 +2,16 @@
 
 import { V } from "./modules/index.js"
 import { it } from "./modules/itertools.js"
-import { readLines, tpl, tuple, typed } from "./modules/lib.js"
+import { readLines, tuple, typed } from "./modules/lib.js"
 import { Map2d } from "./modules/map2d.js"
-import { solution } from "./solution.js"
 
-solution({
-  solve(input) {
-    return [() => part1(input), () => part2(input)]
-  },
-})
+/**
+ * @param {string} input
+ * @returns
+ */
+export function solve(input) {
+  return [() => part1(input), () => part2(input)]
+}
 
 const start = V.vec(500, 0)
 

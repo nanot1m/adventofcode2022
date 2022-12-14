@@ -2,6 +2,7 @@ import { exec } from "child_process"
 import { promises as fsPromises } from "fs"
 import { dirname } from "path"
 import { fileURLToPath } from "url"
+import { solution } from "./solution.js"
 
 const day = process.argv[2]
 
@@ -22,9 +23,15 @@ if (day) {
     )
 }
 
-function execDay(n) {
-  return new Promise((resolve) => {
-    exec(`node ${n}.js`, (error, stdout, stderr) => {
+function execDay(day) {
+  return new Promise(async (resolve) => {
+    const solve = await import(`./${day}.js`).then((m) => m.solve)
+    if (solve) {
+      solution({ solve, day })
+      return
+    }
+
+    exec(`node ${day}.js`, (error, stdout, stderr) => {
       if (error) {
         resolve(error.message)
         return

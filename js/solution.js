@@ -25,19 +25,21 @@ const drawText = (/** @type {string} */ text) =>
  * @param {(input: string) => Array<() => any>} config.solve
  * @param {Record<number, boolean>} [config.submit]
  * @param {(day: number, level: number, result: string) => void} [config.submitFn]
+ * @param {number | string} [config.day]
  */
 export async function solution({
   input = cachedFetchFromAoC,
   solve,
   submit = { 1: false, 2: false },
   submitFn = submitAndLog,
+  day = currentDay,
 }) {
   await Promise.resolve()
     .then(() => {
       drawLine(1)
-      drawText("Advent of Code. Day " + currentDay)
+      drawText("Advent of Code. Day " + day)
       drawLine()
-      return input(Number(currentDay))
+      return input(Number(day))
     })
     .then(solve)
     .then(async (solutions) => {
@@ -76,7 +78,7 @@ export async function solution({
           if (idx > 0) {
             await new Promise((resolve) => setTimeout(resolve, 5000))
           }
-          return submitFn(Number(currentDay), level, result)
+          return submitFn(Number(day), level, result)
         }, Promise.resolve())
     })
     .catch(console.error)
