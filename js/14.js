@@ -19,7 +19,7 @@ const start = V.vec(500, 0)
  * @param {string} input
  * @returns
  */
-function parseMap(input) {
+export function parseMap(input) {
   const lines = readLines(input.trimEnd()).map(typed("vec[]"))
 
   const points = it(lines)
@@ -35,9 +35,8 @@ function parseMap(input) {
 
 /**
  * @param {Map2d<string>} map2d
- * @param {V.Vec2} sandPos
  */
-function* simulateSand(map2d, sandPos, maxY = map2d.bounds.maxY) {
+export function* simulateSand(map2d, maxY = map2d.bounds.maxY) {
   const bot = V.vec(0, 1)
   const leftBot = V.vec(-1, 1)
   const rightBot = V.vec(1, 1)
@@ -77,8 +76,8 @@ function* simulateSand(map2d, sandPos, maxY = map2d.bounds.maxY) {
   }
 
   while (true) {
-    const pos = drop(sandPos)
-    if (pos === null || V.eq(pos, sandPos)) {
+    const pos = drop(start)
+    if (pos === null || V.eq(pos, start)) {
       return
     }
     map2d.set(pos, "o")
@@ -92,7 +91,7 @@ function* simulateSand(map2d, sandPos, maxY = map2d.bounds.maxY) {
 function part1(input) {
   const map2d = parseMap(input)
 
-  return it(simulateSand(map2d, V.vec(500, 0))).count()
+  return it(simulateSand(map2d)).count()
 }
 
 /**

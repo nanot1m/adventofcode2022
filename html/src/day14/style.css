@@ -1,0 +1,23 @@
+body {
+  margin: 0;
+}
+
+canvas {
+  border: 1px solid #dfdede;
+  background: #fff;
+  margin: 0;
+  padding: 0;
+}
+
+.container {
+  padding: 1em;
+  margin: auto;
+  max-width: 800px;
+}
+
+.row {
+  display: flex;
+  gap: 0.5em;
+  flex-wrap: wrap;
+  align-items: flex-start;
+}

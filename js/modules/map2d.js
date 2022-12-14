@@ -123,11 +123,11 @@ export class Map2d {
   }
 
   get height() {
-    return this.#maxY - this.#minY
+    return this.#maxY - this.#minY + 1
   }
 
   get width() {
-    return this.#maxX - this.#minX
+    return this.#maxX - this.#minX + 1
   }
 
   /**
@@ -230,6 +230,34 @@ export class Map2d {
    * @param {Object} params
    * @param {V.Vec2} [params.topLeftPos]
    * @param {V.Vec2} [params.botRightPos]
+   * @param {(arg: T | undefined) => J} params.valToString
+   * @returns
+   *
+   * @template J
+   */
+  to2dArray({
+    topLeftPos = V.vec(this.#minX, this.#minY),
+    botRightPos = V.vec(this.#maxX, this.#maxY),
+    valToString,
+  }) {
+    const [minX, minY] = topLeftPos
+    const [maxX, maxY] = botRightPos
+    const result = []
+    for (let y = minY; y <= maxY; y++) {
+      const row = []
+      for (let x = minX; x <= maxX; x++) {
+        const value = this.get([x, y])
+        row.push(valToString(value))
+      }
+      result.push(row)
+    }
+    return result
+  }
+
+  /**
+   * @param {Object} params
+   * @param {V.Vec2} [params.topLeftPos]
+   * @param {V.Vec2} [params.botRightPos]
    * @param {(arg: T | undefined) => string} [params.valToString]
    * @returns
    */
@@ -238,18 +266,9 @@ export class Map2d {
     botRightPos = V.vec(this.#maxX, this.#maxY),
     valToString = (x) => (x ?? ".").toString(),
   } = {}) {
-    const [minX, minY] = topLeftPos
-    const [maxX, maxY] = botRightPos
-    const result = []
-    for (let y = minY; y <= maxY; y++) {
-      const row = []
-      for (let x = minX; x <= maxX; x++) {
-        const value = this.#data.get(x)?.get(y)
-        row.push(valToString ? valToString(value) : value)
-      }
-      result.push(row.join(" "))
-    }
-    return result.join("\n")
+    return this.to2dArray({ topLeftPos, botRightPos, valToString })
+      .map((row) => row.join(""))
+      .join("\n")
   }
 }
 

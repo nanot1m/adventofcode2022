@@ -1,0 +1,12 @@
+{
+  "name": "html",
+  "source": "./src/index.html",
+  "type": "module",
+  "scripts": {
+    "start": "parcel --no-cache",
+    "build": "parcel build"
+  },
+  "devDependencies": {
+    "parcel": "latest"
+  }
+}
