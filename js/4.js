@@ -1,7 +1,7 @@
 // @ts-check
 
 import { it } from "./modules/itertools.js"
-import { readLines, tpl } from "./modules/lib.js"
+import { readLines, typed } from "./modules/lib.js"
 import { solution } from "./solution.js"
 
 solution({
@@ -11,13 +11,11 @@ solution({
   submit: { 1: false, 2: false },
 })
 
-const lineTpl = tpl`${"pair|int[][]"}`.map((m) => m.pair)
-
 /**
  * @param {string} input
  */
 function parseInput(input) {
-  return readLines(input.trim()).map(lineTpl)
+  return readLines(input.trim()).map(typed("int[][]"))
 }
 
 /**

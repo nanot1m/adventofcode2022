@@ -2,7 +2,7 @@
 
 import { V } from "./modules/index.js"
 import { it } from "./modules/itertools.js"
-import { readLines, tpl, tuple } from "./modules/lib.js"
+import { readLines, tuple, typed } from "./modules/lib.js"
 import { Map2d } from "./modules/map2d.js"
 import { solution } from "./solution.js"
 
@@ -12,13 +12,6 @@ solution({
   },
 })
 
-const example = `\
-498,4 -> 498,6 -> 496,6
-503,4 -> 502,4 -> 502,9 -> 494,9
-`
-
-const lineTpl = tpl`${"points|vec[]"}`.map((x) => x.points)
-
 const sandPos = V.vec(500, 0)
 
 /**
@@ -26,7 +19,7 @@ const sandPos = V.vec(500, 0)
  * @returns
  */
 function parseMap(input) {
-  const lines = readLines(input.trimEnd()).map(lineTpl)
+  const lines = readLines(input.trimEnd()).map(typed("vec[]"))
 
   const points = it(lines)
     .flatMap((line) =>

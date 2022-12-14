@@ -298,54 +298,66 @@ export const rotate = (
 }
 
 /**
+ * @param {string} strVal
+ */
+function tryGetSeparator(strVal) {
+  const separators = [" -> ", ", ", ",", " - ", "-", " "]
+  for (const separator of separators) {
+    if (strVal.includes(separator)) {
+      return separator
+    }
+  }
+  return null
+}
+
+/**
+ * @param {string} strVal
+ * @param {string} type
+ *
+ * @returns {unknown}
+ */
+function strToType(strVal, type) {
+  if (!type) {
+    return strVal
+  }
+  if (type === "vec") {
+    const [x, y] = strVal.split(",").map(Number)
+    return V.vec(x, y)
+  }
+  if (type === "int") {
+    return parseInt(strVal, 10)
+  }
+  if (type.endsWith("[]")) {
+    const separator = tryGetSeparator(strVal)
+    if (!separator) {
+      return [strToType(strVal, type.slice(0, -2))]
+    }
+    const childType = type.slice(0, -2)
+    return strVal.split(separator).map((x) => strToType(x, childType))
+  }
+  return strVal
+}
+
+/**
+ * @param {T} type
+ * @returns {(strVal: string) => import("./types.js").TemplateValueReturnType<T>}
+ *
+ * @template {string} T
+ */
+export function typed(type) {
+  return (strVal) =>
+    /** @type {import("./types.js").TemplateValueReturnType<T>} */ (
+      strToType(strVal, type)
+    )
+}
+
+/**
  * @param {TemplateStringsArray} strings
  * @param  {T} keys
  *
  * @template {string[]} T
  */
 export function tpl(strings, ...keys) {
-  /**
-   * @param {string} strVal
-   */
-  function tryGetSeparator(strVal) {
-    const separators = [" -> ", ", ", ",", " - ", "-", " "]
-    for (const separator of separators) {
-      if (strVal.includes(separator)) {
-        return separator
-      }
-    }
-    return null
-  }
-
-  /**
-   * @param {string} strVal
-   * @param {string} type
-   *
-   * @returns {unknown}
-   *
-   */
-  function parseValue(strVal, type) {
-    if (!type) {
-      return strVal
-    }
-    if (type === "vec") {
-      const [x, y] = strVal.split(",").map(Number)
-      return V.vec(x, y)
-    }
-    if (type === "int") {
-      return parseInt(strVal, 10)
-    }
-    if (type.endsWith("[]")) {
-      const separator = tryGetSeparator(strVal)
-      if (!separator) {
-        return [parseValue(strVal, type.slice(0, -2))]
-      }
-      const childType = type.slice(0, -2)
-      return strVal.split(separator).map((x) => parseValue(x, childType))
-    }
-    return strVal
-  }
-
   /**
    * @param {string} input
    * @returns {{[P in T[number] as import("./types.js").TemplateKey<P>]: import("./types.js").TemplateValue<P> }}
@@ -361,7 +373,7 @@ export function tpl(strings, ...keys) {
         : input.length
       const strVal = input.slice(start, end)
       const [key, type] = keys[i].split("|")
-      model[key] = parseValue(strVal, type)
+      model[key] = strToType(strVal, type)
       lastIndex = end
     }
     return /** @type {any} */ (model)
