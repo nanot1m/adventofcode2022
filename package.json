@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "predeploy": "cd html && npm run build",
-    "deploy": "gh-pages -d dist"
+    "predeploy": "cd html && npm run build && cd ..",
+    "deploy": "gh-pages -d html/dist"
   },
   "keywords": [],
   "author": "",
