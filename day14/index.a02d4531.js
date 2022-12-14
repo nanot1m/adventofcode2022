@@ -534,19 +534,27 @@ function hmrAcceptRun(bundle, id) {
 },{}],"aZTvN":[function(require,module,exports) {
 // @ts-check
 var _14Js = require("../../../js/14.js");
+var _indexJs = require("../../../js/modules/index.js");
 const canvas = document.getElementById("canvas");
 if (!(canvas instanceof HTMLCanvasElement)) throw new Error("no canvas");
 const ctx = canvas.getContext("2d");
 if (!ctx) throw new Error("no ctx");
-let interval = 0;
+let raf = 0;
 /**
  * @param {string} input
  * @param {CanvasRenderingContext2D} ctx
- */ function draw(input, ctx) {
-    clearInterval(interval);
+ */ function draw(input, ctx, part2 = false) {
+    cancelAnimationFrame(raf);
     const map = (0, _14Js.parseMap)(input);
+    if (part2) {
+        const h = map.height + 1;
+        const minX = Math.min(map.bounds.minX, 500 - h);
+        const maxX = Math.max(map.bounds.maxX, 500 + h);
+        const floor = (0, _indexJs.V).segment((0, _indexJs.V).vec(minX, h), (0, _indexJs.V).vec(maxX, h));
+        for (const pos of floor)map.set(pos, "~");
+    }
     const { width , height , bounds  } = map;
-    const scale = Math.min(10, Math.max(4, 100 / width));
+    const scale = Math.min(10, Math.max(2, 200 / width));
     ctx.canvas.width = width * scale;
     ctx.canvas.height = height * scale;
     ctx.canvas.scrollIntoView({
@@ -556,11 +564,11 @@ let interval = 0;
         "+": "orange",
         o: "orange",
         "#": "gray",
-        ".": "darkblue"
+        ".": "darkblue",
+        "~": "brown"
     };
     const iter = (0, _14Js.simulateSand)(map);
-    const first = (iter.next().value?.[1] ?? 0) - bounds.minY;
-    function drawState() {
+    function drawFullState() {
         const map2dStr = map.to2dArray({
             valToString: (x)=>x ?? "."
         });
@@ -570,17 +578,20 @@ let interval = 0;
                 ctx.fillRect(x * scale, y * scale, scale, scale);
             });
         });
-        let x = 500 - bounds.minX;
-        for(let y = 0; y <= first; y++){
-            ctx.fillStyle = colors["o"];
-            ctx.fillRect(x * scale, y * scale, scale, scale);
-        }
     }
-    drawState();
-    interval = setInterval(()=>{
-        iter.next();
-        drawState();
-    }, 33);
+    function drawPoint([x, y], color) {
+        ctx.fillStyle = color;
+        ctx.fillRect((x - bounds.minX) * scale, (y - bounds.minY) * scale, scale, scale);
+    }
+    drawFullState();
+    const step = ()=>{
+        const value = iter.next().value;
+        if (value) {
+            drawPoint(value, colors.o);
+            raf = requestAnimationFrame(step);
+        }
+    };
+    step();
 }
 const inputForm = document.getElementById("input-form");
 if (!(inputForm instanceof HTMLFormElement)) throw new Error("no form");
@@ -588,10 +599,10 @@ inputForm.addEventListener("submit", function(e) {
     e.preventDefault();
     const formData = new FormData(this);
     const input = formData.get("input")?.toString() ?? "";
-    draw(input.trim(), ctx);
+    draw(input.trim(), ctx, formData.get("part2") === "on");
 });
 
-},{"../../../js/14.js":"8P7pF"}],"8P7pF":[function(require,module,exports) {
+},{"../../../js/14.js":"8P7pF","../../../js/modules/index.js":"eVlez"}],"8P7pF":[function(require,module,exports) {
 // @ts-check
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
