@@ -321,7 +321,8 @@ function strToType(strVal, type) {
     return strVal
   }
   if (type === "vec") {
-    const [x, y] = strVal.split(",").map(Number)
+    const separator = tryGetSeparator(strVal)
+    const [x, y] = strVal.split(separator).map(Number)
     return V.vec(x, y)
   }
   if (type === "int") {

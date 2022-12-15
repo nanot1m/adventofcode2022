@@ -152,3 +152,11 @@ export const ZERO = zero()
  */
 export const cLen = (vecA, vecB = zero()) =>
   Math.max(Math.abs(vecA[0] - vecB[0]), Math.abs(vecA[1] - vecB[1]))
+
+/**
+ * @param {Vec2} vecA
+ * @param {Vec2} vecB
+ * @returns {number}
+ */
+export const mLen = (vecA, vecB = zero()) =>
+  Math.abs(vecA[0] - vecB[0]) + Math.abs(vecA[1] - vecB[1])

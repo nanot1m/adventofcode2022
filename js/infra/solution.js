@@ -84,7 +84,7 @@ export async function solution({
     .catch((e) => {
       if (e instanceof HttpError && e.statusCode === 404) {
         console.error(`Day ${day} is not available yet`)
-        process.exit(1)
+        return
       }
       console.error(e)
     })
