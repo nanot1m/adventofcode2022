@@ -1,6 +1,5 @@
 // @ts-check
-import { promises as fsPromises } from "node:fs"
-import { access } from "node:fs/promises"
+import { access, readdir, stat } from "node:fs/promises"
 import { join } from "node:path"
 import { config } from "../infra/config.js"
 import { solution } from "../infra/solution.js"
@@ -25,8 +24,7 @@ function handleError(err) {
 if (day) {
   execDay(day).catch(handleError)
 } else {
-  fsPromises
-    .readdir(config.solutionsDir)
+  readdir(config.solutionsDir)
     .then((dir) => dir.filter((x) => /^\d+\.js$/.test(x)))
     .then((xs) => xs.map((x) => x.split(".")[0]))
     .then((xs) => xs.sort((a, b) => Number(a) - Number(b)))
@@ -47,8 +45,9 @@ if (day) {
  */
 async function execDay(day) {
   const name = join(config.solutionsDir, `${day}.js`)
+
   try {
-    await access(name, fsPromises.constants.R_OK)
+    await access(name)
   } catch (err) {
     const messages = [`Day ${day} is not implemented`, `Can not read ${name}`]
 
