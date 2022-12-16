@@ -33,6 +33,10 @@ export class PriorityQueue {
     }
   }
 
+  get length() {
+    return this.size()
+  }
+
   size() {
     return this._heap.length
   }
