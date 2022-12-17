@@ -33,6 +33,16 @@ form {
   align-items: flex-start;
 }
 
+.col {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5em;
+}
+
 .align-baseline {
   align-items: baseline;
+}
+
+.mb-1 {
+  margin-bottom: 1em;
 }

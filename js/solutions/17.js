@@ -38,7 +38,7 @@ const ROCKS = [
     ],
   },
   {
-    name: "⌟",
+    name: "L",
     pos: V.vec(0, 0),
     width: 3,
     height: 3,
@@ -51,14 +51,14 @@ const ROCKS = [
     ],
   },
   {
-    name: "|",
+    name: "I",
     pos: V.vec(0, 0),
     width: 1,
     height: 4,
     points: [V.vec(0, 0), V.vec(0, -1), V.vec(0, -2), V.vec(0, -3)],
   },
   {
-    name: "o",
+    name: "O",
     pos: V.vec(0, 0),
     width: 2,
     height: 2,
@@ -170,7 +170,7 @@ function rockPlaced(rock, map, height) {
  */
 function placeRockOnMap(rock, map, curHeight) {
   for (const p of rock.points) {
-    map.set(V.add(rock.pos, p), "#")
+    map.set(V.add(rock.pos, p), rock.name)
   }
   return Math.max(curHeight, V.y(rock.pos) + 1)
 }
@@ -230,7 +230,7 @@ export function* simulate(input) {
   while (true) {
     let cycleStart = true
     for (let move of input) {
-      yield { height, placedRocks, cycleStart, map }
+      yield { height, placedRocks, cycleStart, map, rock }
       cycleStart = false
 
       rock = pushRock(rock, move, map)
