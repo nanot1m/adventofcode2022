@@ -310,6 +310,41 @@ function tryGetSeparator(strVal) {
   return null
 }
 
+/** @type {Record<string, {check: (key: string) => boolean, parse: (strVal: string, key: string) => any}>} */
+const converters = {
+  vec: {
+    check(/** @type {string} */ key) {
+      return key === "vec"
+    },
+    parse(/** @type {string} */ strVal) {
+      const separator = tryGetSeparator(strVal)
+      const [x, y] = strVal.split(separator).map(Number)
+      return V.vec(x, y)
+    },
+  },
+  int: {
+    check(/** @type {string} */ key) {
+      return key === "int"
+    },
+    parse(/** @type {string} */ strVal) {
+      return parseInt(strVal, 10)
+    },
+  },
+  array: {
+    check(/** @type {string} */ key) {
+      return key.endsWith("[]")
+    },
+    parse(/** @type {string} */ strVal, /** @type {string} */ key) {
+      const separator = tryGetSeparator(strVal)
+      if (!separator) {
+        return [strToType(strVal, key.slice(0, -2))]
+      }
+      const childType = key.slice(0, -2)
+      return strVal.split(separator).map((x) => strToType(x, childType))
+    },
+  },
+}
+
 /**
  * @param {string} strVal
  * @param {string} type
@@ -320,21 +355,10 @@ function strToType(strVal, type) {
   if (!type) {
     return strVal
   }
-  if (type === "vec") {
-    const separator = tryGetSeparator(strVal)
-    const [x, y] = strVal.split(separator).map(Number)
-    return V.vec(x, y)
-  }
-  if (type === "int") {
-    return parseInt(strVal, 10)
-  }
-  if (type.endsWith("[]")) {
-    const separator = tryGetSeparator(strVal)
-    if (!separator) {
-      return [strToType(strVal, type.slice(0, -2))]
+  for (const key in converters) {
+    if (converters[key].check(type)) {
+      return converters[key].parse(strVal, type)
     }
-    const childType = type.slice(0, -2)
-    return strVal.split(separator).map((x) => strToType(x, childType))
   }
   return strVal
 }

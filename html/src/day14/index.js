@@ -1,12 +1,15 @@
 // @ts-check
 import { parseMap, simulateSand } from "../../../js/solutions/14.js"
 import { V } from "../../../js/modules/index.js"
+import { scaleCanvasToPixelRatio } from "../common.js"
 
 const canvas = document.getElementById("canvas")
 if (!(canvas instanceof HTMLCanvasElement)) throw new Error("no canvas")
 
 const ctx = canvas.getContext("2d")
 if (!ctx) throw new Error("no ctx")
+
+scaleCanvasToPixelRatio(ctx, 100, 100)
 
 let raf = 0
 /**
@@ -31,8 +34,7 @@ function draw(input, ctx, part2 = false) {
   const { width, height, bounds } = map
   const scale = Math.min(10, Math.max(2, 200 / width))
 
-  ctx.canvas.width = width * scale
-  ctx.canvas.height = height * scale
+  scaleCanvasToPixelRatio(ctx, width * scale, height * scale)
 
   ctx.canvas.scrollIntoView({ behavior: "smooth" })
 

@@ -1,17 +1,44 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+:root {
+  --input-border: #dfdede;
+  --input-focus-h: 245;
+  --input-focus-s: 100%;
+  --input-focus-l: 82%;
+
+  --border-color: #dfdede;
+}
+
 html {
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
     Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+
+  background: linear-gradient(90deg, #4b6cb7 0%, #182848 100%);
+  min-height: 100%;
+  font-size: 1em;
 }
 
 body {
   margin: 0;
+  padding: 1em;
+  color: white;
 }
 
 canvas {
-  border: 1px solid #dfdede;
+  border: 2px solid var(--border-color);
+  border-radius: 4px;
   background: #fff;
   margin: 0;
   padding: 0;
+}
+
+a {
+  color: #fff;
+  text-decoration: underline;
 }
 
 form {
@@ -20,10 +47,175 @@ form {
   gap: 0.5em;
 }
 
+input,
+textarea,
+button {
+  font-size: 0.8em;
+  font-family: inherit;
+  padding: 0.25em 0.5em;
+  background: #fff;
+  border: 2px solid var(--input-border);
+  border-radius: 4px;
+}
+
+button:active {
+  background: #eee;
+}
+
+input:not([type="checkbox"], [type="radio"]),
+button {
+  line-height: 1;
+  height: 2.25rem;
+}
+
+input[type="file"] {
+  font-size: 0.9em;
+  padding-top: 0.35rem;
+}
+
+input[readonly],
+textarea[readonly] {
+  border-style: dotted;
+  cursor: not-allowed;
+  color: #777;
+}
+
+input[disabled],
+textarea[disabled],
+button[disabled] {
+  --input-border: #ccc;
+
+  background-color: #eee;
+  cursor: not-allowed;
+}
+
+*:focus-visible {
+  border-color: hsl(
+    var(--input-focus-h),
+    var(--input-focus-s),
+    var(--input-focus-l)
+  );
+  box-shadow: 0 0 0 3px
+    hsla(
+      var(--input-focus-h),
+      var(--input-focus-s),
+      calc(var(--input-focus-l) + 40%),
+      0.8
+    );
+  transition: 180ms box-shadow ease-in-out;
+  outline: 3px solid transparent;
+}
+
+textarea {
+  resize: vertical;
+  font-family: "Courier New", Courier, monospace;
+}
+
+input[type="range"] {
+  height: 34px;
+  -webkit-appearance: none;
+  margin: 10px 0;
+  width: 100%;
+  background: transparent;
+  border: none;
+  padding: 0;
+}
+input[type="range"]:focus {
+  outline: none;
+}
+input[type="range"]::-webkit-slider-runnable-track {
+  width: 100%;
+  height: 11px;
+  cursor: pointer;
+  animate: 0.2s;
+  box-shadow: 1px 1px 1px #000000;
+  background: #74a9d8;
+  border-radius: 1px;
+  border: 0px solid #010101;
+}
+input[type="range"]::-webkit-slider-thumb {
+  box-shadow: 1px 1px 1px #000031;
+  border: 1px solid #00001e;
+  height: 26px;
+  width: 26px;
+  border-radius: 15px;
+  background: #ffffff;
+  cursor: pointer;
+  -webkit-appearance: none;
+  margin-top: -8px;
+}
+input[type="range"]:focus::-webkit-slider-runnable-track {
+  background: #74a9d8;
+}
+input[type="range"]::-moz-range-track {
+  width: 100%;
+  height: 11px;
+  cursor: pointer;
+  animate: 0.2s;
+  box-shadow: 1px 1px 1px #000000;
+  background: #74a9d8;
+  border-radius: 1px;
+  border: 0px solid #010101;
+}
+input[type="range"]::-moz-range-thumb {
+  box-shadow: 1px 1px 1px #000031;
+  border: 1px solid #00001e;
+  height: 26px;
+  width: 26px;
+  border-radius: 15px;
+  background: #ffffff;
+  cursor: pointer;
+}
+input[type="range"]::-ms-track {
+  width: 100%;
+  height: 11px;
+  cursor: pointer;
+  animate: 0.2s;
+  background: transparent;
+  border-color: transparent;
+  color: transparent;
+}
+input[type="range"]::-ms-fill-lower {
+  background: #74a9d8;
+  border: 0px solid #010101;
+  border-radius: 2px;
+  box-shadow: 1px 1px 1px #000000;
+}
+input[type="range"]::-ms-fill-upper {
+  background: #74a9d8;
+  border: 0px solid #010101;
+  border-radius: 2px;
+  box-shadow: 1px 1px 1px #000000;
+}
+input[type="range"]::-ms-thumb {
+  margin-top: 1px;
+  box-shadow: 1px 1px 1px #000031;
+  border: 1px solid #00001e;
+  height: 26px;
+  width: 26px;
+  border-radius: 15px;
+  background: #ffffff;
+  cursor: pointer;
+}
+input[type="range"]:focus::-ms-fill-lower {
+  background: #74a9d8;
+}
+input[type="range"]:focus::-ms-fill-upper {
+  background: #74a9d8;
+}
+
 .container {
   padding: 1em;
-  margin: auto;
+  margin: 1em auto;
   max-width: 800px;
+
+  /* From https://css.glass */
+  background: rgba(255, 255, 255, 0.48);
+  border-radius: 16px;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
 .row {
@@ -45,4 +237,8 @@ form {
 
 .mb-1 {
   margin-bottom: 1em;
+}
+
+.justify-content-center {
+  justify-content: center;
 }
