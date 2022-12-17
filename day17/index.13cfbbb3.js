@@ -142,13 +142,13 @@
       this[globalName] = mainExports;
     }
   }
-})({"anMt6":[function(require,module,exports) {
+})({"4UlvF":[function(require,module,exports) {
 var global = arguments[3];
 var HMR_HOST = null;
 var HMR_PORT = null;
 var HMR_SECURE = false;
 var HMR_ENV_HASH = "d6ea1d42532a7575";
-module.bundle.HMR_BUNDLE_ID = "8f79f1b7a02d4531";
+module.bundle.HMR_BUNDLE_ID = "517c5ca313cfbbb3";
 "use strict";
 /* global HMR_HOST, HMR_PORT, HMR_ENV_HASH, HMR_SECURE, chrome, browser, globalThis, __parcel__import__, __parcel__importScripts__, ServiceWorkerGlobalScope */ /*::
 import type {
@@ -531,92 +531,153 @@ function hmrAcceptRun(bundle, id) {
     acceptedAssets[id] = true;
 }
 
-},{}],"aZTvN":[function(require,module,exports) {
+},{}],"9OEou":[function(require,module,exports) {
 // @ts-check
-var _14Js = require("../../../js/solutions/14.js");
-var _indexJs = require("../../../js/modules/index.js");
+var _common = require("../common");
+var _17Js = require("../../../js/solutions/17.js");
+var _modules = require("../../../js/modules");
+var _itertools = require("../../../js/modules/itertools");
 const canvas = document.getElementById("canvas");
 if (!(canvas instanceof HTMLCanvasElement)) throw new Error("no canvas");
 const ctx = canvas.getContext("2d");
 if (!ctx) throw new Error("no ctx");
-let raf = 0;
-/**
- * @param {string} input
- * @param {CanvasRenderingContext2D} ctx
- */ function draw(input, ctx, part2 = false) {
-    cancelAnimationFrame(raf);
-    const map = (0, _14Js.parseMap)(input);
-    if (part2) {
-        const h = map.height + 1;
-        const minX = Math.min(map.bounds.minX, 500 - h);
-        const maxX = Math.max(map.bounds.maxX, 500 + h);
-        const floor = (0, _indexJs.V).segment((0, _indexJs.V).vec(minX, h), (0, _indexJs.V).vec(maxX, h));
-        for (const pos of floor)map.set(pos, "~");
-    }
-    const { width , height , bounds  } = map;
-    const scale = Math.min(10, Math.max(2, 200 / width));
-    ctx.canvas.width = width * scale;
-    ctx.canvas.height = height * scale;
-    ctx.canvas.scrollIntoView({
-        behavior: "smooth"
-    });
-    const colors = {
-        "+": "orange",
-        o: "orange",
-        "#": "gray",
-        ".": "darkblue",
-        "~": "brown"
-    };
-    const iter = (0, _14Js.simulateSand)(map);
-    function drawFullState() {
-        const map2dStr = map.to2dArray({
-            valToString: (x)=>x ?? "."
-        });
-        map2dStr.forEach((row, y)=>{
-            row.forEach((cell, x)=>{
-                ctx.fillStyle = colors[cell];
-                ctx.fillRect(x * scale, y * scale, scale, scale);
-            });
-        });
-    }
-    function drawPoint([x, y], color) {
-        ctx.fillStyle = color;
-        ctx.fillRect((x - bounds.minX) * scale, (y - bounds.minY) * scale, scale, scale);
-    }
-    drawFullState();
-    const step = ()=>{
-        const value = iter.next().value;
-        if (value) {
-            drawPoint(value, colors.o);
-            raf = requestAnimationFrame(step);
-        }
-    };
-    step();
-}
+const SCREEN_WIDTH = 9;
+const SCREEN_HEIGHT = 64;
+const SIZE = 5;
+const COLORS = {
+    "+": "#ff922b",
+    "-": "#51cf66",
+    L: "#339af0",
+    O: "#cc5de8",
+    I: "#e03131",
+    ".": "white"
+};
+const example = ">>><<><>><<<>><>>><<<>>><<<><<<>><>><<>>";
+(0, _common.scaleCanvasToPixelRatio)(ctx, SCREEN_WIDTH * SIZE, SCREEN_HEIGHT * SIZE);
 const inputForm = document.getElementById("input-form");
 if (!(inputForm instanceof HTMLFormElement)) throw new Error("no form");
+const pauseButton = document.getElementById("pause");
+if (!(pauseButton instanceof HTMLButtonElement)) throw new Error("no pause button");
+const speedInput = document.getElementById("speed");
+if (!(speedInput instanceof HTMLInputElement)) throw new Error("no speed input");
+const inputField = inputForm.elements.namedItem("input");
+if (inputField instanceof HTMLTextAreaElement) inputField.value = example;
 inputForm.addEventListener("submit", function(e) {
     e.preventDefault();
     const formData = new FormData(this);
     const input = formData.get("input")?.toString() ?? "";
-    draw(input.trim(), ctx, formData.get("part2") === "on");
+    draw(input.trim(), ctx);
 });
+pauseButton.addEventListener("click", function(e) {
+    if (paused) play();
+    else pause();
+});
+let paused = false;
+function pause() {
+    paused = true;
+    if (pauseButton) pauseButton.textContent = "Play";
+}
+function play() {
+    paused = false;
+    if (pauseButton) {
+        pauseButton.removeAttribute("disabled");
+        pauseButton.textContent = "Pause";
+    }
+}
+let stepDelay = 500;
+speedInput.value = String(1000 / stepDelay);
+speedInput.addEventListener("input", function(e) {
+    stepDelay = 1000 / Number(this.value);
+});
+let rafHandle = 0;
+/**
+ * @param {string} input
+ * @param {CanvasRenderingContext2D} ctx
+ */ function draw(input, ctx) {
+    ctx.canvas.scrollIntoView({
+        behavior: "smooth"
+    });
+    cancelAnimationFrame(rafHandle);
+    play();
+    const iter = (0, _17Js.simulate)(input.trim());
+    let scroll = 0;
+    function drawFullState() {
+        const { value  } = iter.next();
+        if (!value) return;
+        ctx.fillStyle = "#343a40";
+        ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+        const { map , rock , height  } = value;
+        const maxY = height + 5;
+        if (maxY - scroll > SCREEN_HEIGHT) {
+            scroll = maxY - SCREEN_HEIGHT;
+            console.log(scroll);
+        }
+        const arr = map.to2dArray({
+            valToString: (x)=>x ?? ".",
+            topLeftPos: (0, _modules.V).vec(0, scroll),
+            botRightPos: (0, _modules.V).vec(6, Math.max(maxY, SCREEN_HEIGHT))
+        });
+        const dx = 1;
+        for(let y = 0; y < arr.length; y++)for(let x = 0; x < arr[y].length; x++){
+            ctx.fillStyle = COLORS[arr[y][x]];
+            ctx.fillRect((x + dx) * SIZE, y * SIZE, SIZE, SIZE);
+        }
+        rock.points.forEach((p)=>{
+            const [x, y] = (0, _modules.V).add(p, rock.pos);
+            ctx.fillStyle = COLORS[rock.name];
+            ctx.fillRect((x + dx) * SIZE, (y - scroll) * SIZE, SIZE, SIZE);
+        });
+    }
+    let lastTime = 0;
+    /**
+   * @param {number} dt
+   */ function drawLoop(dt) {
+        if (paused) lastTime = 0;
+        else {
+            if (lastTime === 0) {
+                lastTime = dt;
+                drawFullState();
+            } else if (dt - lastTime > stepDelay) {
+                const countSteps = Math.floor((dt - lastTime) / stepDelay);
+                lastTime = dt;
+                for (const _ of (0, _itertools.range)(countSteps))drawFullState();
+            }
+        }
+        rafHandle = requestAnimationFrame(drawLoop);
+    }
+    drawLoop(0);
+}
 
-},{"../../../js/solutions/14.js":"3Lnzw","../../../js/modules/index.js":"eVlez"}],"3Lnzw":[function(require,module,exports) {
+},{"../common":"8wzUn","../../../js/solutions/17.js":"lFNmz","../../../js/modules":"eVlez","../../../js/modules/itertools":"aDL7D"}],"8wzUn":[function(require,module,exports) {
+// @ts-check
+/**
+ * @param {CanvasRenderingContext2D} ctx
+ * @param {number} width
+ * @param {number} height
+ */ var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "scaleCanvasToPixelRatio", ()=>scaleCanvasToPixelRatio);
+function scaleCanvasToPixelRatio(ctx, width, height) {
+    const pixelRatio = window.devicePixelRatio || 1;
+    ctx.canvas.width = width * pixelRatio;
+    ctx.canvas.height = height * pixelRatio;
+    ctx.canvas.style.width = `${width}px`;
+    ctx.canvas.style.height = `${height}px`;
+    ctx.scale(pixelRatio, pixelRatio);
+}
+
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"5gDop"}],"lFNmz":[function(require,module,exports) {
 // @ts-check
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 /**
  * @param {string} input
- * @returns
+ *
+ * @returns {Array<() => any>}
  */ parcelHelpers.export(exports, "solve", ()=>solve);
 /**
  * @param {string} input
- * @returns
- */ parcelHelpers.export(exports, "parseMap", ()=>parseMap);
-/**
- * @param {Map2d<string>} map2d
- */ parcelHelpers.export(exports, "simulateSand", ()=>simulateSand);
+ */ parcelHelpers.export(exports, "simulate", ()=>simulate);
 var _indexJs = require("../modules/index.js");
 var _itertoolsJs = require("../modules/itertools.js");
 var _libJs = require("../modules/lib.js");
@@ -627,63 +688,205 @@ function solve(input) {
         ()=>part2(input)
     ];
 }
-const start = (0, _indexJs.V).vec(500, 0);
-function parseMap(input) {
-    const lines = (0, _libJs.readLines)(input.trimEnd()).map((0, _libJs.typed)("vec[]"));
-    const points = (0, _itertoolsJs.it)(lines).flatMap((line)=>(0, _itertoolsJs.it)(line).windowed(2).flatMap(([a, b])=>(0, _indexJs.V).segment(a, b))).map((pos)=>(0, _libJs.tuple)(pos, "#"));
-    return new (0, _map2DJs.Map2d)(points).set(start, "+");
+const WIDTH = 7;
+const ROCKS = [
+    {
+        name: "-",
+        pos: (0, _indexJs.V).vec(0, 0),
+        width: 4,
+        height: 1,
+        points: [
+            (0, _indexJs.V).vec(0, 0),
+            (0, _indexJs.V).vec(1, 0),
+            (0, _indexJs.V).vec(2, 0),
+            (0, _indexJs.V).vec(3, 0)
+        ]
+    },
+    {
+        name: "+",
+        pos: (0, _indexJs.V).vec(0, 0),
+        width: 3,
+        height: 3,
+        points: [
+            (0, _indexJs.V).vec(1, 0),
+            (0, _indexJs.V).vec(0, -1),
+            (0, _indexJs.V).vec(1, -1),
+            (0, _indexJs.V).vec(2, -1),
+            (0, _indexJs.V).vec(1, -2)
+        ]
+    },
+    {
+        name: "L",
+        pos: (0, _indexJs.V).vec(0, 0),
+        width: 3,
+        height: 3,
+        points: [
+            (0, _indexJs.V).vec(2, 0),
+            (0, _indexJs.V).vec(2, -1),
+            (0, _indexJs.V).vec(0, -2),
+            (0, _indexJs.V).vec(1, -2),
+            (0, _indexJs.V).vec(2, -2)
+        ]
+    },
+    {
+        name: "I",
+        pos: (0, _indexJs.V).vec(0, 0),
+        width: 1,
+        height: 4,
+        points: [
+            (0, _indexJs.V).vec(0, 0),
+            (0, _indexJs.V).vec(0, -1),
+            (0, _indexJs.V).vec(0, -2),
+            (0, _indexJs.V).vec(0, -3)
+        ]
+    },
+    {
+        name: "O",
+        pos: (0, _indexJs.V).vec(0, 0),
+        width: 2,
+        height: 2,
+        points: [
+            (0, _indexJs.V).vec(0, 0),
+            (0, _indexJs.V).vec(1, 0),
+            (0, _indexJs.V).vec(0, -1),
+            (0, _indexJs.V).vec(1, -1)
+        ]
+    }
+];
+function* rocks() {
+    while(true)for (const rock of ROCKS)yield rock;
 }
-function* simulateSand(map2d, maxY = map2d.bounds.maxY) {
-    const bot = (0, _indexJs.V).vec(0, 1);
-    const leftBot = (0, _indexJs.V).vec(-1, 1);
-    const rightBot = (0, _indexJs.V).vec(1, 1);
-    /**
-   *
-   * @param {V.Vec2} startFrom
-   * @returns
-   */ function drop(startFrom) {
-        let pos = startFrom;
-        while(true){
-            if ((0, _indexJs.V).y(pos) >= maxY) return null;
-            const bottom = (0, _indexJs.V).add(pos, bot);
-            if (map2d.hasPos(bottom) === false) {
-                pos = bottom;
-                continue;
+/**
+ *
+ * @param {Generator<T>} iter
+ * @returns {T}
+ * @template T
+ */ function next(iter) {
+    return iter.next().value;
+}
+/**
+ * @typedef {typeof ROCKS[number]} Rock
+ */ /**
+ *
+ * @param {Rock} rock
+ * @param {V.Vec2} delta
+ */ function moveRock(rock, delta) {
+    return {
+        ...rock,
+        pos: (0, _indexJs.V).add(rock.pos, delta)
+    };
+}
+/**
+ * @param {Rock} rock
+ * @param {string} dir
+ * @param {Map2d<string>} map
+ */ function pushRock(rock, dir, map) {
+    let nextRock = rock;
+    switch(dir){
+        case ">":
+            {
+                const nextX = (0, _indexJs.V).x(rock.pos) + 1;
+                if (nextX + rock.width > WIDTH) return rock;
+                nextRock = moveRock(rock, (0, _indexJs.V).vec(1, 0));
+                break;
             }
-            const lb = (0, _indexJs.V).add(pos, leftBot);
-            if (map2d.hasPos(lb) === false) {
-                pos = lb;
-                continue;
+        case "<":
+            {
+                const nextX1 = (0, _indexJs.V).x(rock.pos) - 1;
+                if (nextX1 < 0) return rock;
+                nextRock = moveRock(rock, (0, _indexJs.V).vec(-1, 0));
+                break;
             }
-            const rb = (0, _indexJs.V).add(pos, rightBot);
-            if (map2d.hasPos(rb) === false) {
-                pos = rb;
-                continue;
-            }
-            return pos;
-        }
+        default:
+            throw new Error(`Unknown direction: ${dir}`);
     }
-    while(true){
-        const pos = drop(start);
-        if (pos === null || (0, _indexJs.V).eq(pos, start)) return;
-        map2d.set(pos, "o");
-        yield pos;
-    }
+    if (nextRock.points.some((p)=>map.hasPos((0, _indexJs.V).add(nextRock.pos, p)))) return rock;
+    return nextRock;
+}
+/**
+ *
+ * @param {Rock} rock
+ * @param {number} height
+ */ function placeRock(rock, height) {
+    const dy = height + 2 + rock.height;
+    const dx = 2;
+    return moveRock(rock, (0, _indexJs.V).vec(dx, dy));
+}
+/**
+ * @param {Rock} rock
+ */ function fallRock(rock) {
+    return moveRock(rock, (0, _indexJs.V).vec(0, -1));
+}
+/**
+ * @param {Rock} rock
+ * @param {Map2d<string>} map
+ * @param {number} height
+ */ function rockPlaced(rock, map, height) {
+    const bottom = (0, _indexJs.V).y(rock.pos) - rock.height + 1;
+    if (bottom > height) return false;
+    if (bottom === 0) return true;
+    const nextRock = moveRock(rock, (0, _indexJs.V).vec(0, -1));
+    return nextRock.points.some((p)=>map.hasPos((0, _indexJs.V).add(nextRock.pos, p)));
+}
+/**
+ * @param {Rock} rock
+ * @param {Map2d<string>} map
+ * @param {number} curHeight
+ * @returns next height
+ */ function placeRockOnMap(rock, map, curHeight) {
+    for (const p of rock.points)map.set((0, _indexJs.V).add(rock.pos, p), rock.name);
+    return Math.max(curHeight, (0, _indexJs.V).y(rock.pos) + 1);
 }
 /**
  * @param {string} input
  */ function part1(input) {
-    const map2d = parseMap(input);
-    return (0, _itertoolsJs.it)(simulateSand(map2d)).count();
+    return (0, _itertoolsJs.it)(simulate(input.trim())).find((s)=>s.placedRocks === 2022).height;
 }
 /**
  * @param {string} input
  */ function part2(input) {
-    const map = parseMap(input);
-    const bfs = map.setGetNeighbors((pos)=>(0, _indexJs.V).DIRS_3_TOP.map((d)=>(0, _indexJs.V).add(pos, d))).bfs((_, b)=>!map.hasPos(b.pos) && b.pos[1] < map.height + 2, start);
-    return (0, _itertoolsJs.it)(bfs).count();
+    const steps = 1000000000000;
+    input = input.trim();
+    const diffs = (0, _itertoolsJs.it)(simulate(input)).distinct((x)=>x.placedRocks).windowed(2).map(([a, b])=>b.height - a.height).take(5000).toArray();
+    const s = diffs.join("");
+    const pattern = s.slice(-30);
+    const start = s.indexOf(pattern, 100);
+    const nextStart = s.indexOf(pattern, start + pattern.length);
+    const period = nextStart - start;
+    const cycleSum = diffs.slice(start, start + period).reduce((0, _libJs.add), 0);
+    const cycles = Math.floor((steps - start) / period);
+    const rest = steps - start - cycles * period;
+    const restSum = diffs.slice(start, start + rest).reduce((0, _libJs.add), 0);
+    const startSum = diffs.slice(0, start).reduce((0, _libJs.add), 0);
+    return startSum + cycles * cycleSum + restSum;
+}
+function* simulate(input) {
+    const r = rocks();
+    /** @type {Map2d<string>} */ const map = new (0, _map2DJs.Map2d)();
+    let height = 0;
+    let rock = placeRock(next(r), height);
+    let placedRocks = 0;
+    while(true){
+        let cycleStart = true;
+        for (let move of input){
+            yield {
+                height,
+                placedRocks,
+                cycleStart,
+                map,
+                rock
+            };
+            cycleStart = false;
+            rock = pushRock(rock, move, map);
+            if (rockPlaced(rock, map, height)) {
+                height = placeRockOnMap(rock, map, height);
+                rock = placeRock(next(r), height);
+                placedRocks++;
+            } else rock = fallRock(rock);
+        }
+    }
 }
 
-},{"../modules/index.js":"eVlez","../modules/itertools.js":"aDL7D","../modules/lib.js":"7Ap0m","../modules/map2d.js":"kAYVe","@parcel/transformer-js/src/esmodule-helpers.js":"5gDop"}]},["anMt6","aZTvN"], "aZTvN", "parcelRequiree764")
+},{"../modules/index.js":"eVlez","../modules/itertools.js":"aDL7D","../modules/lib.js":"7Ap0m","../modules/map2d.js":"kAYVe","@parcel/transformer-js/src/esmodule-helpers.js":"5gDop"}]},["4UlvF","9OEou"], "9OEou", "parcelRequiree764")
 
-//# sourceMappingURL=index.a02d4531.js.map
+//# sourceMappingURL=index.13cfbbb3.js.map
