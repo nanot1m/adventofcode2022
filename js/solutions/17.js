@@ -1,7 +1,8 @@
 // @ts-check
 
 import { V } from "../modules/index.js"
-import { readLines, tpl } from "../modules/lib.js"
+import { it } from "../modules/itertools.js"
+import { add } from "../modules/lib.js"
 import { Map2d } from "../modules/map2d.js"
 
 /**
@@ -12,10 +13,6 @@ import { Map2d } from "../modules/map2d.js"
 export function solve(input) {
   return [() => part1(input), () => part2(input)]
 }
-
-const example = `\
->>><<><>><<<>><>>><<<>>><<<><<<>><>><<>>
-`
 
 const WIDTH = 7
 
@@ -68,17 +65,6 @@ const ROCKS = [
     points: [V.vec(0, 0), V.vec(1, 0), V.vec(0, -1), V.vec(1, -1)],
   },
 ]
-
-/**
- * @param {string} input
- */
-function* mover(input) {
-  while (true) {
-    for (const char of input) {
-      yield char
-    }
-  }
-}
 
 function* rocks() {
   while (true) {
@@ -190,66 +176,71 @@ function placeRockOnMap(rock, map, curHeight) {
 }
 
 /**
- * @param {Rock} rock
- * @param {Map2d<string>} map
- * @param {number} height
- */
-function printRockOnMap(rock, map, height) {
-  const newMap = new Map2d()
-  for (const p of map) {
-    newMap.set(p.pos, p.value)
-  }
-  for (const p of rock.points) {
-    newMap.set(V.add(rock.pos, p), "@")
-  }
-
-  console.log("height", height)
-  console.log(
-    newMap
-      .toString({
-        botRightPos: V.vec(6, Math.max(height + 2, V.y(rock.pos))),
-        topLeftPos: V.vec(0, 0),
-        valToString: (v) => v ?? ".",
-      })
-      .split("\n")
-      .reverse()
-      .join("\n"),
-  )
-  console.log("\n")
-}
-
-/**
  * @param {string} input
  */
 function part1(input) {
-  // input = example
-  const m = mover(input.trim())
-  const r = rocks()
-
-  /** @type {Map2d<string>} */
-  const map = new Map2d()
-
-  let height = 0
-  let rocksStopped = 0
-  let rock = placeRock(next(r), height)
-  while (rocksStopped < 2022) {
-    const move = next(m)
-    rock = pushRock(rock, move, map)
-    if (rockPlaced(rock, map, height)) {
-      height = placeRockOnMap(rock, map, height)
-      rocksStopped++
-      rock = placeRock(next(r), height)
-    } else {
-      rock = fallRock(rock)
-    }
-  }
-
-  return height
+  return it(simulate(input.trim())).find((s) => s.placedRocks === 2022).height
 }
 
 /**
  * @param {string} input
  */
 function part2(input) {
-  return 0
+  const steps = 1000000000000
+
+  input = input.trim()
+
+  const diffs = it(simulate(input))
+    .distinct((x) => x.placedRocks)
+    .windowed(2)
+    .map(([a, b]) => b.height - a.height)
+    .take(5000)
+    .toArray()
+
+  const s = diffs.join("")
+
+  const pattern = s.slice(-30)
+  const start = s.indexOf(pattern, 100)
+  const nextStart = s.indexOf(pattern, start + pattern.length)
+  const period = nextStart - start
+
+  const cycleSum = diffs.slice(start, start + period).reduce(add, 0)
+  const cycles = Math.floor((steps - start) / period)
+
+  const rest = steps - start - cycles * period
+  const restSum = diffs.slice(start, start + rest).reduce(add, 0)
+
+  const startSum = diffs.slice(0, start).reduce(add, 0)
+
+  return startSum + cycles * cycleSum + restSum
+}
+
+/**
+ * @param {string} input
+ */
+export function* simulate(input) {
+  const r = rocks()
+  /** @type {Map2d<string>} */
+  const map = new Map2d()
+
+  let height = 0
+  let rock = placeRock(next(r), height)
+  let placedRocks = 0
+
+  while (true) {
+    let cycleStart = true
+    for (let move of input) {
+      yield { height, placedRocks, cycleStart, map }
+      cycleStart = false
+
+      rock = pushRock(rock, move, map)
+      if (rockPlaced(rock, map, height)) {
+        height = placeRockOnMap(rock, map, height)
+        rock = placeRock(next(r), height)
+        placedRocks++
+      } else {
+        rock = fallRock(rock)
+      }
+    }
+  }
 }

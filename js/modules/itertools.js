@@ -445,6 +445,24 @@ export function* skipAfter(iterable, predicate) {
 }
 
 /**
+ * @param {Iterable<T>} iterable
+ * @param {(arg: T) => any} [mapFn]
+ * @returns {Iterable<T>}
+ *
+ * @template T
+ */
+export function* distinct(iterable, mapFn = (x) => x) {
+  const set = new Set()
+  for (const x of iterable) {
+    const key = mapFn(x)
+    if (!set.has(key)) {
+      set.add(key)
+      yield x
+    }
+  }
+}
+
+/**
  * @typedef {Iterable<T> & {
  *    map: <R>(fn: (arg: T) => R) => FluentIterable<R>
  *    groupsOf: (n: number) => FluentIterable<T[]>
@@ -472,6 +490,7 @@ export function* skipAfter(iterable, predicate) {
  *    updateAt: (index: number, fn: (arg: T) => T) => FluentIterable<T>
  *    unshift: (...values: T[]) => FluentIterable<T>
  *    skipAfter: (predicate: (arg: T) => boolean) => FluentIterable<T>
+ *    distinct: (mapFn?: (arg: T) => any) => FluentIterable<T>
  * }} GenericFluentIterable<T>
  *
  *
@@ -560,6 +579,8 @@ export const it = (iterable) => {
     unshift: (/** @type {T[]} */ ...values) => it(unshift(iterable, ...values)),
     skipAfter: (/** @type {(arg: T) => boolean} */ predicate) =>
       it(skipAfter(iterable, predicate)),
+    distinct: (/** @type {(arg: T) => any} */ mapFn) =>
+      it(distinct(iterable, mapFn)),
     //#endregion
 
     //#region NumFluentIterable methods
