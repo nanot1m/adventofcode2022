@@ -535,10 +535,12 @@ function hmrAcceptRun(bundle, id) {
 // @ts-check
 var _14Js = require("../../../js/solutions/14.js");
 var _indexJs = require("../../../js/modules/index.js");
+var _commonJs = require("../common.js");
 const canvas = document.getElementById("canvas");
 if (!(canvas instanceof HTMLCanvasElement)) throw new Error("no canvas");
 const ctx = canvas.getContext("2d");
 if (!ctx) throw new Error("no ctx");
+(0, _commonJs.scaleCanvasToPixelRatio)(ctx, 100, 100);
 let raf = 0;
 /**
  * @param {string} input
@@ -555,8 +557,7 @@ let raf = 0;
     }
     const { width , height , bounds  } = map;
     const scale = Math.min(10, Math.max(2, 200 / width));
-    ctx.canvas.width = width * scale;
-    ctx.canvas.height = height * scale;
+    (0, _commonJs.scaleCanvasToPixelRatio)(ctx, width * scale, height * scale);
     ctx.canvas.scrollIntoView({
         behavior: "smooth"
     });
@@ -602,7 +603,7 @@ inputForm.addEventListener("submit", function(e) {
     draw(input.trim(), ctx, formData.get("part2") === "on");
 });
 
-},{"../../../js/solutions/14.js":"3Lnzw","../../../js/modules/index.js":"eVlez"}],"3Lnzw":[function(require,module,exports) {
+},{"../../../js/solutions/14.js":"3Lnzw","../../../js/modules/index.js":"eVlez","../common.js":"8wzUn"}],"3Lnzw":[function(require,module,exports) {
 // @ts-check
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);

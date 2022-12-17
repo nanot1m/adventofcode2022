@@ -142,13 +142,13 @@
       this[globalName] = mainExports;
     }
   }
-})({"37NTK":[function(require,module,exports) {
+})({"cwOmA":[function(require,module,exports) {
 var global = arguments[3];
 var HMR_HOST = null;
 var HMR_PORT = null;
 var HMR_SECURE = false;
 var HMR_ENV_HASH = "d6ea1d42532a7575";
-module.bundle.HMR_BUNDLE_ID = "4affd36f26766bf5";
+module.bundle.HMR_BUNDLE_ID = "dd20524707b772bd";
 "use strict";
 /* global HMR_HOST, HMR_PORT, HMR_ENV_HASH, HMR_SECURE, chrome, browser, globalThis, __parcel__import__, __parcel__importScripts__, ServiceWorkerGlobalScope */ /*::
 import type {
@@ -1822,6 +1822,24 @@ function parseMap2d(input) {
     };
 }
 
-},{"./itertools.js":"aDL7D","./vec.js":"2oi5s","@parcel/transformer-js/src/esmodule-helpers.js":"5gDop"}]},["37NTK"], null, "parcelRequiree764")
+},{"./itertools.js":"aDL7D","./vec.js":"2oi5s","@parcel/transformer-js/src/esmodule-helpers.js":"5gDop"}],"8wzUn":[function(require,module,exports) {
+// @ts-check
+/**
+ * @param {CanvasRenderingContext2D} ctx
+ * @param {number} width
+ * @param {number} height
+ */ var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "scaleCanvasToPixelRatio", ()=>scaleCanvasToPixelRatio);
+function scaleCanvasToPixelRatio(ctx, width, height) {
+    const pixelRatio = window.devicePixelRatio || 1;
+    ctx.canvas.width = width * pixelRatio;
+    ctx.canvas.height = height * pixelRatio;
+    ctx.canvas.style.width = `${width}px`;
+    ctx.canvas.style.height = `${height}px`;
+    ctx.scale(pixelRatio, pixelRatio);
+}
 
-//# sourceMappingURL=index.26766bf5.js.map
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"5gDop"}]},["cwOmA"], null, "parcelRequiree764")
+
+//# sourceMappingURL=index.07b772bd.js.map

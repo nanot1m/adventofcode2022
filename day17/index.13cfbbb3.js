@@ -648,25 +648,7 @@ let rafHandle = 0;
     drawLoop(0);
 }
 
-},{"../common":"8wzUn","../../../js/solutions/17.js":"lFNmz","../../../js/modules":"eVlez","../../../js/modules/itertools":"aDL7D"}],"8wzUn":[function(require,module,exports) {
-// @ts-check
-/**
- * @param {CanvasRenderingContext2D} ctx
- * @param {number} width
- * @param {number} height
- */ var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
-parcelHelpers.defineInteropFlag(exports);
-parcelHelpers.export(exports, "scaleCanvasToPixelRatio", ()=>scaleCanvasToPixelRatio);
-function scaleCanvasToPixelRatio(ctx, width, height) {
-    const pixelRatio = window.devicePixelRatio || 1;
-    ctx.canvas.width = width * pixelRatio;
-    ctx.canvas.height = height * pixelRatio;
-    ctx.canvas.style.width = `${width}px`;
-    ctx.canvas.style.height = `${height}px`;
-    ctx.scale(pixelRatio, pixelRatio);
-}
-
-},{"@parcel/transformer-js/src/esmodule-helpers.js":"5gDop"}],"lFNmz":[function(require,module,exports) {
+},{"../common":"8wzUn","../../../js/solutions/17.js":"lFNmz","../../../js/modules":"eVlez","../../../js/modules/itertools":"aDL7D"}],"lFNmz":[function(require,module,exports) {
 // @ts-check
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
