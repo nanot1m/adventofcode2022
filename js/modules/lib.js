@@ -2,6 +2,7 @@
 
 import { V } from "./index.js"
 import { it } from "./itertools.js"
+import { vec3 } from "./vec3.js"
 
 /**
  * @param {T} x
@@ -320,6 +321,16 @@ const converters = {
       const separator = tryGetSeparator(strVal)
       const [x, y] = strVal.split(separator).map(Number)
       return V.vec(x, y)
+    },
+  },
+  vec3: {
+    check(/** @type {string} */ key) {
+      return key === "vec3"
+    },
+    parse(/** @type {string} */ strVal) {
+      const separator = tryGetSeparator(strVal)
+      const [x, y, z] = strVal.split(separator).map(Number)
+      return vec3(x, y, z)
     },
   },
   int: {
