@@ -25,74 +25,139 @@ Blueprint 2: Each ore robot costs 2 ore.\
 
 const lineTpl = tpl`\
 Blueprint ${"index|int"}:\
- Each ore robot costs ${"ao|int"} ore.\
- Each clay robot costs ${"bo|int"} ore.\
- Each obsidian robot costs ${"co|int"} ore and ${"cc|int"} clay.\
- Each geode robot costs ${"do|int"} ore and ${"dg|int"} obsidian.\
+ Each ore robot costs ${"oreBotOre|int"} ore.\
+ Each clay robot costs ${"clayBotOre|int"} ore.\
+ Each obsidian robot costs ${"obsBotOre|int"} ore and ${"obsBotClay|int"} clay.\
+ Each geode robot costs ${"geoBotOre|int"} ore and ${"geoBotObs|int"} obsidian.\
 `
 
 /**
  *
- * @param {ReturnType<typeof lineTpl>} p
+ * @param {ReturnType<typeof lineTpl>} blueprint
  * @param {number} timeLeft
  */
-function countGeodes(p, timeLeft) {
-  const maxOreRobots = Math.max(p.ao, p.bo, p.co, p.do)
-  const maxClayRobots = p.cc
-  const maxObsidianRobots = p.dg
+function countGeodes(blueprint, timeLeft) {
+  const maxOreRobots = Math.max(
+    blueprint.oreBotOre,
+    blueprint.clayBotOre,
+    blueprint.obsBotOre,
+    blueprint.geoBotOre,
+  )
+  const maxClayRobots = blueprint.obsBotClay
+  const maxObsidianRobots = blueprint.geoBotObs
 
   /**
-   * @param {number} a - ore robots
-   * @param {number} b - clay robots
-   * @param {number} c - obsidian robots
-   * @param {number} d - geode robots
-   * @param {number} ar - ore
-   * @param {number} br - clay
-   * @param {number} or - obsidian
-   * @param {number} gr - geode
-   * @param {number} tp - time passed
-   * @param {number} t - time total
+   * @param {number} oreBots - ore robots
+   * @param {number} clayBots - clay robots
+   * @param {number} obsBots - obsidian robots
+   * @param {number} geoBots - geode robots
+   * @param {number} ore - ore
+   * @param {number} clay - clay
+   * @param {number} obs - obsidian
+   * @param {number} geode - geode
+   * @param {number} timePassed - time passed
+   * @param {number} timeTotal - time total
    */
-  function dfs(a, b, c, d, ar, br, or, gr, tp, t) {
+  function dfs(
+    oreBots,
+    clayBots,
+    obsBots,
+    geoBots,
+    ore,
+    clay,
+    obs,
+    geode,
+    timePassed,
+    timeTotal,
+  ) {
     let isOreRobotBuilt = false
     let isClayBotBuilt = false
     let isObsBotBuilt = false
     let isGeodeBotBuilt = false
 
-    let max = gr
+    let max = geode
 
-    for (let i = tp; i < t; i++) {
-      const canBuildOreBot = p.ao <= ar
-      const canBuildClayBot = p.bo <= ar
-      const canBuildObsBot = p.co <= ar && p.cc <= br
-      const canBuildGeoBot = p.do <= ar && p.dg <= or
+    for (let i = timePassed; i < timeTotal; i++) {
+      const canBuildOreBot = blueprint.oreBotOre <= ore
+      const canBuildClayBot = blueprint.clayBotOre <= ore
+      const canBuildObsBot =
+        blueprint.obsBotOre <= ore && blueprint.obsBotClay <= clay
+      const canBuildGeoBot =
+        blueprint.geoBotOre <= ore && blueprint.geoBotObs <= obs
 
-      ;(ar += a), (br += b), (or += c), (gr += d)
+      ore += oreBots
+      clay += clayBots
+      obs += obsBots
+      geode += geoBots
 
       if (canBuildGeoBot && !isGeodeBotBuilt) {
-        const r = dfs(a, b, c, d + 1, ar - p.do, br, or - p.dg, gr, i + 1, t)
+        const r = dfs(
+          oreBots,
+          clayBots,
+          obsBots,
+          geoBots + 1,
+          ore - blueprint.geoBotOre,
+          clay,
+          obs - blueprint.geoBotObs,
+          geode,
+          i + 1,
+          timeTotal,
+        )
         max = Math.max(max, r)
         isGeodeBotBuilt = true
         continue
       }
-      if (canBuildObsBot && !isObsBotBuilt && c < maxObsidianRobots) {
-        const r = dfs(a, b, c + 1, d, ar - p.co, br - p.cc, or, gr, i + 1, t)
+      if (canBuildObsBot && !isObsBotBuilt && obsBots < maxObsidianRobots) {
+        const r = dfs(
+          oreBots,
+          clayBots,
+          obsBots + 1,
+          geoBots,
+          ore - blueprint.obsBotOre,
+          clay - blueprint.obsBotClay,
+          obs,
+          geode,
+          i + 1,
+          timeTotal,
+        )
         max = Math.max(max, r)
         isObsBotBuilt = true
         continue
       }
-      if (canBuildClayBot && !isClayBotBuilt && b < maxClayRobots) {
-        const r = dfs(a, b + 1, c, d, ar - p.bo, br, or, gr, i + 1, t)
+      if (canBuildClayBot && !isClayBotBuilt && clayBots < maxClayRobots) {
+        const r = dfs(
+          oreBots,
+          clayBots + 1,
+          obsBots,
+          geoBots,
+          ore - blueprint.clayBotOre,
+          clay,
+          obs,
+          geode,
+          i + 1,
+          timeTotal,
+        )
         max = Math.max(max, r)
         isClayBotBuilt = true
       }
-      if (canBuildOreBot && !isOreRobotBuilt && a < maxOreRobots) {
-        const r = dfs(a + 1, b, c, d, ar - p.ao, br, or, gr, i + 1, t)
+      if (canBuildOreBot && !isOreRobotBuilt && oreBots < maxOreRobots) {
+        const r = dfs(
+          oreBots + 1,
+          clayBots,
+          obsBots,
+          geoBots,
+          ore - blueprint.oreBotOre,
+          clay,
+          obs,
+          geode,
+          i + 1,
+          timeTotal,
+        )
         max = Math.max(max, r)
         isOreRobotBuilt = true
       }
 
-      max = Math.max(max, gr)
+      max = Math.max(max, geode)
     }
     return max
   }
