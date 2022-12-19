@@ -73,11 +73,13 @@ function countGeodes(p, timeLeft) {
         const r = dfs(a, b, c, d + 1, ar - p.do, br, or - p.dg, gr, i + 1, t)
         max = Math.max(max, r)
         isGeodeBotBuilt = true
+        continue
       }
       if (canBuildObsBot && !isObsBotBuilt && c < maxObsidianRobots) {
         const r = dfs(a, b, c + 1, d, ar - p.co, br - p.cc, or, gr, i + 1, t)
         max = Math.max(max, r)
         isObsBotBuilt = true
+        continue
       }
       if (canBuildClayBot && !isClayBotBuilt && b < maxClayRobots) {
         const r = dfs(a, b + 1, c, d, ar - p.bo, br, or, gr, i + 1, t)
