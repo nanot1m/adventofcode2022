@@ -1,6 +1,6 @@
 // @ts-check
 
-import { add } from "./lib.js"
+import { add, mul } from "./lib.js"
 import * as V from "./vec.js"
 
 /**
@@ -115,14 +115,16 @@ export function* iterate(x, f) {
 /**
  *
  * @param {Iterable<T>} iterable
- * @param {(arg: T) => R} f
+ * @param {(arg: T, index: number) => R} f
  *
  * @template T
  * @template R
  */
 export function* map(iterable, f) {
+  let index = 0
   for (const x of iterable) {
-    yield f(x)
+    yield f(x, index)
+    index += 1
   }
 }
 
@@ -176,6 +178,14 @@ export function find(iterable, predicate) {
  */
 export function sum(xs) {
   return reduce(xs, add, 0)
+}
+
+/**
+ * @param {Iterable<number>} xs
+ * @returns
+ */
+export function multiply(xs) {
+  return reduce(xs, mul, 1)
 }
 
 /**
@@ -464,7 +474,7 @@ export function* distinct(iterable, mapFn = (x) => x) {
 
 /**
  * @typedef {Iterable<T> & {
- *    map: <R>(fn: (arg: T) => R) => FluentIterable<R>
+ *    map: <R>(fn: (arg: T, index: number) => R) => FluentIterable<R>
  *    groupsOf: (n: number) => FluentIterable<T[]>
  *    toArray: () => T[]
  *    first: () => T | undefined
@@ -506,6 +516,7 @@ export function* distinct(iterable, mapFn = (x) => x) {
 /**
  * @typedef {GenericFluentIterable<number> & {
  *    sum: () => number
+ *    multiply: () => number
  *    min: () => number
  *    max: () => number
  * }} NumFluentIterable
@@ -535,7 +546,7 @@ export const it = (iterable) => {
   const returnValue = {
     //#region GenericFluentIterable methods
     [Symbol.iterator]: () => iterable[Symbol.iterator](),
-    /** @type {<R>(fn: (arg: T) => R) => FluentIterable<R>} */
+    /** @type {<R>(fn: (arg: T, index: number) => R) => FluentIterable<R>} */
     map: (fn) => it(map(iterable, fn)),
     groupsOf: (n) => it(groupsOf(iterable, n)),
     toArray: () => toArray(iterable),
@@ -584,6 +595,7 @@ export const it = (iterable) => {
     //#endregion
 
     //#region NumFluentIterable methods
+    multiply: () => multiply(/** @type {Iterable<number>} */ (iterable)),
     sum: () => sum(/** @type {Iterable<number>} */ (iterable)),
     min: () =>
       /** @type {NumFluentIterable} */ (returnValue).reduce(Math.min, Infinity),
