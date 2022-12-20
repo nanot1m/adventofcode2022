@@ -301,8 +301,8 @@ export const rotate = (
 /**
  * @param {string} strVal
  */
-function tryGetSeparator(strVal) {
-  const separators = [" -> ", ", ", ",", " - ", "-", " "]
+export function tryGetSeparator(strVal) {
+  const separators = ["\n\n", "\n", " -> ", ", ", ",", " - ", "-", " "]
   for (const separator of separators) {
     if (strVal.includes(separator)) {
       return separator

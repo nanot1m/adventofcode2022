@@ -1,17 +1,9 @@
 // @ts-check
 
 import { it } from "../modules/itertools.js"
-import { readLines, tpl } from "../modules/lib.js"
+import { t } from "../modules/parser.js"
 
-/**
- * @param {string} input
- * @returns {Array<() => any>}
- */
-export function solve(input) {
-  return [() => part1(input), () => part2(input)]
-}
-
-const example = `\
+export const exampleInput = `\
 Blueprint 1: Each ore robot costs 4 ore.\
  Each clay robot costs 2 ore.\
  Each obsidian robot costs 3 ore and 14 clay.\
@@ -23,17 +15,21 @@ Blueprint 2: Each ore robot costs 2 ore.\
  Each geode robot costs 3 ore and 12 obsidian.
 `
 
-const lineTpl = tpl`\
+/**
+ * @typedef {ReturnType<typeof parseInput>} InputType
+ */
+
+export const parseInput = t.arr(t.tpl`\
 Blueprint ${"index|int"}:\
  Each ore robot costs ${"oreBotOre|int"} ore.\
  Each clay robot costs ${"clayBotOre|int"} ore.\
  Each obsidian robot costs ${"obsBotOre|int"} ore and ${"obsBotClay|int"} clay.\
  Each geode robot costs ${"geoBotOre|int"} ore and ${"geoBotObs|int"} obsidian.\
-`
+`).parse
 
 /**
  *
- * @param {ReturnType<typeof lineTpl>} blueprint
+ * @param {InputType[number]} blueprint
  * @param {number} timeLeft
  */
 function countGeodes(blueprint, timeLeft) {
@@ -166,23 +162,19 @@ function countGeodes(blueprint, timeLeft) {
 }
 
 /**
- * @param {string} input
+ * @param {InputType} input
  */
-function part1(input) {
-  const blueprints = readLines(input.trim()).map(lineTpl)
-
-  return it(blueprints)
+export function part1(input) {
+  return it(input)
     .map((x) => x.index * countGeodes(x, 24))
     .sum()
 }
 
 /**
- * @param {string} input
+ * @param {InputType} input
  */
-function part2(input) {
-  const blueprints = readLines(input.trim()).map(lineTpl)
-
-  return it(blueprints)
+export function part2(input) {
+  return it(input)
     .take(3)
     .map((x) => countGeodes(x, 32))
     .multiply()

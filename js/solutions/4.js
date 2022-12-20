@@ -2,6 +2,7 @@
 
 import { it } from "../modules/itertools.js"
 import { readLines, typed } from "../modules/lib.js"
+import { t } from "../modules/parser.js"
 
 /**
  * @param {string} input
@@ -16,7 +17,7 @@ export function solve(input) {
  * @param {string} input
  */
 function parseInput(input) {
-  return readLines(input.trim()).map(typed("int[][]"))
+  return t.arr(t.tuple(t.vec(), t.vec())).parse(input)
 }
 
 /**

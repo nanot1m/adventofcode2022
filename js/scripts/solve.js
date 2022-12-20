@@ -81,6 +81,9 @@ async function execDay(day) {
    */
   const solver = (input) => {
     input = module.useExample ? module.exampleInput : input
+    if (!module.disableInputTrim) {
+      input = input.trim()
+    }
     const parse = () => (module.parseInput ? module.parseInput(input) : input)
     return module.solve
       ? module.solve(parse())

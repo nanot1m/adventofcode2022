@@ -1,15 +1,13 @@
 // @ts-check
 
 import { range } from "../modules/itertools.js"
-import { readLines } from "../modules/lib.js"
+import { t } from "../modules/parser.js"
 
 /**
  * @typedef {ReturnType<typeof parseInput>} InputType
  */
 
-export const parseInput = (/** @type {string} */ input) => {
-  return readLines(input.trim()).map(Number)
-}
+export const parseInput = t.arr(t.int()).parse
 
 export const useExample = false
 

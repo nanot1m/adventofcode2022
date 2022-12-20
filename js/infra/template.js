@@ -1,6 +1,6 @@
 // @ts-check
 
-import { readBlocks, readLines, tpl, typed } from "../modules/lib.js"
+import { t } from "../modules/parser.js"
 
 export const useExample = false
 
@@ -9,14 +9,7 @@ export const exampleInput = `\
 
 /** @typedef {ReturnType<typeof parseInput>} InputType */
 
-// const lineTpl = tpl`a=${"a|int"}`
-// const lineTpl = typed("vec[]")
-
-export const parseInput = (/** @type {string} */ input) => {
-  // const blocks = readBlocks(input.trim()).map(lineTpl)
-  // const lines = readLines(input.trim()).map(lineTpl)
-  return input
-}
+export const parseInput = t.str().parse
 
 /**
  * @param {InputType} input
