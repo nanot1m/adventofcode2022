@@ -2,33 +2,32 @@
 
 import { readBlocks, readLines, tpl, typed } from "../modules/lib.js"
 
-/**
- * @param {string} input
- * @returns {Array<() => any>}
- */
-export function solve(input) {
-  return [() => part1(input), () => part2(input)]
-}
+export const useExample = false
 
-const example = `\
+export const exampleInput = `\
 `
 
-// const lineTpl = tpl`a=${"a|int"}`
-// const lineTpl = typed("vec2[]")
+/** @typedef {ReturnType<typeof parseInput>} InputType */
 
-/**
- * @param {string} input
- */
-function part1(input) {
-  input = example
+// const lineTpl = tpl`a=${"a|int"}`
+// const lineTpl = typed("vec[]")
+
+export const parseInput = (/** @type {string} */ input) => {
   // const blocks = readBlocks(input.trim()).map(lineTpl)
   // const lines = readLines(input.trim()).map(lineTpl)
+  return input
+}
+
+/**
+ * @param {InputType} input
+ */
+export function part1(input) {
   return 0
 }
 
 /**
- * @param {string} input
+ * @param {InputType} input
  */
-function part2(input) {
+export function part2(input) {
   return 0
 }

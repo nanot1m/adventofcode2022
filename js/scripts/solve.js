@@ -54,15 +54,40 @@ async function execDay(day) {
     throw new Error(messages.join("\n"), { cause: err })
   }
 
-  const { solve } = await import(name)
-  if (!solve) {
+  const module = await import(name)
+  if (!module.solve && !(module.part1 || module.part2)) {
     const messages = [
       `Day ${day} is not implemented`,
       `Expected a ${name} to export a function named "solve"`,
+      `or a function named "part1" or/and a function named "part2"`,
     ]
 
     throw new Error(messages.join("\n"))
   }
 
-  await solution({ solve, day })
+  if (module.useExample) {
+    if (module.exampleInput === undefined) {
+      const messages = [
+        `Example input for day ${day} is not provided`,
+        `Expected a ${name} to export a string named "exampleInput"`,
+      ]
+
+      throw new Error(messages.join("\n"))
+    }
+  }
+
+  /**
+   * @param {string} input
+   */
+  const solver = (input) => {
+    input = module.useExample ? module.exampleInput : input
+    const parse = () => (module.parseInput ? module.parseInput(input) : input)
+    return module.solve
+      ? module.solve(parse())
+      : // We don't want to share parsed input between parts
+        // because solution can possibly mutate it
+        [() => module.part1?.(parse()), () => module.part2?.(parse())]
+  }
+
+  await solution({ solve: solver, day })
 }

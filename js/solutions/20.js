@@ -4,14 +4,16 @@ import { range } from "../modules/itertools.js"
 import { readLines } from "../modules/lib.js"
 
 /**
- * @param {string} input
- * @returns {Array<() => any>}
+ * @typedef {ReturnType<typeof parseInput>} InputType
  */
-export function solve(input) {
-  return [() => part1(input), () => part2(input)]
+
+export const parseInput = (/** @type {string} */ input) => {
+  return readLines(input.trim()).map(Number)
 }
 
-const example = `\
+export const useExample = false
+
+export const exampleInput = `\
 1
 2
 -3
@@ -121,11 +123,10 @@ function mix(nodes) {
 }
 
 /**
- * @param {string} input
+ * @param {InputType} input
  */
-function part1(input) {
-  const nums = readLines(input.trim()).map(Number)
-  const nodes = toLinkedList(nums)
+export function part1(input) {
+  const nodes = toLinkedList(input)
 
   mix(nodes)
 
@@ -138,13 +139,10 @@ function part1(input) {
 }
 
 /**
- * @param {string} input
+ * @param {InputType} input
  */
-function part2(input) {
-  const nums = readLines(input.trim())
-    .map(Number)
-    .map((x) => x * 811589153)
-  const nodes = toLinkedList(nums)
+export function part2(input) {
+  const nodes = toLinkedList(input.map((x) => x * 811589153))
 
   for (const _ of range(10)) {
     mix(nodes)
