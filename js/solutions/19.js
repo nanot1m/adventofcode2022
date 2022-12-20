@@ -172,7 +172,7 @@ function part1(input) {
   const blueprints = readLines(input.trim()).map(lineTpl)
 
   return it(blueprints)
-    .map((x, index) => (index + 1) * countGeodes(x, 24))
+    .map((x) => x.index * countGeodes(x, 24))
     .sum()
 }
 
