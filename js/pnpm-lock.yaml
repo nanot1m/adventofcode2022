@@ -6,6 +6,7 @@ specifiers:
   '@typescript-eslint/utils': ^5.47.0
   eslint: ^8.30.0
   eslint-plugin-rulesdir: ^0.2.2
+  ts-toolbelt: ^9.6.0
   tsutils: ^3.21.0
   typescript: 4.9.4
 
@@ -15,6 +16,7 @@ devDependencies:
   '@typescript-eslint/utils': 5.47.0_lzzuuodtsqwxnvqeq4g4likcqa
   eslint: 8.30.0
   eslint-plugin-rulesdir: 0.2.2
+  ts-toolbelt: 9.6.0
   tsutils: 3.21.0_typescript@4.9.4
   typescript: 4.9.4
 
@@ -886,6 +888,10 @@ packages:
     engines: {node: '>=8.0'}
     dependencies:
       is-number: 7.0.0
+    dev: true
+
+  /ts-toolbelt/9.6.0:
+    resolution: {integrity: sha512-nsZd8ZeNUzukXPlJmTBwUAuABDe/9qtVDelJeT/qW0ow3ZS3BsQJtNkan1802aM9Uf68/Y8ljw86Hu0h5IUW3w==}
     dev: true
 
   /tslib/1.14.1:

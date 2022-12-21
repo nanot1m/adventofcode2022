@@ -4,8 +4,7 @@ import { V, V3 } from "./index.js"
 import { tryGetSeparator } from "./lib.js"
 
 /**
- * @typedef {Object} Parser
- * @property {string} name
+ * @typedef {Object} ParserRegistryItem
  * @property {(input: string) => boolean} check
  * @property {(input: string, key?: string) => T} parse
  *
@@ -15,31 +14,31 @@ import { tryGetSeparator } from "./lib.js"
 /**
  * @typedef {T & {withSeparator: (separator: string) => T}} WithSeparator
  *
- * @template {Parser<unknown>} T
+ * @template {ParserRegistryItem<unknown>} T
  */
 
 /**
  * @param {T} parsers
  * @returns {T}
  *
- * @template {Record<string, Parser<unknown>>} T
+ * @template {Record<string, ParserRegistryItem<unknown>>} T
  */
 function registerParsers(parsers) {
   return parsers
 }
 
 const PARSERS = registerParsers({
-  int: {
+  int: /** @type {const} */ ({
     name: "int",
     check: (key) => key === "int",
     parse: (strVal) => parseInt(strVal, 10),
-  },
-  str: {
+  }),
+  str: /** @type {const} */ ({
     name: "str",
     check: (key) => key === "str",
     parse: (strVal) => strVal,
-  },
-  vec: {
+  }),
+  vec: /** @type {const} */ ({
     name: "vec",
     check: (key) => key === "vec",
     parse: (strVal) => {
@@ -50,8 +49,8 @@ const PARSERS = registerParsers({
       const [x, y] = strVal.split(separator).map(Number)
       return V.vec(x, y)
     },
-  },
-  vec3: {
+  }),
+  vec3: /** @type {const} */ ({
     name: "vec3",
     check: (key) => key === "vec3",
     parse: (strVal) => {
@@ -62,8 +61,8 @@ const PARSERS = registerParsers({
       const [x, y, z] = strVal.split(separator).map(Number)
       return V3.vec3(x, y, z)
     },
-  },
-  arr: {
+  }),
+  arr: /** @type {const} */ ({
     name: "arr",
     check: (key) => key.endsWith("[]"),
     parse: (strVal, key = "") => {
@@ -75,8 +74,8 @@ const PARSERS = registerParsers({
       const separator = tryGetSeparator(strVal) ?? ","
       return strVal.split(separator).map((x) => parser.parse(x, type))
     },
-  },
-  tuple: {
+  }),
+  tuple: /** @type {const} */ ({
     name: "tuple",
     check: (key) => key.startsWith("(") && key.endsWith(")"),
     parse: (strVal, key = "") => {
@@ -90,12 +89,12 @@ const PARSERS = registerParsers({
         return parser.parse(x, types[i])
       })
     },
-  },
+  }),
 })
 
 /**
  * @param {string} type
- * @returns {Parser<unknown> | null}
+ * @returns {ParserRegistryItem<unknown> | null}
  */
 function getParserByType(type) {
   for (const key in PARSERS) {
@@ -122,18 +121,23 @@ function parse(strVal, type) {
 }
 
 /**
- *
+ * @typedef {Object} Parser
+ * @property {(strVal: string) => T} parse
+ * @template T
+ */
+
+/**
  * @param {T} parserFactory
  * @returns {T}
  *
- * @template {Record<keyof typeof PARSERS, (...args: Parser<unknown>[]) => Parser<unknown>>} T
+ * @template {Record<keyof typeof PARSERS, (...args: any[]) => Parser<unknown>>} T
  */
 function createParserFactory(parserFactory) {
   return parserFactory
 }
 
 const commonTypes = createParserFactory({
-  int: () => PARSERS.int,
+  int: () => ({ parse: PARSERS.int.parse }),
 
   str: () => PARSERS.str,
 
@@ -142,75 +146,54 @@ const commonTypes = createParserFactory({
   vec3: () => PARSERS.vec3,
 
   /**
-   *
    * @param {Parser<T>} type
-   * @returns {Parser<T[]> & {withSeparator: (separator: string) => Parser<T[]>}}
+   * @param {string} [separator]
+   * @returns {WithSeparator<Parser<T[]>>}}
    *
    * @template T
    */
-  arr: (type) => {
-    return {
-      name: `${type.name}[]`,
-      check: (key) => key === `${type.name}[]`,
-      parse: (strVal) => {
-        const separator = tryGetSeparator(strVal) ?? ","
-        return strVal.split(separator).map((x) => type.parse(x, type.name))
-      },
-      /**
-       * @param {string} separator
-       */
-      withSeparator: (separator) => {
-        return {
-          name: `${type.name}[]`,
-          check: (key) => key === `${type.name}[]`,
-          parse: (strVal) => {
-            return strVal.split(separator).map((x) => type.parse(x, type.name))
-          },
-        }
-      },
-    }
-  },
+  arr: (type, separator) => ({
+    parse: (strVal) => {
+      return strVal
+        .split(separator ?? tryGetSeparator(strVal) ?? ",")
+        .map((x) => type.parse(x))
+    },
+    /**
+     * @param {string} separator
+     */
+    withSeparator: (separator) => ({
+      parse: (strVal) => strVal.split(separator).map((x) => type.parse(x)),
+    }),
+  }),
 
   /**
    *
-   * @param  {T} types
+   * @param {import("ts-toolbelt").F.Narrow<T>} types
+   * @param {string} [separator]
    * @returns {WithSeparator<Parser<{[K in keyof T]: T[K] extends Parser<infer U> ? U : never}>>}
    *
    * @template {Parser<unknown>[]} T
    */
-  tuple: (...types) => {
-    const name = `(${types.map((x) => x.name).join(",")})`
-    return {
-      name: name,
-      check: (key) => key.startsWith("(") && key.endsWith(")"),
+  tuple: (types, separator) => ({
+    // @ts-ignore
+    parse: (strVal) => {
+      return strVal
+        .split(separator ?? tryGetSeparator(strVal) ?? ",")
+        .map((x, i) => types[i].parse(x))
+    },
+    withSeparator: (separator) => ({
+      // @ts-ignore
       parse: (strVal) => {
-        const separator = tryGetSeparator(strVal) ?? ","
-        return /** @type {any} */ (
-          strVal
-            .split(separator)
-            .map((x, i) => types[i].parse(x, types[i].name))
-        )
+        return strVal.split(separator).map((x, i) => types[i].parse(x))
       },
-      withSeparator: (separator) => {
-        return {
-          name: name,
-          check: (key) => key.startsWith("(") && key.endsWith(")"),
-          parse: (strVal) => {
-            return /** @type {any} */ (
-              strVal
-                .split(separator)
-                .map((x, i) => types[i].parse(x, types[i].name))
-            )
-          },
-        }
-      },
-    }
-  },
+    }),
+  }),
 })
 
 /**
  * @param {TemplateStringsArray} strings
  * @param {T} keys
+ *
  * @template {string[]} T
  */
 function tpl(strings, ...keys) {
@@ -235,11 +218,7 @@ function tpl(strings, ...keys) {
     return /** @type {any} */ (model)
   }
 
-  return {
-    name: "tpl",
-    check: () => true,
-    parse: parseInternal,
-  }
+  return { parse: parseInternal }
 }
 
 export const t = {

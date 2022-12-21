@@ -17,7 +17,7 @@ export function solve(input) {
  * @param {string} input
  */
 function parseInput(input) {
-  return t.arr(t.tuple(t.vec(), t.vec())).parse(input)
+  return t.arr(t.tuple([t.vec(), t.vec()])).parse(input)
 }
 
 /**

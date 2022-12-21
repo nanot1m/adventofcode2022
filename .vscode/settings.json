@@ -1,5 +1,5 @@
 {
   "typescript.tsdk": "./js/node_modules/typescript/lib",
   "editor.tabSize": 2,
-  "cSpell.words": ["chel", "slon"]
+  "cSpell.words": ["chel", "slon", "toolbelt"]
 }

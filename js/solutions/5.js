@@ -1,41 +1,25 @@
 // @ts-check
 
 import { first, it } from "../modules/itertools.js"
-import { readBlocks, readLines, rotate, tpl } from "../modules/lib.js"
+import { readLines, rotate } from "../modules/lib.js"
+import { t } from "../modules/parser.js"
 
-/**
- * @param {string} input
- *
- * @returns {Array<() => any>}
- */
-export function solve(input) {
-  return [() => part1(input), () => part2(input)]
+const stacksParser = {
+  parse: (/** @type {string} */ stacksStr) =>
+    it(rotate(readLines(stacksStr)))
+      .takeEvery(4, 1)
+      .map((x) => x.slice(1).split("").reverse())
+      .toArray(),
 }
 
-const commandTpl = tpl`move ${"count|int"} from ${"from|int"} to ${"to|int"}`
+const commandParser = t.tpl`move ${"count|int"} from ${"from|int"} to ${"to|int"}`
+
+export const parseInput = t.tuple([stacksParser, t.arr(commandParser)]).parse
 
 /**
- * @param {string} input
+ * @param {ReturnType<typeof parseInput>} input
  */
-function parseInput(input) {
-  const [stacksStr, commandsStr] = readBlocks(input.trimEnd())
-
-  const stacks = it(rotate(readLines(stacksStr)))
-    .takeEvery(4, 1)
-    .map((x) => x.slice(1).split("").reverse())
-    .toArray()
-
-  const commands = it(readLines(commandsStr)).map(commandTpl)
-
-  return { stacks, commands }
-}
-
-/**
- * @param {string} input
- */
-function part1(input) {
-  const { stacks, commands } = parseInput(input)
-
+export function part1([stacks, commands]) {
   return commands
     .reduce((xs, { count, from, to }) => {
       xs[to - 1].unshift(...xs[from - 1].splice(0, count).reverse())
@@ -46,11 +30,9 @@ function part1(input) {
 }
 
 /**
- * @param {string} input
+ * @param {ReturnType<typeof parseInput>} input
  */
-function part2(input) {
-  const { stacks, commands } = parseInput(input)
-
+export function part2([stacks, commands]) {
   return commands
     .reduce((xs, { count, from, to }) => {
       xs[to - 1].unshift(...xs[from - 1].splice(0, count))
