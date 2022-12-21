@@ -1,0 +1,10 @@
+{
+  "extends": ["../.eslintrc.cjs"],
+  "plugins": ["aoc"],
+  "rules": {
+    "aoc/solution-format": "error"
+  },
+  "parserOptions": {
+    "project": "js/jsconfig.json"
+  }
+}
