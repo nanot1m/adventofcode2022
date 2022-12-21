@@ -26,3 +26,22 @@ export type TemplateValueReturnType<V> = V extends "int"
   : never
 
 export type NestedArray<T> = T | NestedArray<T>[]
+
+type SolutionModuleInterface<T> = {
+  parseInput: (input: string) => T
+  part1: (input: T) => any
+  part2: (input: T) => any
+  useExample?: boolean
+  exampleInput?: string
+  disableInputTrim?: boolean
+}
+
+export type SolutionModuleValid<T> = T extends SolutionModuleInterface<infer U>
+  ? true
+  : T extends { parseInput: (input: string) => infer J }
+  ? T extends { part1: (input: any) => any }
+    ? T extends { part2: (input: any) => any }
+      ? `Solution module must properly implement the SolutionModuleInterface<${J}>`
+      : "Solution module must have a part2 function"
+    : "Solution module must have a part1 function"
+  : "Solution module must have a parseInput function that returns a value"
