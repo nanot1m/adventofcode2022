@@ -552,10 +552,13 @@ const speedInput = document.getElementById("speed");
 if (!(speedInput instanceof HTMLInputElement)) throw new Error("no speed input");
 let stepDelay = 100;
 speedInput.value = String(1000 / stepDelay);
+// @ts-ignore
+document.querySelector(`[for="speed"]`).innerText = "Steps per second: " + 1000 / stepDelay;
 speedInput.addEventListener("input", function(e) {
     stepDelay = 1000 / Number(this.value);
+    // @ts-ignore
+    document.querySelector(`[for="speed"]`).innerText = "Steps per second: " + this.value;
 });
-const nextButton = document.getElementById("next");
 inputForm.addEventListener("submit", function(e) {
     e.preventDefault();
     const formData = new FormData(this);
@@ -618,16 +621,6 @@ let rafHandle = 0;
     const { map , moves , start , sideSize  } = (0, _22.parseInput)(input);
     const connections = (0, _22.getConnectionsOnCube)(sideSize);
     const iter = (0, _22.traverseMap)(map, moves, connections, start, sideSize, true);
-    if (!nextButton) throw new Error("no next button");
-    nextButton.onclick = ()=>{
-        const result = iter.next();
-        if (result.done) return;
-        const { dir , pos , move  } = result.value;
-        drawPos(pos, dir);
-        // @ts-ignore
-        document.getElementById("status").innerText = `Move: ${move}, Dir: ${dirToChar[dir]}`;
-    };
-    nextButton.removeAttribute("disabled");
     ctx.fillStyle = "black";
     ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
     function drawPos(pos, dir, fillStyle, skipUpdate) {
@@ -684,7 +677,10 @@ let rafHandle = 0;
         const result = iter.next();
         if (result.done) return;
         const { dir , pos , move  } = result.value;
-        if (lastPos) drawPos(lastPos, dir, "#51cf66", true);
+        if (lastPos) {
+            drawPos(lastPos, dir, "white", true);
+            drawPos(lastPos, dir, "#1971c2a0", true);
+        }
         drawPos(pos, dir, "#e03131");
         lastPos = pos;
         // @ts-ignore
