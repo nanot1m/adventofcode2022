@@ -630,44 +630,45 @@ let rafHandle = 0;
     nextButton.removeAttribute("disabled");
     ctx.fillStyle = "black";
     ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-    function drawPos(pos, dir) {
-        ctx.fillStyle = "#51cf66";
+    function drawPos(pos, dir, fillStyle, skipUpdate) {
+        ctx.fillStyle = fillStyle;
         ctx.fillRect(pos[0] * SIZE, pos[1] * SIZE, SIZE, SIZE);
-        updateFaceBackground("front", [
-            1,
-            1
-        ]);
-        updateFaceBackground("top", [
-            1,
-            0
-        ]);
-        updateFaceBackground("right", [
-            2,
-            0
-        ]);
-        updateFaceBackground("bottom", [
-            1,
-            2
-        ]);
-        updateFaceBackground("left", [
-            0,
-            2
-        ]);
-        updateFaceBackground("back", [
-            0,
-            3
-        ]);
-        // rotate to face containing pos
-        let face = "front";
-        if (pos[1] < 50) face = pos[0] < 100 ? "top" : "right";
-        else if (pos[1] < 100) face = "front";
-        else if (pos[1] < 150) face = pos[0] < 50 ? "left" : "bottom";
-        else face = "back";
-        const faceElement = document.querySelector(`[name="rotate-cube-side"][value="${face}"]`);
-        console.log(face, faceElement);
-        if (faceElement instanceof HTMLInputElement) {
-            faceElement.checked = true;
-            changeSide();
+        if (!skipUpdate) {
+            updateFaceBackground("front", [
+                1,
+                1
+            ]);
+            updateFaceBackground("top", [
+                1,
+                0
+            ]);
+            updateFaceBackground("right", [
+                2,
+                0
+            ]);
+            updateFaceBackground("bottom", [
+                1,
+                2
+            ]);
+            updateFaceBackground("left", [
+                0,
+                2
+            ]);
+            updateFaceBackground("back", [
+                0,
+                3
+            ]);
+            // rotate to face containing pos
+            let face = "front";
+            if (pos[1] < 50) face = pos[0] < 100 ? "top" : "right";
+            else if (pos[1] < 100) face = "front";
+            else if (pos[1] < 150) face = pos[0] < 50 ? "left" : "bottom";
+            else face = "back";
+            const faceElement = document.querySelector(`[name="rotate-cube-side"][value="${face}"]`);
+            if (faceElement instanceof HTMLInputElement) {
+                faceElement.checked = true;
+                changeSide();
+            }
         }
     }
     function drawInitState() {
@@ -678,11 +679,14 @@ let rafHandle = 0;
         drawPos(start, "R");
     }
     drawInitState();
+    let lastPos;
     function drawStep() {
         const result = iter.next();
         if (result.done) return;
         const { dir , pos , move  } = result.value;
-        drawPos(pos, dir);
+        if (lastPos) drawPos(lastPos, dir, "#51cf66", true);
+        drawPos(pos, dir, "#e03131");
+        lastPos = pos;
         // @ts-ignore
         document.getElementById("status").innerText = `Move: ${move}, Dir: ${dirToChar[dir]}`;
     }
