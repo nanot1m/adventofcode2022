@@ -535,6 +535,7 @@ function hmrAcceptRun(bundle, id) {
 // @ts-check
 var _common = require("../common");
 var _22 = require("../../../js/solutions/22");
+var _itertools = require("../../../js/modules/itertools");
 const canvas = document.getElementById("canvas");
 if (!(canvas instanceof HTMLCanvasElement)) throw new Error("no canvas");
 const ctx = canvas.getContext("2d");
@@ -547,6 +548,13 @@ canvas.style.width = "200px";
 canvas.style.height = "200px";
 const inputForm = document.getElementById("input-form");
 if (!(inputForm instanceof HTMLFormElement)) throw new Error("no form");
+const speedInput = document.getElementById("speed");
+if (!(speedInput instanceof HTMLInputElement)) throw new Error("no speed input");
+let stepDelay = 100;
+speedInput.value = String(1000 / stepDelay);
+speedInput.addEventListener("input", function(e) {
+    stepDelay = 1000 / Number(this.value);
+});
 const nextButton = document.getElementById("next");
 inputForm.addEventListener("submit", function(e) {
     e.preventDefault();
@@ -569,7 +577,7 @@ function changeSide() {
 }
 changeSide();
 radioGroup?.addEventListener("change", changeSide);
-function setFaceBackground(faceName, base64bg, pos) {
+function updateFaceBackground(faceName, pos) {
     const face = document.querySelector(`.cube__face--${faceName}`);
     if (!(canvas instanceof HTMLCanvasElement)) throw new Error("no canvas");
     if (face instanceof HTMLElement) {
@@ -625,31 +633,42 @@ let rafHandle = 0;
     function drawPos(pos, dir) {
         ctx.fillStyle = "#51cf66";
         ctx.fillRect(pos[0] * SIZE, pos[1] * SIZE, SIZE, SIZE);
-        const image = ctx.canvas.toDataURL();
-        setFaceBackground("front", image, [
+        updateFaceBackground("front", [
             1,
             1
         ]);
-        setFaceBackground("top", image, [
+        updateFaceBackground("top", [
             1,
             0
         ]);
-        setFaceBackground("right", image, [
+        updateFaceBackground("right", [
             2,
             0
         ]);
-        setFaceBackground("bottom", image, [
+        updateFaceBackground("bottom", [
             1,
             2
         ]);
-        setFaceBackground("left", image, [
+        updateFaceBackground("left", [
             0,
             2
         ]);
-        setFaceBackground("back", image, [
+        updateFaceBackground("back", [
             0,
             3
         ]);
+        // rotate to face containing pos
+        let face = "front";
+        if (pos[1] < 50) face = pos[0] < 100 ? "top" : "right";
+        else if (pos[1] < 100) face = "front";
+        else if (pos[1] < 150) face = pos[0] < 50 ? "left" : "bottom";
+        else face = "back";
+        const faceElement = document.querySelector(`[name="rotate-cube-side"][value="${face}"]`);
+        console.log(face, faceElement);
+        if (faceElement instanceof HTMLInputElement) {
+            faceElement.checked = true;
+            changeSide();
+        }
     }
     function drawInitState() {
         for (const p of map){
@@ -659,19 +678,30 @@ let rafHandle = 0;
         drawPos(start, "R");
     }
     drawInitState();
-    function drawLoop() {
+    function drawStep() {
         const result = iter.next();
         if (result.done) return;
         const { dir , pos , move  } = result.value;
         drawPos(pos, dir);
         // @ts-ignore
         document.getElementById("status").innerText = `Move: ${move}, Dir: ${dirToChar[dir]}`;
+    }
+    let lastTime = 0;
+    function drawLoop(dt) {
+        if (lastTime === 0) {
+            lastTime = dt;
+            drawStep();
+        } else if (dt - lastTime > stepDelay) {
+            const countSteps = Math.floor((dt - lastTime) / stepDelay);
+            lastTime = dt;
+            for (const _ of (0, _itertools.range)(countSteps))drawStep();
+        }
         rafHandle = requestAnimationFrame(drawLoop);
     }
-    drawLoop();
+    drawLoop(0);
 }
 
-},{"../common":"8wzUn","../../../js/solutions/22":"gj9xW"}],"gj9xW":[function(require,module,exports) {
+},{"../common":"8wzUn","../../../js/solutions/22":"gj9xW","../../../js/modules/itertools":"aDL7D"}],"gj9xW":[function(require,module,exports) {
 // @ts-check
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
