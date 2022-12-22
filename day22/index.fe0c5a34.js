@@ -1941,11 +1941,12 @@ function parseMap2d(input) {
  * @param {CanvasRenderingContext2D} ctx
  * @param {number} width
  * @param {number} height
+ * @param {number} [scale]
  */ var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "scaleCanvasToPixelRatio", ()=>scaleCanvasToPixelRatio);
-function scaleCanvasToPixelRatio(ctx, width, height) {
-    const pixelRatio = window.devicePixelRatio || 1;
+function scaleCanvasToPixelRatio(ctx, width, height, scale) {
+    const pixelRatio = scale ?? window.devicePixelRatio ?? 1;
     ctx.canvas.width = width * pixelRatio;
     ctx.canvas.height = height * pixelRatio;
     ctx.canvas.style.width = `${width}px`;

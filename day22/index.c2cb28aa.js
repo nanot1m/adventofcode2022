@@ -534,8 +534,6 @@ function hmrAcceptRun(bundle, id) {
 },{}],"7g93n":[function(require,module,exports) {
 // @ts-check
 var _common = require("../common");
-var _modules = require("../../../js/modules");
-var _itertools = require("../../../js/modules/itertools");
 var _22 = require("../../../js/solutions/22");
 const canvas = document.getElementById("canvas");
 if (!(canvas instanceof HTMLCanvasElement)) throw new Error("no canvas");
@@ -543,8 +541,10 @@ const ctx = canvas.getContext("2d");
 if (!ctx) throw new Error("no ctx");
 const WIDTH = 200;
 const HEIGHT = 200;
-const SIZE = 3;
+const SIZE = 2;
 (0, _common.scaleCanvasToPixelRatio)(ctx, WIDTH * SIZE, HEIGHT * SIZE);
+canvas.style.width = "200px";
+canvas.style.height = "200px";
 const inputForm = document.getElementById("input-form");
 if (!(inputForm instanceof HTMLFormElement)) throw new Error("no form");
 const nextButton = document.getElementById("next");
@@ -554,9 +554,42 @@ inputForm.addEventListener("submit", function(e) {
     const input = formData.get("input")?.toString() ?? "";
     draw(input.trimEnd(), ctx);
 });
+const cube = document.querySelector(".cube");
+const radioGroup = document.querySelector(".radio-group");
+let currentClass = "";
+function changeSide() {
+    if (!(radioGroup instanceof HTMLElement)) throw new Error("no radio group");
+    var checkedRadio = radioGroup.querySelector(":checked");
+    if (checkedRadio instanceof HTMLInputElement) {
+        var showClass = "show-" + checkedRadio.value;
+        if (currentClass && cube) cube.classList.remove(currentClass);
+        cube?.classList.add(showClass);
+        currentClass = showClass;
+    }
+}
+changeSide();
+radioGroup?.addEventListener("change", changeSide);
+function setFaceBackground(faceName, base64bg, pos) {
+    const face = document.querySelector(`.cube__face--${faceName}`);
+    if (!(canvas instanceof HTMLCanvasElement)) throw new Error("no canvas");
+    if (face instanceof HTMLElement) {
+        let faceCanvas = face.querySelector("canvas");
+        let faceCtx;
+        if (!faceCanvas) {
+            faceCanvas = document.createElement("canvas");
+            faceCtx = faceCanvas.getContext("2d");
+            if (!faceCtx) throw new Error("no ctx");
+            (0, _common.scaleCanvasToPixelRatio)(faceCtx, 200, 200);
+            face.appendChild(faceCanvas);
+        }
+        faceCtx = faceCanvas.getContext("2d");
+        if (!faceCtx) throw new Error("no ctx");
+        faceCtx.drawImage(canvas, -pos[0] * 100 * SIZE, -pos[1] * 100 * SIZE);
+    }
+}
 const colors = {
     ".": "white",
-    "#": "orange"
+    "#": "#343a40"
 };
 const dirToChar = {
     D: "↑",
@@ -569,20 +602,18 @@ let rafHandle = 0;
  * @param {string} input
  * @param {CanvasRenderingContext2D} ctx
  */ function draw(input, ctx) {
+    if (rafHandle) cancelAnimationFrame(rafHandle);
     ctx.canvas.scrollIntoView({
         behavior: "smooth"
     });
     const { map , moves , start , sideSize  } = (0, _22.parseInput)(input);
     const connections = (0, _22.getConnectionsOnCube)(sideSize);
-    const iter = (0, _22.traverseMap)(map, moves, connections, start, true);
+    const iter = (0, _22.traverseMap)(map, moves, connections, start, sideSize, true);
     if (!nextButton) throw new Error("no next button");
     nextButton.onclick = ()=>{
         const result = iter.next();
         if (result.done) return;
         const { dir , pos , move  } = result.value;
-        console.log({
-            pos
-        });
         drawPos(pos, dir);
         // @ts-ignore
         document.getElementById("status").innerText = `Move: ${move}, Dir: ${dirToChar[dir]}`;
@@ -591,8 +622,33 @@ let rafHandle = 0;
     ctx.fillStyle = "black";
     ctx.fillRect(0, 0, WIDTH * SIZE, HEIGHT * SIZE);
     function drawPos(pos, dir) {
-        ctx.fillStyle = "red";
+        ctx.fillStyle = "#51cf66";
         ctx.fillRect(pos[0] * SIZE, pos[1] * SIZE, SIZE, SIZE);
+        const image = ctx.canvas.toDataURL();
+        setFaceBackground("front", image, [
+            1,
+            1
+        ]);
+        setFaceBackground("top", image, [
+            1,
+            0
+        ]);
+        setFaceBackground("right", image, [
+            2,
+            0
+        ]);
+        setFaceBackground("bottom", image, [
+            1,
+            2
+        ]);
+        setFaceBackground("left", image, [
+            0,
+            2
+        ]);
+        setFaceBackground("back", image, [
+            0,
+            3
+        ]);
     }
     function drawInitState() {
         for (const p of map){
@@ -614,7 +670,7 @@ let rafHandle = 0;
     drawLoop();
 }
 
-},{"../common":"8wzUn","../../../js/modules":"eVlez","../../../js/modules/itertools":"aDL7D","../../../js/solutions/22":"gj9xW"}],"gj9xW":[function(require,module,exports) {
+},{"../common":"8wzUn","../../../js/solutions/22":"gj9xW"}],"gj9xW":[function(require,module,exports) {
 // @ts-check
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
@@ -627,6 +683,7 @@ parcelHelpers.export(exports, "parseInput", ()=>parseInput);
  * @param {string[]} moves
  * @param {Map2d<Record<V.Dir, V.Vec2>>} connections
  * @param {V.Vec2} start
+ * @param {number} sideSize
  */ parcelHelpers.export(exports, "traverseMap", ()=>traverseMap);
 /**
  * @param {InputType} input
@@ -731,7 +788,7 @@ const scores = {
     [(0, _vecJs.asDir)("L")]: 2,
     [(0, _vecJs.asDir)("U")]: 3
 };
-function* traverseMap(map, moves, connections, start, onCube = false) {
+function* traverseMap(map, moves, connections, start, sideSize, onCube = false) {
     let pos = start;
     let dirIdx = 1;
     const visited = new (0, _map2DJs.Map2d)();
@@ -764,36 +821,7 @@ function* traverseMap(map, moves, connections, start, onCube = false) {
             dir
         };
         nextPos = connection[dir];
-        if (onCube) {
-            if (dir === "L" && (0, _indexJs.V).x(pos) === 50 && (0, _indexJs.V).y(pos) < 50) dir = "R" // from face 1 left to face 5, continue to move right
-            ;
-            else if (dir === "L" && (0, _indexJs.V).x(pos) === 50) dir = "U" // from face 3 left to face 5, continue to move up
-            ;
-            else if (dir === "L" && (0, _indexJs.V).x(pos) === 0 && (0, _indexJs.V).y(pos) < 150) dir = "R" // from face 5 left to face 1, continue to move right
-            ;
-            else if (dir === "L" && (0, _indexJs.V).x(pos) === 0) dir = "U" // from face 6 left to face 1, continue to move up
-            ;
-            else if (dir === "U" && (0, _indexJs.V).y(pos) === 149) dir = "L" // from face 4 up to face 6, continue to move left
-            ;
-            else if (dir === "U" && (0, _indexJs.V).y(pos) === 49) dir = "L" // from face 2 up to face 3, continue to move left
-            ;
-            else if (dir === "U" && (0, _indexJs.V).y(pos) === 199) dir = "U" // from face 6 up to face 2, continue to move up
-            ;
-            else if (dir === "D" && (0, _indexJs.V).y(pos) === 0 && (0, _indexJs.V).x(pos) < 100) dir = "R" // from face 1 down to face 6, continue to move right
-            ;
-            else if (dir === "D" && (0, _indexJs.V).y(pos) === 0) dir = "D" // from face 2 down to face 6, continue to move down
-            ;
-            else if (dir === "D" && (0, _indexJs.V).y(pos) === 100) dir = "R" // from face 5 down to face 3, continue to move right
-            ;
-            else if (dir === "R" && (0, _indexJs.V).x(pos) === 149) dir = "L" // from face 2 right to face 4, continue to move left
-            ;
-            else if (dir === "R" && (0, _indexJs.V).x(pos) === 99 && (0, _indexJs.V).y(pos) < 100) dir = "D" // from face 3 right to face 2, continue to move down
-            ;
-            else if (dir === "R" && (0, _indexJs.V).x(pos) === 99) dir = "L" // from face 4 right to face 2, continue to move left
-            ;
-            else if (dir === "R" && (0, _indexJs.V).x(pos) === 49) dir = "D" // from face 6 right to face 4, continue to move down
-            ;
-        }
+        if (onCube) dir = adjustDirectionAfterPlainSwitch(dir, pos, sideSize);
         visited.set(pos, dir);
         return {
             pos: nextPos,
@@ -848,9 +876,51 @@ function* traverseMap(map, moves, connections, start, onCube = false) {
         }
     }
 }
-function part1({ map , moves , start  }) {
+/**
+ * @param {V.Dir} dir
+ * @param {V.Vec2} pos
+ * @param {number} sideSize
+ * @returns
+ */ function adjustDirectionAfterPlainSwitch(dir, pos, sideSize) {
+    switch(dir){
+        case "L":
+            if ((0, _indexJs.V).x(pos) === sideSize && (0, _indexJs.V).y(pos) < sideSize) return "R" // from face 1 left to face 5, continue to move right
+            ;
+            else if ((0, _indexJs.V).x(pos) === sideSize) return "U" // from face 3 left to face 5, continue to move up
+            ;
+            else if ((0, _indexJs.V).x(pos) === 0 && (0, _indexJs.V).y(pos) < sideSize * 3) return "R" // from face 5 left to face 1, continue to move right
+            ;
+            else if ((0, _indexJs.V).x(pos) === 0) return "U" // from face 6 left to face 1, continue to move up
+            ;
+        case "U":
+            if ((0, _indexJs.V).y(pos) === sideSize * 3 - 1) return "L" // from face 4 up to face 6, continue to move left
+            ;
+            else if ((0, _indexJs.V).y(pos) === sideSize - 1) return "L" // from face 2 up to face 3, continue to move left
+            ;
+            else if ((0, _indexJs.V).y(pos) === sideSize * 4 - 1) return "U" // from face 6 up to face 2, continue to move up
+            ;
+        case "D":
+            if ((0, _indexJs.V).y(pos) === 0 && (0, _indexJs.V).x(pos) < sideSize * 2) return "R" // from face 1 down to face 6, continue to move right
+            ;
+            else if ((0, _indexJs.V).y(pos) === 0) return "D" // from face 2 down to face 6, continue to move down
+            ;
+            else if ((0, _indexJs.V).y(pos) === sideSize * 2) return "R" // from face 5 down to face 3, continue to move right
+            ;
+        case "R":
+            if ((0, _indexJs.V).x(pos) === sideSize * 3 - 1) return "L" // from face 2 right to face 4, continue to move left
+            ;
+            else if ((0, _indexJs.V).x(pos) === sideSize * 2 - 1 && (0, _indexJs.V).y(pos) < sideSize * 2) return "D" // from face 3 right to face 2, continue to move down
+            ;
+            else if ((0, _indexJs.V).x(pos) === sideSize * 2 - 1) return "L" // from face 4 right to face 2, continue to move left
+            ;
+            else if ((0, _indexJs.V).x(pos) === sideSize - 1) return "D" // from face 6 right to face 4, continue to move down
+            ;
+    }
+    return dir;
+}
+function part1({ map , moves , start , sideSize  }) {
     const connections = getConnectionsOnPlane(map);
-    let { pos , dir  } = (0, _itertoolsJs.it)(traverseMap(map, moves, connections, start)).last();
+    let { pos , dir  } = (0, _itertoolsJs.it)(traverseMap(map, moves, connections, start, sideSize)).last();
     pos = (0, _indexJs.V).add(pos, (0, _indexJs.V).vec(1, 1));
     return (0, _indexJs.V).y(pos) * 1000 + (0, _indexJs.V).x(pos) * 4 + scores[dir];
 }
@@ -944,7 +1014,7 @@ function getConnectionsOnCube(sideSize) {
 }
 function part2({ map , moves , start , sideSize  }) {
     const connections = getConnectionsOnCube(sideSize);
-    let { pos , dir  } = (0, _itertoolsJs.it)(traverseMap(map, moves, connections, start, true)).last();
+    let { pos , dir  } = (0, _itertoolsJs.it)(traverseMap(map, moves, connections, start, sideSize, true)).last();
     pos = (0, _indexJs.V).add(pos, (0, _indexJs.V).vec(1, 1));
     return (0, _indexJs.V).y(pos) * 1000 + (0, _indexJs.V).x(pos) * 4 + scores[dir];
 }
