@@ -1,13 +1,8 @@
 // @ts-check
 
-import { V, V3 } from "../modules/index.js"
+import { V } from "../modules/index.js"
 import { it, range } from "../modules/itertools.js"
-import {
-  mulMatrices,
-  readBlocks,
-  readLines,
-  rotateStrings2d,
-} from "../modules/lib.js"
+import { readBlocks, readLines } from "../modules/lib.js"
 import { Map2d } from "../modules/map2d.js"
 import { asDir, DIR_TO_VEC } from "../modules/vec.js"
 
@@ -149,8 +144,16 @@ const scores = {
  * @param {string[]} moves
  * @param {Map2d<Record<V.Dir, V.Vec2>>} connections
  * @param {V.Vec2} start
+ * @param {number} sideSize
  */
-export function* traverseMap(map, moves, connections, start, onCube = false) {
+export function* traverseMap(
+  map,
+  moves,
+  connections,
+  start,
+  sideSize,
+  onCube = false,
+) {
   let pos = start
   let dirIdx = 1
   const visited = new Map2d()
@@ -184,37 +187,8 @@ export function* traverseMap(map, moves, connections, start, onCube = false) {
     }
     nextPos = connection[dir]
     if (onCube) {
-      if (dir === "L" && V.x(pos) === 50 && V.y(pos) < 50) {
-        dir = "R" // from face 1 left to face 5, continue to move right
-      } else if (dir === "L" && V.x(pos) === 50) {
-        dir = "U" // from face 3 left to face 5, continue to move up
-      } else if (dir === "L" && V.x(pos) === 0 && V.y(pos) < 150) {
-        dir = "R" // from face 5 left to face 1, continue to move right
-      } else if (dir === "L" && V.x(pos) === 0) {
-        dir = "U" // from face 6 left to face 1, continue to move up
-      } else if (dir === "U" && V.y(pos) === 149) {
-        dir = "L" // from face 4 up to face 6, continue to move left
-      } else if (dir === "U" && V.y(pos) === 49) {
-        dir = "L" // from face 2 up to face 3, continue to move left
-      } else if (dir === "U" && V.y(pos) === 199) {
-        dir = "U" // from face 6 up to face 2, continue to move up
-      } else if (dir === "D" && V.y(pos) === 0 && V.x(pos) < 100) {
-        dir = "R" // from face 1 down to face 6, continue to move right
-      } else if (dir === "D" && V.y(pos) === 0) {
-        dir = "D" // from face 2 down to face 6, continue to move down
-      } else if (dir === "D" && V.y(pos) === 100) {
-        dir = "R" // from face 5 down to face 3, continue to move right
-      } else if (dir === "R" && V.x(pos) === 149) {
-        dir = "L" // from face 2 right to face 4, continue to move left
-      } else if (dir === "R" && V.x(pos) === 99 && V.y(pos) < 100) {
-        dir = "D" // from face 3 right to face 2, continue to move down
-      } else if (dir === "R" && V.x(pos) === 99) {
-        dir = "L" // from face 4 right to face 2, continue to move left
-      } else if (dir === "R" && V.x(pos) === 49) {
-        dir = "D" // from face 6 right to face 4, continue to move down
-      }
+      dir = adjustDirectionAfterPlainSwitch(dir, pos, sideSize)
     }
-
     visited.set(pos, dir)
     return { pos: nextPos, ok: true, dir }
   }
@@ -281,11 +255,69 @@ export function* traverseMap(map, moves, connections, start, onCube = false) {
 }
 
 /**
+ * @param {V.Dir} dir
+ * @param {V.Vec2} pos
+ * @param {number} sideSize
+ * @returns
+ */
+function adjustDirectionAfterPlainSwitch(dir, pos, sideSize) {
+  switch (dir) {
+    case "L": {
+      if (V.x(pos) === sideSize && V.y(pos) < sideSize) {
+        return "R" // from face 1 left to face 5, continue to move right
+      } else if (V.x(pos) === sideSize) {
+        return "U" // from face 3 left to face 5, continue to move up
+      } else if (V.x(pos) === 0 && V.y(pos) < sideSize * 3) {
+        return "R" // from face 5 left to face 1, continue to move right
+      } else if (V.x(pos) === 0) {
+        return "U" // from face 6 left to face 1, continue to move up
+      }
+    }
+
+    case "U": {
+      if (V.y(pos) === sideSize * 3 - 1) {
+        return "L" // from face 4 up to face 6, continue to move left
+      } else if (V.y(pos) === sideSize - 1) {
+        return "L" // from face 2 up to face 3, continue to move left
+      } else if (V.y(pos) === sideSize * 4 - 1) {
+        return "U" // from face 6 up to face 2, continue to move up
+      }
+    }
+
+    case "D": {
+      if (V.y(pos) === 0 && V.x(pos) < sideSize * 2) {
+        return "R" // from face 1 down to face 6, continue to move right
+      } else if (V.y(pos) === 0) {
+        return "D" // from face 2 down to face 6, continue to move down
+      } else if (V.y(pos) === sideSize * 2) {
+        return "R" // from face 5 down to face 3, continue to move right
+      }
+    }
+
+    case "R": {
+      if (V.x(pos) === sideSize * 3 - 1) {
+        return "L" // from face 2 right to face 4, continue to move left
+      } else if (V.x(pos) === sideSize * 2 - 1 && V.y(pos) < sideSize * 2) {
+        return "D" // from face 3 right to face 2, continue to move down
+      } else if (V.x(pos) === sideSize * 2 - 1) {
+        return "L" // from face 4 right to face 2, continue to move left
+      } else if (V.x(pos) === sideSize - 1) {
+        return "D" // from face 6 right to face 4, continue to move down
+      }
+    }
+  }
+
+  return dir
+}
+
+/**
  * @param {InputType} input
  */
-export function part1({ map, moves, start }) {
+export function part1({ map, moves, start, sideSize }) {
   const connections = getConnectionsOnPlane(map)
-  let { pos, dir } = it(traverseMap(map, moves, connections, start)).last()
+  let { pos, dir } = it(
+    traverseMap(map, moves, connections, start, sideSize),
+  ).last()
   pos = V.add(pos, V.vec(1, 1))
   return V.y(pos) * 1000 + V.x(pos) * 4 + scores[dir]
 }
@@ -411,7 +443,7 @@ export function getConnectionsOnCube(sideSize) {
 export function part2({ map, moves, start, sideSize }) {
   const connections = getConnectionsOnCube(sideSize)
   let { pos, dir } = it(
-    traverseMap(map, moves, connections, start, true),
+    traverseMap(map, moves, connections, start, sideSize, true),
   ).last()
 
   pos = V.add(pos, V.vec(1, 1))

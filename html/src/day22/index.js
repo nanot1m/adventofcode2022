@@ -1,13 +1,12 @@
 // @ts-check
 
 import { scaleCanvasToPixelRatio } from "../common"
-import { V } from "../../../js/modules"
-import { range } from "../../../js/modules/itertools"
 import {
   parseInput,
   getConnectionsOnCube,
   traverseMap,
 } from "../../../js/solutions/22"
+import { range } from "../../../js/modules/itertools"
 
 const canvas = document.getElementById("canvas")
 if (!(canvas instanceof HTMLCanvasElement)) throw new Error("no canvas")
@@ -17,12 +16,22 @@ if (!ctx) throw new Error("no ctx")
 
 const WIDTH = 200
 const HEIGHT = 200
-const SIZE = 3
+const SIZE = 2
 
-scaleCanvasToPixelRatio(ctx, WIDTH * SIZE, HEIGHT * SIZE)
+const SCALE = scaleCanvasToPixelRatio(ctx, WIDTH * SIZE, HEIGHT * SIZE)
+canvas.style.width = 200 + "px"
+canvas.style.height = 200 + "px"
 
 const inputForm = document.getElementById("input-form")
 if (!(inputForm instanceof HTMLFormElement)) throw new Error("no form")
+const speedInput = document.getElementById("speed")
+if (!(speedInput instanceof HTMLInputElement)) throw new Error("no speed input")
+
+let stepDelay = 100
+speedInput.value = String(1000 / stepDelay)
+speedInput.addEventListener("input", function (e) {
+  stepDelay = 1000 / Number(this.value)
+})
 
 const nextButton = document.getElementById("next")
 
@@ -33,9 +42,55 @@ inputForm.addEventListener("submit", function (e) {
   draw(input.trimEnd(), ctx)
 })
 
+const cube = document.querySelector(".cube")
+const radioGroup = document.querySelector(".radio-group")
+let currentClass = ""
+function changeSide() {
+  if (!(radioGroup instanceof HTMLElement)) {
+    throw new Error("no radio group")
+  }
+  var checkedRadio = radioGroup.querySelector(":checked")
+  if (checkedRadio instanceof HTMLInputElement) {
+    var showClass = "show-" + checkedRadio.value
+    if (currentClass && cube) {
+      cube.classList.remove(currentClass)
+    }
+    cube?.classList.add(showClass)
+    currentClass = showClass
+  }
+}
+changeSide()
+radioGroup?.addEventListener("change", changeSide)
+
+function updateFaceBackground(faceName, pos) {
+  const face = document.querySelector(`.cube__face--${faceName}`)
+  if (!(canvas instanceof HTMLCanvasElement)) {
+    throw new Error("no canvas")
+  }
+  if (face instanceof HTMLElement) {
+    let faceCanvas = face.querySelector("canvas")
+    let faceCtx
+    if (!faceCanvas) {
+      faceCanvas = document.createElement("canvas")
+      faceCtx = faceCanvas.getContext("2d")
+      if (!faceCtx) throw new Error("no ctx")
+      faceCtx.canvas.width = 50 * SIZE * SCALE
+      faceCtx.canvas.height = 50 * SIZE * SCALE
+      face.appendChild(faceCanvas)
+    }
+    faceCtx = faceCanvas.getContext("2d")
+    if (!faceCtx) throw new Error("no ctx")
+    faceCtx.drawImage(
+      canvas,
+      -pos[0] * 50 * SIZE * SCALE,
+      -pos[1] * 50 * SIZE * SCALE,
+    )
+  }
+}
+
 const colors = {
   ".": "white",
-  "#": "orange",
+  "#": "#343a40",
 }
 
 const dirToChar = {
@@ -59,7 +114,7 @@ function draw(input, ctx) {
   const { map, moves, start, sideSize } = parseInput(input)
   const connections = getConnectionsOnCube(sideSize)
 
-  const iter = traverseMap(map, moves, connections, start, true)
+  const iter = traverseMap(map, moves, connections, start, sideSize, true)
 
   if (!nextButton) {
     throw new Error("no next button")
@@ -70,7 +125,6 @@ function draw(input, ctx) {
       return
     }
     const { dir, pos, move } = result.value
-    console.log({ pos })
     drawPos(pos, dir)
 
     // @ts-ignore
@@ -82,11 +136,38 @@ function draw(input, ctx) {
   nextButton.removeAttribute("disabled")
 
   ctx.fillStyle = "black"
-  ctx.fillRect(0, 0, WIDTH * SIZE, HEIGHT * SIZE)
+  ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height)
 
-  function drawPos(pos, dir) {
-    ctx.fillStyle = "red"
+  function drawPos(pos, dir, fillStyle, skipUpdate) {
+    ctx.fillStyle = fillStyle
     ctx.fillRect(pos[0] * SIZE, pos[1] * SIZE, SIZE, SIZE)
+    if (!skipUpdate) {
+      updateFaceBackground("front", [1, 1])
+      updateFaceBackground("top", [1, 0])
+      updateFaceBackground("right", [2, 0])
+      updateFaceBackground("bottom", [1, 2])
+      updateFaceBackground("left", [0, 2])
+      updateFaceBackground("back", [0, 3])
+
+      // rotate to face containing pos
+      let face = "front"
+      if (pos[1] < 50) {
+        face = pos[0] < 100 ? "top" : "right"
+      } else if (pos[1] < 100) {
+        face = "front"
+      } else if (pos[1] < 150) {
+        face = pos[0] < 50 ? "left" : "bottom"
+      } else {
+        face = "back"
+      }
+      const faceElement = document.querySelector(
+        `[name="rotate-cube-side"][value="${face}"]`,
+      )
+      if (faceElement instanceof HTMLInputElement) {
+        faceElement.checked = true
+        changeSide()
+      }
+    }
   }
 
   function drawInitState() {
@@ -99,19 +180,39 @@ function draw(input, ctx) {
 
   drawInitState()
 
-  function drawLoop() {
+  let lastPos
+  function drawStep() {
     const result = iter.next()
     if (result.done) {
       return
     }
     const { dir, pos, move } = result.value
-    drawPos(pos, dir)
-
+    if (lastPos) {
+      drawPos(lastPos, dir, "#51cf66", true)
+    }
+    drawPos(pos, dir, "#e03131")
+    lastPos = pos
     // @ts-ignore
     document.getElementById(
       "status",
     ).innerText = `Move: ${move}, Dir: ${dirToChar[dir]}`
+  }
+
+  let lastTime = 0
+
+  function drawLoop(dt) {
+    if (lastTime === 0) {
+      lastTime = dt
+      drawStep()
+    } else if (dt - lastTime > stepDelay) {
+      const countSteps = Math.floor((dt - lastTime) / stepDelay)
+      lastTime = dt
+      for (const _ of range(countSteps)) {
+        drawStep()
+      }
+    }
+
     rafHandle = requestAnimationFrame(drawLoop)
   }
-  drawLoop()
+  drawLoop(0)
 }
