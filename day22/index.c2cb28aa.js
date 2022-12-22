@@ -542,7 +542,7 @@ if (!ctx) throw new Error("no ctx");
 const WIDTH = 200;
 const HEIGHT = 200;
 const SIZE = 2;
-const scale = (0, _common.scaleCanvasToPixelRatio)(ctx, WIDTH * SIZE, HEIGHT * SIZE);
+const SCALE = (0, _common.scaleCanvasToPixelRatio)(ctx, WIDTH * SIZE, HEIGHT * SIZE);
 canvas.style.width = "200px";
 canvas.style.height = "200px";
 const inputForm = document.getElementById("input-form");
@@ -579,12 +579,13 @@ function setFaceBackground(faceName, base64bg, pos) {
             faceCanvas = document.createElement("canvas");
             faceCtx = faceCanvas.getContext("2d");
             if (!faceCtx) throw new Error("no ctx");
-            (0, _common.scaleCanvasToPixelRatio)(faceCtx, 200, 200);
+            faceCtx.canvas.width = 50 * SIZE * SCALE;
+            faceCtx.canvas.height = 50 * SIZE * SCALE;
             face.appendChild(faceCanvas);
         }
         faceCtx = faceCanvas.getContext("2d");
         if (!faceCtx) throw new Error("no ctx");
-        faceCtx.drawImage(canvas, -pos[0] * 200 * SIZE / scale, -pos[1] * 200 * SIZE / scale);
+        faceCtx.drawImage(canvas, -pos[0] * 50 * SIZE * SCALE, -pos[1] * 50 * SIZE * SCALE);
     }
 }
 const colors = {
@@ -620,7 +621,7 @@ let rafHandle = 0;
     };
     nextButton.removeAttribute("disabled");
     ctx.fillStyle = "black";
-    ctx.fillRect(0, 0, WIDTH * SIZE, HEIGHT * SIZE);
+    ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
     function drawPos(pos, dir) {
         ctx.fillStyle = "#51cf66";
         ctx.fillRect(pos[0] * SIZE, pos[1] * SIZE, SIZE, SIZE);
