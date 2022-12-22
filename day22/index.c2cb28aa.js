@@ -542,7 +542,7 @@ if (!ctx) throw new Error("no ctx");
 const WIDTH = 200;
 const HEIGHT = 200;
 const SIZE = 2;
-(0, _common.scaleCanvasToPixelRatio)(ctx, WIDTH * SIZE, HEIGHT * SIZE);
+const scale = (0, _common.scaleCanvasToPixelRatio)(ctx, WIDTH * SIZE, HEIGHT * SIZE);
 canvas.style.width = "200px";
 canvas.style.height = "200px";
 const inputForm = document.getElementById("input-form");
@@ -584,7 +584,7 @@ function setFaceBackground(faceName, base64bg, pos) {
         }
         faceCtx = faceCanvas.getContext("2d");
         if (!faceCtx) throw new Error("no ctx");
-        faceCtx.drawImage(canvas, -pos[0] * 100 * SIZE, -pos[1] * 100 * SIZE);
+        faceCtx.drawImage(canvas, -pos[0] * 200 * SIZE / scale, -pos[1] * 200 * SIZE / scale);
     }
 }
 const colors = {

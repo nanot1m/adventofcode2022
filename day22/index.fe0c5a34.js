@@ -1952,6 +1952,7 @@ function scaleCanvasToPixelRatio(ctx, width, height, scale) {
     ctx.canvas.style.width = `${width}px`;
     ctx.canvas.style.height = `${height}px`;
     ctx.scale(pixelRatio, pixelRatio);
+    return pixelRatio;
 }
 
 },{"@parcel/transformer-js/src/esmodule-helpers.js":"5gDop"}]},["h9mVJ"], null, "parcelRequiree764")
