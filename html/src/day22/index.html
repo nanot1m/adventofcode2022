@@ -101,14 +101,27 @@
 
       <div class="row">
         <div class="row">
-          <div class="scene">
-            <div class="cube">
-              <div class="cube__face cube__face--front"></div>
-              <div class="cube__face cube__face--back"></div>
-              <div class="cube__face cube__face--right"></div>
-              <div class="cube__face cube__face--left"></div>
-              <div class="cube__face cube__face--top"></div>
-              <div class="cube__face cube__face--bottom"></div>
+          <div class="col">
+            <div class="scene">
+              <div class="cube">
+                <div class="cube__face cube__face--front"></div>
+                <div class="cube__face cube__face--back"></div>
+                <div class="cube__face cube__face--right"></div>
+                <div class="cube__face cube__face--left"></div>
+                <div class="cube__face cube__face--top"></div>
+                <div class="cube__face cube__face--bottom"></div>
+              </div>
+            </div>
+            <div class="col">
+              <label for="speed">Steps per second</label>
+              <input
+                type="range"
+                name="speed"
+                id="speed"
+                min="1"
+                max="120"
+                value="3"
+              />
             </div>
           </div>
 
@@ -145,17 +158,6 @@
         </div>
 
         <form id="input-form">
-          <div class="col">
-            <label for="speed">Steps per second</label>
-            <input
-              type="range"
-              name="speed"
-              id="speed"
-              min="1"
-              max="60"
-              value="3"
-            />
-          </div>
           <textarea
             name="input"
             id="input"
@@ -368,7 +370,6 @@
           >
           <div class="form-actions mb-1">
             <button>Simulate</button>
-            <button type="button" id="next" disabled>Next</button>
           </div>
         </form>
       </div>
