@@ -18,6 +18,8 @@ html {
     Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
 
   background: linear-gradient(90deg, #4b6cb7 0%, #182848 100%);
+  background-image: url("./img/space.jpg");
+  background-position: center center;
   min-height: 100%;
   font-size: 1em;
 }
@@ -210,7 +212,7 @@ input[type="range"]:focus::-ms-fill-upper {
   max-width: 800px;
 
   /* From https://css.glass */
-  background: rgba(255, 255, 255, 0.48);
+  background: rgba(255, 255, 255, 0.2);
   border-radius: 16px;
   box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
   backdrop-filter: blur(5px);
