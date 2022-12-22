@@ -160,3 +160,13 @@ export const cLen = (vecA, vecB = zero()) =>
  */
 export const mLen = (vecA, vecB = zero()) =>
   Math.abs(vecA[0] - vecB[0]) + Math.abs(vecA[1] - vecB[1])
+
+/**
+ *
+ * @param {Vec2} vec
+ * @param {Vec2} min
+ * @param {Vec2} max
+ * @returns
+ */
+export const inRange = (vec, min, max) =>
+  vec[0] >= min[0] && vec[0] <= max[0] && vec[1] >= min[1] && vec[1] <= max[1]

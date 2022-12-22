@@ -12,6 +12,13 @@
  */
 export const vec3 = (x, y, z) => [x, y, z]
 
+/** @param {Vec3} vec */
+export const x = (vec) => vec[0]
+/** @param {Vec3} vec */
+export const y = (vec) => vec[1]
+/** @param {Vec3} vec */
+export const z = (vec) => vec[2]
+
 /**
  *
  * @returns {Vec3}
@@ -28,6 +35,22 @@ export const add = (vecA, vecB) => [
   vecA[1] + vecB[1],
   vecA[2] + vecB[2],
 ]
+
+/**
+ *
+ * @param {Vec3} vec
+ * @param {number[][]} rot
+ * @returns {Vec3}
+ */
+export const rot = (vec, rot) => {
+  const [x, y, z] = vec
+  const [xRot, yRot, zRot] = rot
+  return [
+    x * xRot[0] + y * xRot[1] + z * xRot[2],
+    x * yRot[0] + y * yRot[1] + z * yRot[2],
+    x * zRot[0] + y * zRot[1] + z * zRot[2],
+  ]
+}
 
 /**
  * @param {Vec3} vecA

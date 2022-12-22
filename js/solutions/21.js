@@ -26,9 +26,8 @@ hmdt: 32`
 
 /** @typedef {ReturnType<typeof parseInput>} InputType */
 
-export const parseInput = t.arr(
-  t.tuple([t.str(), t.tuple([t.str(), t.str(), t.str()], " ")], ": "),
-).parse
+const valParser = t.tuple([t.str(), t.str(), t.str()], " ")
+export const parseInput = t.arr(t.tuple([t.str(), valParser], ": ")).parse
 
 /**
  *

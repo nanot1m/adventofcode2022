@@ -1,6 +1,5 @@
 // @ts-check
 
-import { it } from "./itertools.js"
 import * as V from "./vec.js"
 
 /**

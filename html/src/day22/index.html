@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AoC 2022. Day 17</title>
+    <link rel="stylesheet" href="../common.css" />
+    <script src="./index.js" type="module"></script>
+    <style>
+      #canvas {
+        /* transform: scaleY(-1); */
+      }
+      form {
+        flex: 1;
+      }
+      .form-actions {
+        align-self: flex-start;
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.25em;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Advent of code 2022. Day 17</h1>
+      <aside>
+        <ul>
+          <li>
+            <a href="../index.html">Main</a>
+          </li>
+        </ul>
+      </aside>
+    </div>
+
+    <section class="container">
+      <h2>Solution</h2>
+
+      <div class="row">
+        <div class="col">
+          <canvas id="canvas"></canvas>
+
+          <div id="status"></div>
+        </div>
+
+        <form id="input-form">
+          <textarea
+            name="input"
+            id="input"
+            cols="20"
+            rows="10"
+            placeholder="Paste your input here"
+          ></textarea>
+          <div class="form-actions mb-1">
+            <button>Simulate</button>
+            <button type="button" id="next" disabled>Next</button>
+          </div>
+          <!-- <div class="col">
+            <label for="speed">Steps per second</label>
+            <input
+              type="range"
+              name="speed"
+              id="speed"
+              min="1"
+              max="1200"
+              value="3"
+            />
+          </div> -->
+        </form>
+      </div>
+    </section>
+  </body>
+</html>

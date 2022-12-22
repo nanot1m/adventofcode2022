@@ -137,7 +137,7 @@ function createParserFactory(parserFactory) {
 }
 
 const commonTypes = createParserFactory({
-  int: () => ({ parse: PARSERS.int.parse }),
+  int: () => PARSERS.int,
 
   str: () => PARSERS.str,
 

@@ -159,6 +159,35 @@ export function mul(a, b) {
 }
 
 /**
+ *
+ * @param {number[][]} m1
+ * @param {number[][]} m2
+ */
+export function mulMatrix(m1, m2) {
+  /** @type {number[][]} */
+  const result = []
+  for (let i = 0; i < m1.length; i++) {
+    result[i] = []
+    for (let j = 0; j < m2[0].length; j++) {
+      let sum = 0
+      for (let k = 0; k < m1[0].length; k++) {
+        sum += m1[i][k] * m2[k][j]
+      }
+      result[i][j] = sum
+    }
+  }
+  return result
+}
+
+/**
+ *  @param {number[][]} mat1
+ * @param  {...number[][]} mats
+ */
+export function mulMatrices(mat1, ...mats) {
+  return mats.reduce(mulMatrix, mat1)
+}
+
+/**
  * @param {number} a
  * @param {number} b
  * @returns
