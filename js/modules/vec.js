@@ -8,6 +8,13 @@
  * @typedef {"U" | "R"| "D" | "L" | "UR" | "UL"} Dir
  */
 
+/**
+ * @param {number} x
+ * @param {number} y
+ * @returns {Vec2}
+ */
+export const vec = (x, y) => [x, y]
+
 /** @type {Record<Dir, Vec2>} */
 export const DIR_TO_VEC = {
   U: [0, 1],
@@ -20,6 +27,16 @@ export const DIR_TO_VEC = {
 
 export const DIRS_4 = [DIR_TO_VEC.U, DIR_TO_VEC.R, DIR_TO_VEC.D, DIR_TO_VEC.L]
 export const DIRS_3_TOP = [DIR_TO_VEC.UL, DIR_TO_VEC.U, DIR_TO_VEC.UR]
+export const DIRS_8 = [
+  vec(-1, -1),
+  vec(0, -1),
+  vec(1, -1),
+  vec(-1, 0),
+  vec(1, 0),
+  vec(-1, 1),
+  vec(0, 1),
+  vec(1, 1),
+]
 
 /**
  *
@@ -67,13 +84,6 @@ export const fromDir = (dir) => DIR_TO_VEC[dir]
  * @returns {Vec2}
  */
 export const zero = () => [0, 0]
-
-/**
- * @param {number} x
- * @param {number} y
- * @returns {Vec2}
- */
-export const vec = (x, y) => [x, y]
 
 /**
  * @param {Vec2} vec
