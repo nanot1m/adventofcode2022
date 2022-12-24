@@ -142,13 +142,13 @@
       this[globalName] = mainExports;
     }
   }
-})({"cCaj4":[function(require,module,exports) {
+})({"4HJcs":[function(require,module,exports) {
 var global = arguments[3];
 var HMR_HOST = null;
 var HMR_PORT = null;
 var HMR_SECURE = false;
 var HMR_ENV_HASH = "d6ea1d42532a7575";
-module.bundle.HMR_BUNDLE_ID = "ea3cf04f2f0e0d7c";
+module.bundle.HMR_BUNDLE_ID = "8bd72fc705248d44";
 "use strict";
 /* global HMR_HOST, HMR_PORT, HMR_ENV_HASH, HMR_SECURE, chrome, browser, globalThis, __parcel__import__, __parcel__importScripts__, ServiceWorkerGlobalScope */ /*::
 import type {
@@ -1960,16 +1960,16 @@ function parseMap2d(input) {
  */ var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "scaleCanvasToPixelRatio", ()=>scaleCanvasToPixelRatio);
-function scaleCanvasToPixelRatio(ctx, width, height, scale) {
-    const pixelRatio = scale ?? window.devicePixelRatio ?? 1;
-    ctx.canvas.width = width * pixelRatio;
-    ctx.canvas.height = height * pixelRatio;
-    ctx.canvas.style.width = `${width}px`;
-    ctx.canvas.style.height = `${height}px`;
+function scaleCanvasToPixelRatio(ctx, width, height, scale = 1) {
+    const pixelRatio = (window.devicePixelRatio ?? 1) * scale;
+    ctx.canvas.width = width * scale * pixelRatio;
+    ctx.canvas.height = height * scale * pixelRatio;
+    ctx.canvas.style.width = `${width * scale}px`;
+    ctx.canvas.style.height = `${height * scale}px`;
     ctx.scale(pixelRatio, pixelRatio);
     return pixelRatio;
 }
 
-},{"@parcel/transformer-js/src/esmodule-helpers.js":"5gDop"}]},["cCaj4"], null, "parcelRequiree764")
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"5gDop"}]},["4HJcs"], null, "parcelRequiree764")
 
-//# sourceMappingURL=index.2f0e0d7c.js.map
+//# sourceMappingURL=index.05248d44.js.map

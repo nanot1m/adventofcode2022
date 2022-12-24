@@ -782,7 +782,7 @@ function* rocks() {
         default:
             throw new Error(`Unknown direction: ${dir}`);
     }
-    if (nextRock.points.some((p)=>map.hasPos((0, _indexJs.V).add(nextRock.pos, p)))) return rock;
+    if (nextRock.points.some((p)=>map.has((0, _indexJs.V).add(nextRock.pos, p)))) return rock;
     return nextRock;
 }
 /**
@@ -808,7 +808,7 @@ function* rocks() {
     if (bottom > height) return false;
     if (bottom === 0) return true;
     const nextRock = moveRock(rock, (0, _indexJs.V).vec(0, -1));
-    return nextRock.points.some((p)=>map.hasPos((0, _indexJs.V).add(nextRock.pos, p)));
+    return nextRock.points.some((p)=>map.has((0, _indexJs.V).add(nextRock.pos, p)));
 }
 /**
  * @param {Rock} rock

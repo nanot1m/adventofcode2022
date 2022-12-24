@@ -142,13 +142,13 @@
       this[globalName] = mainExports;
     }
   }
-})({"anMt6":[function(require,module,exports) {
+})({"2wF5n":[function(require,module,exports) {
 var global = arguments[3];
 var HMR_HOST = null;
 var HMR_PORT = null;
 var HMR_SECURE = false;
 var HMR_ENV_HASH = "d6ea1d42532a7575";
-module.bundle.HMR_BUNDLE_ID = "8f79f1b7a02d4531";
+module.bundle.HMR_BUNDLE_ID = "349966cc758ec585";
 "use strict";
 /* global HMR_HOST, HMR_PORT, HMR_ENV_HASH, HMR_SECURE, chrome, browser, globalThis, __parcel__import__, __parcel__importScripts__, ServiceWorkerGlobalScope */ /*::
 import type {
@@ -531,160 +531,538 @@ function hmrAcceptRun(bundle, id) {
     acceptedAssets[id] = true;
 }
 
-},{}],"aZTvN":[function(require,module,exports) {
-// @ts-check
-var _14Js = require("../../../js/solutions/14.js");
-var _indexJs = require("../../../js/modules/index.js");
-var _commonJs = require("../common.js");
+},{}],"5j2lZ":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+var _common = require("../common");
+var _24 = require("../../../js/solutions/24");
+var _map2D = require("../../../js/modules/map2d");
+var _grassPng = require("./img/grass.png");
+var _grassPngDefault = parcelHelpers.interopDefault(_grassPng);
+var _wallVPng = require("./img/wall-v.png");
+var _wallVPngDefault = parcelHelpers.interopDefault(_wallVPng);
+var _wallHPng = require("./img/wall-h.png");
+var _wallHPngDefault = parcelHelpers.interopDefault(_wallHPng);
+var _wallTlPng = require("./img/wall-tl.png");
+var _wallTlPngDefault = parcelHelpers.interopDefault(_wallTlPng);
+var _wallTrPng = require("./img/wall-tr.png");
+var _wallTrPngDefault = parcelHelpers.interopDefault(_wallTrPng);
+var _wallBlPng = require("./img/wall-bl.png");
+var _wallBlPngDefault = parcelHelpers.interopDefault(_wallBlPng);
+var _wallBrPng = require("./img/wall-br.png");
+var _wallBrPngDefault = parcelHelpers.interopDefault(_wallBrPng);
+var _modules = require("../../../js/modules");
+const example = `#.######
+#>>.<^<#
+#.<..<<#
+#>v.><>#
+#<^v^^>#
+######.#`;
 const canvas = document.getElementById("canvas");
-if (!(canvas instanceof HTMLCanvasElement)) throw new Error("no canvas");
-const ctx = canvas.getContext("2d");
-if (!ctx) throw new Error("no ctx");
-(0, _commonJs.scaleCanvasToPixelRatio)(ctx, 100, 100);
-let raf = 0;
-/**
- * @param {string} input
- * @param {CanvasRenderingContext2D} ctx
- */ function draw(input, ctx, part2 = false) {
-    cancelAnimationFrame(raf);
-    const map = (0, _14Js.parseMap)(input);
-    if (part2) {
-        const h = map.height + 1;
-        const minX = Math.min(map.bounds.minX, 500 - h);
-        const maxX = Math.max(map.bounds.maxX, 500 + h);
-        const floor = (0, _indexJs.V).segment((0, _indexJs.V).vec(minX, h), (0, _indexJs.V).vec(maxX, h));
-        for (const pos of floor)map.set(pos, "~");
-    }
-    const { width , height , bounds  } = map;
-    const scale = Math.min(10, Math.max(2, 200 / width));
-    (0, _commonJs.scaleCanvasToPixelRatio)(ctx, width * scale, height * scale);
-    ctx.canvas.scrollIntoView({
-        behavior: "smooth"
-    });
-    const colors = {
-        "+": "orange",
-        o: "orange",
-        "#": "gray",
-        ".": "darkblue",
-        "~": "brown"
-    };
-    const iter = (0, _14Js.simulateSand)(map);
-    function drawFullState() {
-        const map2dStr = map.to2dArray({
-            valToString: (x)=>x ?? "."
-        });
-        map2dStr.forEach((row, y)=>{
-            row.forEach((cell, x)=>{
-                ctx.fillStyle = colors[cell];
-                ctx.fillRect(x * scale, y * scale, scale, scale);
-            });
-        });
-    }
-    function drawPoint([x, y], color) {
-        ctx.fillStyle = color;
-        ctx.fillRect((x - bounds.minX) * scale, (y - bounds.minY) * scale, scale, scale);
-    }
-    drawFullState();
-    const step = ()=>{
-        const value = iter.next().value;
-        if (value) {
-            drawPoint(value, colors.o);
-            raf = requestAnimationFrame(step);
-        }
-    };
-    step();
-}
-const inputForm = document.getElementById("input-form");
-if (!(inputForm instanceof HTMLFormElement)) throw new Error("no form");
-inputForm.addEventListener("submit", function(e) {
+/** @type {CanvasRenderingContext2D} */ const ctx = canvas.getContext("2d");
+const form = document.getElementById("input-form");
+const inputElement = document.getElementById("input");
+inputElement.value = example;
+const controls = document.querySelector(".controls");
+form.addEventListener("submit", function(e) {
     e.preventDefault();
     const formData = new FormData(this);
     const input = formData.get("input")?.toString() ?? "";
-    draw(input.trim(), ctx, formData.get("part2") === "on");
+    startLevel(input.trim());
 });
+const tileSize = 10;
+let scale = 4;
+const padding = 4;
+const colors = {
+    bg: "#1e130a",
+    blizzard: "#4dabf7"
+};
+function drawElf(pos) {
+    drawChar(pos, "\uD83E\uDDCC", "green", false);
+}
+function drawElf2(pos) {
+    drawChar(pos, "\uD83E\uDDDD‍♂️", "green", false);
+}
+function drawChar(pos, char, color = "white", clear = true) {
+    ctx.font = tileSize * scale + "px monospace";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    const size = tileSize * scale;
+    if (clear) {
+        ctx.fillStyle = colors.bg;
+        ctx.fillRect(pos[0] * size, pos[1] * size, size, size);
+    }
+    ctx.fillStyle = color;
+    ctx.fillText(char, pos[0] * size + size / 2, pos[1] * size + size / 2);
+}
+function drawSprite(pos, sprite) {
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(sprite, 0, 0, tileSize, tileSize, pos[0] * tileSize * scale, pos[1] * tileSize * scale, tileSize * scale, tileSize * scale);
+}
+function loadSprite(path) {
+    return new Promise((resolve, reject)=>{
+        const img = new Image();
+        img.onload = ()=>resolve(img);
+        img.onerror = reject;
+        img.src = path;
+    });
+}
+async function loadSprites() {
+    const sprites = await Promise.all([
+        loadSprite((0, _grassPngDefault.default)),
+        loadSprite((0, _wallVPngDefault.default)),
+        loadSprite((0, _wallHPngDefault.default)),
+        loadSprite((0, _wallTlPngDefault.default)),
+        loadSprite((0, _wallTrPngDefault.default)),
+        loadSprite((0, _wallBlPngDefault.default)),
+        loadSprite((0, _wallBrPngDefault.default))
+    ]);
+    return {
+        grass: sprites[0],
+        wallV: sprites[1],
+        wallH: sprites[2],
+        wallTL: sprites[3],
+        wallTR: sprites[4],
+        wallBL: sprites[5],
+        wallBR: sprites[6]
+    };
+}
+function delay(ms) {
+    return new Promise((resolve)=>setTimeout(resolve, ms));
+}
+async function startLevel(level) {
+    const map = (0, _24.parseInput)(level);
+    const width = (map.width + 2) * tileSize + padding * 2;
+    const height = (map.height + 2) * tileSize + padding * 2;
+    const screenWidth = window.innerWidth;
+    const maxScale = Math.max(Math.min(Math.floor(screenWidth / width), 4), 1);
+    console.log("maxScale", maxScale);
+    scale = maxScale;
+    (0, _common.scaleCanvasToPixelRatio)(ctx, width, height, scale);
+    ctx.fillStyle = colors.bg;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.translate(padding * scale, padding * scale);
+    const message = "Loading...";
+    let timePassed = Date.now();
+    for(let i = 0; i < message.length; i++)drawChar([
+        i,
+        1
+    ], message[i], "white");
+    const sprites = await loadSprites();
+    timePassed = Date.now() - timePassed;
+    if (timePassed < 1000) await delay(1000 - timePassed);
+    ctx.fillStyle = colors.bg;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    let playerPos = [
+        0,
+        -1
+    ];
+    let time = 0;
+    let lost = false;
+    let won = false;
+    drawLevel(map, time);
+    setButtonsState();
+    function drawLevel(map, time) {
+        let drawMap = new (0, _map2D.Map2d)();
+        for(let i = -1; i <= map.width; i++){
+            drawMap.set([
+                i,
+                -1
+            ], "#");
+            drawMap.set([
+                i,
+                map.height
+            ], "#");
+        }
+        for(let i1 = 0; i1 < map.height; i1++){
+            drawMap.set([
+                -1,
+                i1
+            ], "#");
+            drawMap.set([
+                map.width,
+                i1
+            ], "#");
+        }
+        drawMap.set([
+            0,
+            -1
+        ], ".");
+        drawMap.set([
+            map.width - 1,
+            map.height
+        ], ".");
+        drawMap = (0, _map2D.parseMap2d)(drawMap.toString());
+        for (const { pos , value  } of drawMap){
+            const origPos = [
+                pos[0] - 1,
+                pos[1] - 1
+            ];
+            const blizzards = [];
+            if (map.has(origPos)) {
+                if ((0, _24.checks).u(map, origPos, time)) blizzards.push("⇡");
+                if ((0, _24.checks).d(map, origPos, time)) blizzards.push("⇣");
+                if ((0, _24.checks).l(map, origPos, time)) blizzards.push("⇠");
+                if ((0, _24.checks).r(map, origPos, time)) blizzards.push("⇢");
+            }
+            if (blizzards.length > 0) blizzards.forEach((blizzard, i)=>drawChar(pos, blizzard, colors.blizzard, i === 0));
+            else if (value === "#") {
+                const isWallOnLeft = drawMap.get([
+                    pos[0] - 1,
+                    pos[1]
+                ]) === "#";
+                const isWallOnRight = drawMap.get([
+                    pos[0] + 1,
+                    pos[1]
+                ]) === "#";
+                const isWallOnTop = drawMap.get([
+                    pos[0],
+                    pos[1] - 1
+                ]) === "#";
+                const isWallOnBottom = drawMap.get([
+                    pos[0],
+                    pos[1] + 1
+                ]) === "#";
+                if (isWallOnRight && isWallOnBottom) drawSprite(pos, sprites.wallTL);
+                else if (isWallOnLeft && isWallOnBottom || isWallOnLeft && !isWallOnRight) drawSprite(pos, sprites.wallTR);
+                else if (isWallOnRight && isWallOnTop || isWallOnRight && !isWallOnLeft) drawSprite(pos, sprites.wallBL);
+                else if (isWallOnLeft && isWallOnTop) drawSprite(pos, sprites.wallBR);
+                else if (isWallOnRight || isWallOnLeft) drawSprite(pos, sprites.wallH);
+                else drawSprite(pos, sprites.wallV);
+            } else drawSprite(pos, sprites.grass);
+        }
+        console.log({
+            playerPos
+        });
+        drawElf([
+            playerPos[0] + 1,
+            playerPos[1] + 1
+        ]);
+        drawElf2([
+            drawMap.width - 2,
+            drawMap.height - 1
+        ]);
+    }
+    function setButtonsState() {
+        const canMove = {
+            up: (0, _modules.V).eq([
+                playerPos[0],
+                playerPos[1] - 1
+            ], [
+                0,
+                -1
+            ]) || map.has([
+                playerPos[0],
+                playerPos[1] - 1
+            ]),
+            down: (0, _modules.V).eq([
+                playerPos[0],
+                playerPos[1] + 1
+            ], [
+                map.width - 1,
+                map.height
+            ]) || map.has([
+                playerPos[0],
+                playerPos[1] + 1
+            ]),
+            left: map.has([
+                playerPos[0] - 1,
+                playerPos[1]
+            ]),
+            right: map.has([
+                playerPos[0] + 1,
+                playerPos[1]
+            ]),
+            stay: true
+        };
+        for (const button of controls.children)button.disabled = lost || won || !canMove[button.name];
+    }
+    function drawLoseScreen() {
+        ctx.fillStyle = colors.bg;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        const message = "You lost!";
+        for(let i = 0; i < message.length; i++)drawChar([
+            i,
+            1
+        ], message[i], "red");
+    }
+    function drawWinScreen() {
+        ctx.fillStyle = colors.bg;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        const message = "You won!";
+        for(let i = 0; i < message.length; i++)drawChar([
+            i,
+            1
+        ], message[i], "green");
+    }
+    function handleMove(direction) {
+        time++;
+        if (direction === "up") playerPos[1]--;
+        else if (direction === "down") playerPos[1]++;
+        else if (direction === "left") playerPos[0]--;
+        else if (direction === "right") playerPos[0]++;
+        drawLevel(map, time);
+        setButtonsState();
+        if ((0, _modules.V).eq(playerPos, [
+            map.width - 1,
+            map.height
+        ])) {
+            won = true;
+            drawWinScreen();
+        } else if ((0, _24.checks).u(map, playerPos, time) || (0, _24.checks).d(map, playerPos, time) || (0, _24.checks).l(map, playerPos, time) || (0, _24.checks).r(map, playerPos, time)) {
+            lost = true;
+            drawLoseScreen();
+        }
+    }
+    controls.onclick = function(e) {
+        handleMove(e.target.name);
+    };
+}
 
-},{"../../../js/solutions/14.js":"3Lnzw","../../../js/modules/index.js":"eVlez","../common.js":"8wzUn"}],"3Lnzw":[function(require,module,exports) {
+},{"../common":"8wzUn","../../../js/solutions/24":"i9Vgd","../../../js/modules/map2d":"kAYVe","./img/grass.png":"iMAve","./img/wall-v.png":"8yDjB","./img/wall-h.png":"9KdlT","./img/wall-tl.png":"7fqsw","./img/wall-tr.png":"fQWy3","./img/wall-bl.png":"k9FM7","./img/wall-br.png":"elz9g","@parcel/transformer-js/src/esmodule-helpers.js":"5gDop","../../../js/modules":"eVlez"}],"i9Vgd":[function(require,module,exports) {
 // @ts-check
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "useExample", ()=>useExample);
+parcelHelpers.export(exports, "exampleInput", ()=>exampleInput);
+parcelHelpers.export(exports, "parseInput", ()=>parseInput);
+parcelHelpers.export(exports, "checks", ()=>checks);
 /**
- * @param {string} input
- * @returns
- */ parcelHelpers.export(exports, "solve", ()=>solve);
+ *
+ * @param {Map2d<string>} map
+ * @param {V.Vec2 | null} me
+ * @param {number} time
+ */ parcelHelpers.export(exports, "prepareMapForDraw", ()=>prepareMapForDraw);
 /**
- * @param {string} input
- * @returns
- */ parcelHelpers.export(exports, "parseMap", ()=>parseMap);
+ * @param {Map2d<string>} map
+ * @param {V.Vec2} start
+ * @param {V.Vec2} end
+ * @param {V.Vec2} pos
+ * @param {number} t
+ * @returns {V.Vec2[]}
+ */ parcelHelpers.export(exports, "getAvailablePositions", ()=>getAvailablePositions);
 /**
- * @param {Map2d<string>} map2d
- */ parcelHelpers.export(exports, "simulateSand", ()=>simulateSand);
+ * @param {InputType} input
+ */ parcelHelpers.export(exports, "part1", ()=>part1);
+/**
+ * @param {InputType} input
+ */ parcelHelpers.export(exports, "part2", ()=>part2);
 var _indexJs = require("../modules/index.js");
-var _itertoolsJs = require("../modules/itertools.js");
 var _libJs = require("../modules/lib.js");
 var _map2DJs = require("../modules/map2d.js");
-function solve(input) {
+const useExample = false;
+const exampleInput = `\
+#.######
+#>>.<^<#
+#.<..<<#
+#>v.><>#
+#<^v^^>#
+######.#`;
+const parseInput = (/** @type {string} */ input)=>{
+    /** @type {Map2d<string>} */ const resultMap = new (0, _map2DJs.Map2d)();
+    const lines = (0, _libJs.readLines)(input);
+    for(let y = 1; y < lines.length - 1; y++)for(let x = 1; x < lines[y].length - 1; x++)resultMap.set((0, _indexJs.V).vec(x - 1, y - 1), lines[y][x]);
+    return resultMap;
+};
+/**
+ *
+ * @param {Map2d<string>} map
+ * @param {V.Vec2} pos
+ * @param {number} time
+ * @returns
+ */ function isBlizzard(map, pos, time) {
+    return checks.u(map, pos, time) || checks.d(map, pos, time) || checks.l(map, pos, time) || checks.r(map, pos, time);
+}
+const checks = {
+    u: (map, [x, y], time)=>map.get([
+            x,
+            (0, _libJs.mod)(y + time, map.height)
+        ]) === "^",
+    d: (map, [x, y], time)=>map.get([
+            x,
+            (0, _libJs.mod)(y - time, map.height)
+        ]) === "v",
+    l: (map, [x, y], time)=>map.get([
+            (0, _libJs.mod)(x + time, map.width),
+            y
+        ]) === "<",
+    r: (map, [x, y], time)=>map.get([
+            (0, _libJs.mod)(x - time, map.width),
+            y
+        ]) === ">"
+};
+function prepareMapForDraw(map, me, time) {
+    const drawMap = new (0, _map2DJs.Map2d)();
+    for (const { pos  } of map){
+        const blizzards = [];
+        if (checks.u(map, pos, time)) blizzards.push("^");
+        if (checks.d(map, pos, time)) blizzards.push("v");
+        if (checks.l(map, pos, time)) blizzards.push("<");
+        if (checks.r(map, pos, time)) blizzards.push(">");
+        if (blizzards.length > 0) drawMap.set(pos, blizzards.length === 1 ? blizzards[0] : blizzards.length);
+    }
+    for(let i = -1; i <= map.width; i++){
+        drawMap.set([
+            i,
+            -1
+        ], "#");
+        drawMap.set([
+            i,
+            map.height
+        ], "#");
+    }
+    for(let i1 = 0; i1 < map.height; i1++){
+        drawMap.set([
+            -1,
+            i1
+        ], "#");
+        drawMap.set([
+            map.width,
+            i1
+        ], "#");
+    }
+    drawMap.set([
+        0,
+        -1
+    ], ".");
+    drawMap.set([
+        map.width - 1,
+        map.height
+    ], ".");
+    if (me) drawMap.set(me, "E");
+    return (0, _map2DJs.parseMap2d)(drawMap.toString());
+}
+/** @typedef {[V.Vec2, number, BfsStep | null]} BfsStep */ /**
+ * @param {BfsStep} step
+ */ function toArray(step) {
+    const result = [];
+    while(step){
+        result.push(step);
+        step = step[2];
+    }
+    return result.reverse();
+}
+function getAvailablePositions(map, start, end, pos, t) {
     return [
-        ()=>part1(input),
-        ()=>part2(input)
-    ];
+        ...(0, _indexJs.V).DIRS_4,
+        (0, _indexJs.V).ZERO
+    ].map((d)=>(0, _indexJs.V).add(pos, d)).filter((n)=>{
+        return !isBlizzard(map, n, t + 1) && ((0, _indexJs.V).eq(n, start) || (0, _indexJs.V).eq(n, end) || map.has(n));
+    });
 }
-const start = (0, _indexJs.V).vec(500, 0);
-function parseMap(input) {
-    const lines = (0, _libJs.readLines)(input.trimEnd()).map((0, _libJs.typed)("vec[]"));
-    const points = (0, _itertoolsJs.it)(lines).flatMap((line)=>(0, _itertoolsJs.it)(line).windowed(2).flatMap(([a, b])=>(0, _indexJs.V).segment(a, b))).map((pos)=>(0, _libJs.tuple)(pos, "#"));
-    return new (0, _map2DJs.Map2d)(points).set(start, "+");
-}
-function* simulateSand(map2d, maxY = map2d.bounds.maxY) {
-    const bot = (0, _indexJs.V).vec(0, 1);
-    const leftBot = (0, _indexJs.V).vec(-1, 1);
-    const rightBot = (0, _indexJs.V).vec(1, 1);
+/**
+ *
+ * @param {InputType} map
+ * @param {V.Vec2} start
+ * @param {V.Vec2} end
+ * @param {number} startTime
+ * @returns
+ */ function solve(map, start, end, startTime) {
+    while(isBlizzard(map, start, startTime))startTime++;
     /**
+   * @param {V.Vec2} start
+   * @param {V.Vec2} end
+   * @param {number} startTime
    *
-   * @param {V.Vec2} startFrom
-   * @returns
-   */ function drop(startFrom) {
-        let pos = startFrom;
-        while(true){
-            if ((0, _indexJs.V).y(pos) >= maxY) return null;
-            const bottom = (0, _indexJs.V).add(pos, bot);
-            if (map2d.has(bottom) === false) {
-                pos = bottom;
-                continue;
-            }
-            const lb = (0, _indexJs.V).add(pos, leftBot);
-            if (map2d.has(lb) === false) {
-                pos = lb;
-                continue;
-            }
-            const rb = (0, _indexJs.V).add(pos, rightBot);
-            if (map2d.has(rb) === false) {
-                pos = rb;
-                continue;
-            }
-            return pos;
+   * @returns {BfsStep | null}
+   */ function bfs(start, end, startTime) {
+        /** @type {Array<BfsStep>} */ const queue = [
+            [
+                start,
+                startTime,
+                null
+            ]
+        ];
+        const visited = new Set();
+        while(queue.length > 0){
+            const cur = queue.shift();
+            const [pos, t] = cur;
+            if ((0, _indexJs.V).eq(pos, end)) return cur;
+            const key = pos.toString() + ":" + t;
+            if (visited.has(key)) continue;
+            else visited.add(key);
+            for (const next of getAvailablePositions(map, start, end, pos, t))queue.push([
+                next,
+                t + 1,
+                cur
+            ]);
         }
+        throw new Error("No path found");
     }
-    while(true){
-        const pos = drop(start);
-        if (pos === null || (0, _indexJs.V).eq(pos, start)) return;
-        map2d.set(pos, "o");
-        yield pos;
-    }
+    const result = bfs(start, end, startTime);
+    // toArray(result).forEach((pos, i) => {
+    //   drawMap(map, pos[0], i + startTime)
+    // })
+    return result[1];
 }
-/**
- * @param {string} input
- */ function part1(input) {
-    const map2d = parseMap(input);
-    return (0, _itertoolsJs.it)(simulateSand(map2d)).count();
+function part1(input) {
+    const start = (0, _indexJs.V).vec(0, -1);
+    const end = (0, _indexJs.V).vec(input.width - 1, input.height);
+    return solve(input, start, end, 0);
 }
-/**
- * @param {string} input
- */ function part2(input) {
-    const map = parseMap(input);
-    const bfs = map.setGetNeighbors((pos)=>(0, _indexJs.V).DIRS_3_TOP.map((d)=>(0, _indexJs.V).add(pos, d))).bfs((_, b)=>!map.has(b.pos) && b.pos[1] < map.height + 2, start);
-    return (0, _itertoolsJs.it)(bfs).count();
+function part2(input) {
+    const start = (0, _indexJs.V).vec(0, -1);
+    const end = (0, _indexJs.V).vec(input.width - 1, input.height);
+    const first = solve(input, start, end, 0);
+    const second = solve(input, end, start, first);
+    const third = solve(input, start, end, second);
+    return third;
 }
 
-},{"../modules/index.js":"eVlez","../modules/itertools.js":"aDL7D","../modules/lib.js":"7Ap0m","../modules/map2d.js":"kAYVe","@parcel/transformer-js/src/esmodule-helpers.js":"5gDop"}]},["anMt6","aZTvN"], "aZTvN", "parcelRequiree764")
+},{"../modules/index.js":"eVlez","../modules/lib.js":"7Ap0m","../modules/map2d.js":"kAYVe","@parcel/transformer-js/src/esmodule-helpers.js":"5gDop"}],"iMAve":[function(require,module,exports) {
+module.exports = require("./helpers/bundle-url").getBundleURL("4vZ2b") + "../grass.bccba575.png" + "?" + Date.now();
 
-//# sourceMappingURL=index.a02d4531.js.map
+},{"./helpers/bundle-url":"fPs0q"}],"fPs0q":[function(require,module,exports) {
+"use strict";
+var bundleURL = {};
+function getBundleURLCached(id) {
+    var value = bundleURL[id];
+    if (!value) {
+        value = getBundleURL();
+        bundleURL[id] = value;
+    }
+    return value;
+}
+function getBundleURL() {
+    try {
+        throw new Error();
+    } catch (err) {
+        var matches = ("" + err.stack).match(/(https?|file|ftp|(chrome|moz|safari-web)-extension):\/\/[^)\n]+/g);
+        if (matches) // The first two stack frames will be this function and getBundleURLCached.
+        // Use the 3rd one, which will be a runtime in the original bundle.
+        return getBaseURL(matches[2]);
+    }
+    return "/";
+}
+function getBaseURL(url) {
+    return ("" + url).replace(/^((?:https?|file|ftp|(chrome|moz|safari-web)-extension):\/\/.+)\/[^/]+$/, "$1") + "/";
+} // TODO: Replace uses with `new URL(url).origin` when ie11 is no longer supported.
+function getOrigin(url) {
+    var matches = ("" + url).match(/(https?|file|ftp|(chrome|moz|safari-web)-extension):\/\/[^/]+/);
+    if (!matches) throw new Error("Origin not found");
+    return matches[0];
+}
+exports.getBundleURL = getBundleURLCached;
+exports.getBaseURL = getBaseURL;
+exports.getOrigin = getOrigin;
+
+},{}],"8yDjB":[function(require,module,exports) {
+module.exports = require("./helpers/bundle-url").getBundleURL("4vZ2b") + "../wall-v.359df388.png" + "?" + Date.now();
+
+},{"./helpers/bundle-url":"fPs0q"}],"9KdlT":[function(require,module,exports) {
+module.exports = require("./helpers/bundle-url").getBundleURL("4vZ2b") + "../wall-h.687776f7.png" + "?" + Date.now();
+
+},{"./helpers/bundle-url":"fPs0q"}],"7fqsw":[function(require,module,exports) {
+module.exports = require("./helpers/bundle-url").getBundleURL("4vZ2b") + "../wall-tl.c98868e8.png" + "?" + Date.now();
+
+},{"./helpers/bundle-url":"fPs0q"}],"fQWy3":[function(require,module,exports) {
+module.exports = require("./helpers/bundle-url").getBundleURL("4vZ2b") + "../wall-tr.f7b996ac.png" + "?" + Date.now();
+
+},{"./helpers/bundle-url":"fPs0q"}],"k9FM7":[function(require,module,exports) {
+module.exports = require("./helpers/bundle-url").getBundleURL("4vZ2b") + "../wall-bl.3edc8d7b.png" + "?" + Date.now();
+
+},{"./helpers/bundle-url":"fPs0q"}],"elz9g":[function(require,module,exports) {
+module.exports = require("./helpers/bundle-url").getBundleURL("4vZ2b") + "../wall-br.ff9b468d.png" + "?" + Date.now();
+
+},{"./helpers/bundle-url":"fPs0q"}]},["2wF5n","5j2lZ"], "5j2lZ", "parcelRequiree764")
+
+//# sourceMappingURL=index.758ec585.js.map

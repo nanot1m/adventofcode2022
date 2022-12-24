@@ -142,13 +142,13 @@
       this[globalName] = mainExports;
     }
   }
-})({"cCaj4":[function(require,module,exports) {
+})({"2iGDR":[function(require,module,exports) {
 var global = arguments[3];
 var HMR_HOST = null;
 var HMR_PORT = null;
 var HMR_SECURE = false;
 var HMR_ENV_HASH = "d6ea1d42532a7575";
-module.bundle.HMR_BUNDLE_ID = "ea3cf04f2f0e0d7c";
+module.bundle.HMR_BUNDLE_ID = "a7c9381e44468318";
 "use strict";
 /* global HMR_HOST, HMR_PORT, HMR_ENV_HASH, HMR_SECURE, chrome, browser, globalThis, __parcel__import__, __parcel__importScripts__, ServiceWorkerGlobalScope */ /*::
 import type {
@@ -822,6 +822,7 @@ parcelHelpers.defineInteropFlag(exports);
  * @param {string} input
  * @param {string} [separator]
  */ parcelHelpers.export(exports, "readIntArr", ()=>readIntArr);
+parcelHelpers.export(exports, "mod", ()=>mod);
 /**
  *
  * @param {T} value
@@ -966,6 +967,7 @@ function readIntLines(input) {
 function readIntArr(input, separator = ",") {
     return input.split(separator).map(Number);
 }
+const mod = (n, m)=>(n % m + m) % m;
 function functor(value) {
     return {
         /**
@@ -1796,7 +1798,7 @@ class Map2d {
    *
    * @param {V.Vec2} pos
    * @returns {Iterable<V.Vec2>}
-   */ getNeighbors = (pos)=>_vecJs.DIRS_4.map((dir)=>_vecJs.add(pos, dir)).filter((pos)=>this.hasPos(pos));
+   */ #getNeighbors = (pos)=>_vecJs.DIRS_4.map((dir)=>_vecJs.add(pos, dir)).filter((pos)=>this.has(pos));
     /**
    * @type {Map<number, Map<number, T>>}
    */ #data = new Map();
@@ -1862,7 +1864,7 @@ class Map2d {
     }
     /**
    * @param {V.Vec2} vec
-   */ hasPos([x, y]) {
+   */ has([x, y]) {
         return this.#data.get(x)?.has(y) === true;
     }
     /**
@@ -1881,13 +1883,13 @@ class Map2d {
    * @param {V.Vec2} start
    * @returns {Iterable<BfsPos<T>>}
    */ bfs(canGoFromTo, start) {
-        return bfs(this, canGoFromTo, start, this.getNeighbors);
+        return bfs(this, canGoFromTo, start, this.#getNeighbors);
     }
     /**
    *
    * @param {(arg: V.Vec2) => Iterable<V.Vec2>} getNeighbors
    */ setGetNeighbors(getNeighbors) {
-        this.getNeighbors = getNeighbors;
+        this.#getNeighbors = getNeighbors;
         return this;
     }
     [Symbol.iterator]() {
@@ -1960,16 +1962,16 @@ function parseMap2d(input) {
  */ var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "scaleCanvasToPixelRatio", ()=>scaleCanvasToPixelRatio);
-function scaleCanvasToPixelRatio(ctx, width, height, scale) {
-    const pixelRatio = scale ?? window.devicePixelRatio ?? 1;
-    ctx.canvas.width = width * pixelRatio;
-    ctx.canvas.height = height * pixelRatio;
-    ctx.canvas.style.width = `${width}px`;
-    ctx.canvas.style.height = `${height}px`;
+function scaleCanvasToPixelRatio(ctx, width, height, scale = 1) {
+    const pixelRatio = (window.devicePixelRatio ?? 1) * scale;
+    ctx.canvas.width = width * scale * pixelRatio;
+    ctx.canvas.height = height * scale * pixelRatio;
+    ctx.canvas.style.width = `${width * scale}px`;
+    ctx.canvas.style.height = `${height * scale}px`;
     ctx.scale(pixelRatio, pixelRatio);
     return pixelRatio;
 }
 
-},{"@parcel/transformer-js/src/esmodule-helpers.js":"5gDop"}]},["cCaj4"], null, "parcelRequiree764")
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"5gDop"}]},["2iGDR"], null, "parcelRequiree764")
 
-//# sourceMappingURL=index.2f0e0d7c.js.map
+//# sourceMappingURL=index.44468318.js.map
