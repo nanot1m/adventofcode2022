@@ -1,5 +1,10 @@
 import { scaleCanvasToPixelRatio } from "../common"
-import { checks, parseInput, prepareMapForDraw } from "../../../js/solutions/24"
+import {
+  checks,
+  parseInput,
+  getShortestPath,
+  toArray,
+} from "../../../js/solutions/24"
 import { parseMap2d, Map2d } from "../../../js/modules/map2d"
 
 import grass from "./img/grass.png"
@@ -27,6 +32,7 @@ const inputElement = document.getElementById("input")
 inputElement.value = example
 
 const controls = document.querySelector(".controls")
+const solveBtn = document.getElementById("solve")
 
 form.addEventListener("submit", function (e) {
   e.preventDefault()
@@ -114,6 +120,8 @@ function delay(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
+let handle = 0
+
 async function startLevel(level) {
   const map = parseInput(level)
   const width = (map.width + 2) * tileSize + padding * 2
@@ -136,6 +144,9 @@ async function startLevel(level) {
     drawChar([i, 1], message[i], "white")
   }
   const sprites = await loadSprites()
+  const shortestPath = toArray(
+    getShortestPath(map, [0, -1], [map.width - 1, map.height], 0),
+  )
   timePassed = Date.now() - timePassed
   if (timePassed < 1000) {
     await delay(1000 - timePassed)
@@ -151,6 +162,38 @@ async function startLevel(level) {
 
   drawLevel(map, time)
   setButtonsState()
+
+  function showSolution() {
+    cancelAnimationFrame(handle)
+    blockAllButtons()
+    time = 0
+    function step() {
+      if (time >= shortestPath.length) {
+        cancelAnimationFrame(handle)
+        return
+      }
+      playerPos = shortestPath[time][0]
+      drawLevel(map, time)
+      time++
+    }
+    let lastTime = 0
+    let stepDelay = 100
+    function loop(dt) {
+      if (lastTime === 0) {
+        lastTime = dt
+        step()
+      } else if (dt - lastTime > stepDelay) {
+        const countSteps = Math.floor((dt - lastTime) / stepDelay)
+        lastTime = dt
+        for (let i = 0; i < countSteps; i++) {
+          step()
+        }
+      }
+
+      handle = requestAnimationFrame(loop)
+    }
+    loop(0)
+  }
 
   function drawLevel(map, time) {
     let drawMap = new Map2d()
@@ -209,9 +252,15 @@ async function startLevel(level) {
         drawSprite(pos, sprites.grass)
       }
     }
-    console.log({ playerPos })
+
     drawElf([playerPos[0] + 1, playerPos[1] + 1])
     drawElf2([drawMap.width - 2, drawMap.height - 1])
+  }
+
+  function blockAllButtons() {
+    for (const button of controls.children) {
+      button.disabled = true
+    }
   }
 
   function setButtonsState() {
@@ -278,5 +327,9 @@ async function startLevel(level) {
 
   controls.onclick = function (e) {
     handleMove(e.target.name)
+  }
+
+  solveBtn.onclick = function () {
+    showSolution()
   }
 }

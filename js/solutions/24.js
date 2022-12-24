@@ -90,7 +90,7 @@ export function prepareMapForDraw(map, me, time) {
 /**
  * @param {BfsStep} step
  */
-function toArray(step) {
+export function toArray(step) {
   const result = []
   while (step) {
     result.push(step)
@@ -126,7 +126,7 @@ export function getAvailablePositions(map, start, end, pos, t) {
  * @param {number} startTime
  * @returns
  */
-function solve(map, start, end, startTime) {
+export function getShortestPath(map, start, end, startTime) {
   while (isBlizzard(map, start, startTime)) startTime++
 
   /**
@@ -162,7 +162,7 @@ function solve(map, start, end, startTime) {
   // toArray(result).forEach((pos, i) => {
   //   drawMap(map, pos[0], i + startTime)
   // })
-  return result[1]
+  return result
 }
 
 /**
@@ -171,7 +171,7 @@ function solve(map, start, end, startTime) {
 export function part1(input) {
   const start = V.vec(0, -1)
   const end = V.vec(input.width - 1, input.height)
-  return solve(input, start, end, 0)
+  return getShortestPath(input, start, end, 0)[1]
 }
 
 /**
@@ -180,8 +180,8 @@ export function part1(input) {
 export function part2(input) {
   const start = V.vec(0, -1)
   const end = V.vec(input.width - 1, input.height)
-  const first = solve(input, start, end, 0)
-  const second = solve(input, end, start, first)
-  const third = solve(input, start, end, second)
+  const first = getShortestPath(input, start, end, 0)
+  const second = getShortestPath(input, end, start, first[1])
+  const third = getShortestPath(input, start, end, second[1])
   return third
 }
