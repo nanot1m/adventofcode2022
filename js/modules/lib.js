@@ -99,6 +99,13 @@ export function readIntArr(input, separator = ",") {
 }
 
 /**
+ * @param {number} n
+ * @param {number} m
+ * @returns
+ */
+export const mod = (n, m) => ((n % m) + m) % m
+
+/**
  *
  * @param {T} value
  * @template T
