@@ -47,11 +47,11 @@ function simulate(map, rules) {
   let targets = new Map2d()
 
   for (const p of map) {
-    if (V.DIRS_8.every((d) => !map.hasPos(V.add(p.pos, d)))) {
+    if (V.DIRS_8.every((d) => !map.has(V.add(p.pos, d)))) {
       continue
     }
     const rule = rules.find(([neighbors]) =>
-      neighbors.every((n) => !map.hasPos(V.add(p.pos, n))),
+      neighbors.every((n) => !map.has(V.add(p.pos, n))),
     )
     if (rule) {
       const target = V.add(p.pos, rule[1])

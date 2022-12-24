@@ -93,7 +93,7 @@ export class Map2d {
    * @returns {Iterable<V.Vec2>}
    */
   #getNeighbors = (pos) =>
-    V.DIRS_4.map((dir) => V.add(pos, dir)).filter((pos) => this.hasPos(pos))
+    V.DIRS_4.map((dir) => V.add(pos, dir)).filter((pos) => this.has(pos))
 
   /**
    * @type {Map<number, Map<number, T>>}
@@ -184,7 +184,7 @@ export class Map2d {
   /**
    * @param {V.Vec2} vec
    */
-  hasPos([x, y]) {
+  has([x, y]) {
     return this.#data.get(x)?.has(y) === true
   }
 

@@ -2,7 +2,7 @@
 
 import { V } from "../modules/index.js"
 import { mod, readLines } from "../modules/lib.js"
-import { Map2d } from "../modules/map2d.js"
+import { Map2d, parseMap2d } from "../modules/map2d.js"
 
 export const useExample = false
 
@@ -58,7 +58,7 @@ export const checks = {
  * @param {V.Vec2 | null} me
  * @param {number} time
  */
-function drawMap(map, me, time) {
+export function prepareMapForDraw(map, me, time) {
   const drawMap = new Map2d()
 
   for (const { pos } of map) {
@@ -82,8 +82,7 @@ function drawMap(map, me, time) {
   drawMap.set([0, -1], ".")
   drawMap.set([map.width - 1, map.height], ".")
   if (me) drawMap.set(me, "E")
-  console.log(`\nMinute ${time}`)
-  console.log(drawMap.toString())
+  return parseMap2d(drawMap.toString())
 }
 
 /** @typedef {[V.Vec2, number, BfsStep | null]} BfsStep */
@@ -101,6 +100,25 @@ function toArray(step) {
 }
 
 /**
+ * @param {Map2d<string>} map
+ * @param {V.Vec2} start
+ * @param {V.Vec2} end
+ * @param {V.Vec2} pos
+ * @param {number} t
+ * @returns {V.Vec2[]}
+ */
+export function getAvailablePositions(map, start, end, pos, t) {
+  return [...V.DIRS_4, V.ZERO]
+    .map((d) => V.add(pos, d))
+    .filter((n) => {
+      return (
+        !isBlizzard(map, n, t + 1) &&
+        (V.eq(n, start) || V.eq(n, end) || map.has(n))
+      )
+    })
+}
+
+/**
  *
  * @param {InputType} map
  * @param {V.Vec2} start
@@ -109,23 +127,6 @@ function toArray(step) {
  * @returns
  */
 function solve(map, start, end, startTime) {
-  /**
-   * @param {V.Vec2} pos
-   * @param {number} t
-   *
-   * @returns {V.Vec2[]}
-   */
-  const getAvailablePositions = (pos, t) => {
-    const result = V.DIRS_4.concat([V.vec(0, 0)])
-      .map((d) => V.add(pos, d))
-      .filter((next) => {
-        if (V.eq(next, start) || V.eq(next, end)) return true
-        if (isBlizzard(map, next, t + 1)) return false
-        return map.hasPos(next)
-      })
-    return result
-  }
-
   while (isBlizzard(map, start, startTime)) startTime++
 
   /**
@@ -149,7 +150,7 @@ function solve(map, start, end, startTime) {
       if (visited.has(key)) continue
       else visited.add(key)
 
-      for (const next of getAvailablePositions(pos, t)) {
+      for (const next of getAvailablePositions(map, start, end, pos, t)) {
         queue.push([next, t + 1, cur])
       }
     }

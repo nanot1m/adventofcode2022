@@ -54,19 +54,19 @@ export function* simulateSand(map2d, maxY = map2d.bounds.maxY) {
       }
 
       const bottom = V.add(pos, bot)
-      if (map2d.hasPos(bottom) === false) {
+      if (map2d.has(bottom) === false) {
         pos = bottom
         continue
       }
 
       const lb = V.add(pos, leftBot)
-      if (map2d.hasPos(lb) === false) {
+      if (map2d.has(lb) === false) {
         pos = lb
         continue
       }
 
       const rb = V.add(pos, rightBot)
-      if (map2d.hasPos(rb) === false) {
+      if (map2d.has(rb) === false) {
         pos = rb
         continue
       }
@@ -102,7 +102,7 @@ function part2(input) {
 
   const bfs = map
     .setGetNeighbors((pos) => V.DIRS_3_TOP.map((d) => V.add(pos, d)))
-    .bfs((_, b) => !map.hasPos(b.pos) && b.pos[1] < map.height + 2, start)
+    .bfs((_, b) => !map.has(b.pos) && b.pos[1] < map.height + 2, start)
 
   return it(bfs).count()
 }

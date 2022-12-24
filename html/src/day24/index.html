@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AoC 2022. Day 24</title>
+    <link rel="stylesheet" href="../common.css" />
+    <script src="./index.js" type="module"></script>
+    <style>
+      form {
+        flex: 1;
+      }
+      .controls {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 0.5em;
+      }
+      .controls button {
+        width: 40px;
+        height: 40px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Advent of code 2022. Day 24</h1>
+      <aside>
+        <ul>
+          <li>
+            <a href="../index.html">Main</a>
+          </li>
+        </ul>
+      </aside>
+    </div>
+
+    <section class="container">
+      <h2>Solution</h2>
+
+      <div class="col">
+        <div class="row justify-content-center">
+          <canvas id="canvas"></canvas>
+          <div class="controls">
+            <span></span>
+            <button type="button" name="up">↑</button>
+            <span></span>
+            <button type="button" name="left">←</button>
+            <button type="button" name="stay">⌾</button>
+            <button type="button" name="right">→</button>
+            <span></span>
+            <button type="button" name="down">↓</button>
+            <span></span>
+          </div>
+        </div>
+        <form id="input-form">
+          <button>Start level</button>
+          <textarea
+            name="input"
+            id="input"
+            cols="20"
+            rows="10"
+            placeholder="Paste your input here"
+          >
+          </textarea>
+        </form>
+      </div>
+    </section>
+  </body>
+</html>

@@ -124,7 +124,7 @@ function pushRock(rock, dir, map) {
       throw new Error(`Unknown direction: ${dir}`)
   }
 
-  if (nextRock.points.some((p) => map.hasPos(V.add(nextRock.pos, p)))) {
+  if (nextRock.points.some((p) => map.has(V.add(nextRock.pos, p)))) {
     return rock
   }
   return nextRock
@@ -159,7 +159,7 @@ function rockPlaced(rock, map, height) {
   if (bottom === 0) return true
 
   const nextRock = moveRock(rock, V.vec(0, -1))
-  return nextRock.points.some((p) => map.hasPos(V.add(nextRock.pos, p)))
+  return nextRock.points.some((p) => map.has(V.add(nextRock.pos, p)))
 }
 
 /**
