@@ -551,18 +551,27 @@ var _wallBlPngDefault = parcelHelpers.interopDefault(_wallBlPng);
 var _wallBrPng = require("./img/wall-br.png");
 var _wallBrPngDefault = parcelHelpers.interopDefault(_wallBrPng);
 var _modules = require("../../../js/modules");
+var _itertools = require("../../../js/modules/itertools");
+var _lib = require("../../../js/modules/lib");
 const example = `#.######
 #>>.<^<#
 #.<..<<#
 #>v.><>#
 #<^v^^>#
 ######.#`;
+const blizzardToChar = {
+    "<": "⇠",
+    ">": "⇢",
+    "^": "⇡",
+    v: "⇣"
+};
 const canvas = document.getElementById("canvas");
 /** @type {CanvasRenderingContext2D} */ const ctx = canvas.getContext("2d");
 const form = document.getElementById("input-form");
 const inputElement = document.getElementById("input");
 inputElement.value = example;
 const controls = document.querySelector(".controls");
+const solveBtn = document.getElementById("solve");
 form.addEventListener("submit", function(e) {
     e.preventDefault();
     const formData = new FormData(this);
@@ -629,13 +638,14 @@ async function loadSprites() {
 function delay(ms) {
     return new Promise((resolve)=>setTimeout(resolve, ms));
 }
+let handle = 0;
 async function startLevel(level) {
     const map = (0, _24.parseInput)(level);
     const width = (map.width + 2) * tileSize + padding * 2;
     const height = (map.height + 2) * tileSize + padding * 2;
+    const blizzards = (0, _itertools.it)(map).filter((x)=>x.value !== ".").toArray();
     const screenWidth = window.innerWidth;
     const maxScale = Math.max(Math.min(Math.floor(screenWidth / width), 4), 1);
-    console.log("maxScale", maxScale);
     scale = maxScale;
     (0, _common.scaleCanvasToPixelRatio)(ctx, width, height, scale);
     ctx.fillStyle = colors.bg;
@@ -648,10 +658,17 @@ async function startLevel(level) {
         1
     ], message[i], "white");
     const sprites = await loadSprites();
+    const shortestPath = (0, _24.toArray)((0, _24.getShortestPath)(map, [
+        0,
+        -1
+    ], [
+        map.width - 1,
+        map.height
+    ], 0));
     timePassed = Date.now() - timePassed;
     if (timePassed < 1000) await delay(1000 - timePassed);
     ctx.fillStyle = colors.bg;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillRect(-padding, -padding, canvas.width, canvas.height);
     let playerPos = [
         0,
         -1
@@ -659,9 +676,72 @@ async function startLevel(level) {
     let time = 0;
     let lost = false;
     let won = false;
+    let blizzardsToDraw = blizzards;
     drawLevel(map, time);
     setButtonsState();
+    async function showSolution() {
+        cancelAnimationFrame(handle);
+        blockAllButtons();
+        for (const [pos] of shortestPath)await movePlayerFromToWithAnimation(playerPos, pos, 100);
+    }
+    function movePlayerFromToWithAnimation(from, to, duration) {
+        return new Promise((res)=>{
+            const [x1, y1] = from;
+            const [x2, y2] = to;
+            const dx = x2 - x1;
+            const dy = y2 - y1;
+            let lastTime = 0;
+            const origPoses = blizzardsToDraw.map((b)=>b.pos);
+            function loop(dt) {
+                if (lastTime === 0) lastTime = dt;
+                const dTime = dt - lastTime;
+                const progress = Math.min(dTime / duration, 1);
+                const x = x1 + dx * progress;
+                const y = y1 + dy * progress;
+                playerPos = [
+                    x,
+                    y
+                ];
+                blizzardsToDraw.forEach((b, i)=>{
+                    const dx = b.value === "<" ? -1 : b.value === ">" ? 1 : 0;
+                    const dy = b.value === "^" ? -1 : b.value === "v" ? 1 : 0;
+                    blizzardsToDraw[i] = {
+                        value: b.value,
+                        pos: [
+                            origPoses[i][0] + dx * progress,
+                            origPoses[i][1] + dy * progress
+                        ]
+                    };
+                });
+                drawLevel(map, time);
+                if (progress < 1) handle = requestAnimationFrame(loop);
+                else {
+                    cancelAnimationFrame(handle);
+                    playerPos = to;
+                    time++;
+                    blizzardsToDraw.forEach((b, i)=>{
+                        const dx = b.value === "<" ? -1 : b.value === ">" ? 1 : 0;
+                        const dy = b.value === "^" ? -1 : b.value === "v" ? 1 : 0;
+                        const x = (0, _lib.mod)(origPoses[i][0] + dx, map.width);
+                        const y = (0, _lib.mod)(origPoses[i][1] + dy, map.height);
+                        blizzardsToDraw[i] = {
+                            value: b.value,
+                            pos: [
+                                x,
+                                y
+                            ]
+                        };
+                    });
+                    drawLevel(map, time);
+                    res();
+                }
+            }
+            loop(0);
+        });
+    }
     function drawLevel(map, time) {
+        ctx.fillStyle = colors.bg;
+        ctx.fillRect(-padding * scale, -padding * scale, canvas.width, canvas.height);
         let drawMap = new (0, _map2D.Map2d)();
         for(let i = -1; i <= map.width; i++){
             drawMap.set([
@@ -692,46 +772,32 @@ async function startLevel(level) {
             map.height
         ], ".");
         drawMap = (0, _map2D.parseMap2d)(drawMap.toString());
-        for (const { pos , value  } of drawMap){
-            const origPos = [
+        for (const { pos , value  } of drawMap)if (value === "#") {
+            const isWallOnLeft = drawMap.get([
                 pos[0] - 1,
+                pos[1]
+            ]) === "#";
+            const isWallOnRight = drawMap.get([
+                pos[0] + 1,
+                pos[1]
+            ]) === "#";
+            const isWallOnTop = drawMap.get([
+                pos[0],
                 pos[1] - 1
-            ];
-            const blizzards = [];
-            if (map.has(origPos)) {
-                if ((0, _24.checks).u(map, origPos, time)) blizzards.push("⇡");
-                if ((0, _24.checks).d(map, origPos, time)) blizzards.push("⇣");
-                if ((0, _24.checks).l(map, origPos, time)) blizzards.push("⇠");
-                if ((0, _24.checks).r(map, origPos, time)) blizzards.push("⇢");
-            }
-            if (blizzards.length > 0) blizzards.forEach((blizzard, i)=>drawChar(pos, blizzard, colors.blizzard, i === 0));
-            else if (value === "#") {
-                const isWallOnLeft = drawMap.get([
-                    pos[0] - 1,
-                    pos[1]
-                ]) === "#";
-                const isWallOnRight = drawMap.get([
-                    pos[0] + 1,
-                    pos[1]
-                ]) === "#";
-                const isWallOnTop = drawMap.get([
-                    pos[0],
-                    pos[1] - 1
-                ]) === "#";
-                const isWallOnBottom = drawMap.get([
-                    pos[0],
-                    pos[1] + 1
-                ]) === "#";
-                if (isWallOnRight && isWallOnBottom) drawSprite(pos, sprites.wallTL);
-                else if (isWallOnLeft && isWallOnBottom || isWallOnLeft && !isWallOnRight) drawSprite(pos, sprites.wallTR);
-                else if (isWallOnRight && isWallOnTop || isWallOnRight && !isWallOnLeft) drawSprite(pos, sprites.wallBL);
-                else if (isWallOnLeft && isWallOnTop) drawSprite(pos, sprites.wallBR);
-                else if (isWallOnRight || isWallOnLeft) drawSprite(pos, sprites.wallH);
-                else drawSprite(pos, sprites.wallV);
-            } else drawSprite(pos, sprites.grass);
+            ]) === "#";
+            const isWallOnBottom = drawMap.get([
+                pos[0],
+                pos[1] + 1
+            ]) === "#";
+            if (isWallOnRight && isWallOnBottom) drawSprite(pos, sprites.wallTL);
+            else if (isWallOnLeft && isWallOnBottom || isWallOnLeft && !isWallOnRight) drawSprite(pos, sprites.wallTR);
+            else if (isWallOnRight && isWallOnTop || isWallOnRight && !isWallOnLeft) drawSprite(pos, sprites.wallBL);
+            else if (isWallOnLeft && isWallOnTop) drawSprite(pos, sprites.wallBR);
+            else if (isWallOnRight || isWallOnLeft) drawSprite(pos, sprites.wallH);
+            else drawSprite(pos, sprites.wallV);
         }
-        console.log({
-            playerPos
+        blizzardsToDraw.forEach((blizzard)=>{
+            drawChar((0, _modules.V).add(blizzard.pos, (0, _modules.V).vec(1, 1)), blizzardToChar[blizzard.value], colors.blizzard, false);
         });
         drawElf([
             playerPos[0] + 1,
@@ -741,6 +807,9 @@ async function startLevel(level) {
             drawMap.width - 2,
             drawMap.height - 1
         ]);
+    }
+    function blockAllButtons() {
+        for (const button of controls.children)button.disabled = true;
     }
     function setButtonsState() {
         const canMove = {
@@ -794,14 +863,7 @@ async function startLevel(level) {
             1
         ], message[i], "green");
     }
-    function handleMove(direction) {
-        time++;
-        if (direction === "up") playerPos[1]--;
-        else if (direction === "down") playerPos[1]++;
-        else if (direction === "left") playerPos[0]--;
-        else if (direction === "right") playerPos[0]++;
-        drawLevel(map, time);
-        setButtonsState();
+    function checkWinLose() {
         if ((0, _modules.V).eq(playerPos, [
             map.width - 1,
             map.height
@@ -813,12 +875,27 @@ async function startLevel(level) {
             drawLoseScreen();
         }
     }
+    async function handleMove(direction) {
+        let nextPos = [
+            ...playerPos
+        ];
+        if (direction === "up") nextPos[1]--;
+        else if (direction === "down") nextPos[1]++;
+        else if (direction === "left") nextPos[0]--;
+        else if (direction === "right") nextPos[0]++;
+        await movePlayerFromToWithAnimation(playerPos, nextPos, 300);
+        checkWinLose();
+        setButtonsState();
+    }
     controls.onclick = function(e) {
         handleMove(e.target.name);
     };
+    solveBtn.onclick = function() {
+        showSolution();
+    };
 }
 
-},{"../common":"8wzUn","../../../js/solutions/24":"i9Vgd","../../../js/modules/map2d":"kAYVe","./img/grass.png":"iMAve","./img/wall-v.png":"8yDjB","./img/wall-h.png":"9KdlT","./img/wall-tl.png":"7fqsw","./img/wall-tr.png":"fQWy3","./img/wall-bl.png":"k9FM7","./img/wall-br.png":"elz9g","@parcel/transformer-js/src/esmodule-helpers.js":"5gDop","../../../js/modules":"eVlez"}],"i9Vgd":[function(require,module,exports) {
+},{"../common":"8wzUn","../../../js/solutions/24":"i9Vgd","../../../js/modules/map2d":"kAYVe","./img/grass.png":"iMAve","./img/wall-v.png":"8yDjB","./img/wall-h.png":"9KdlT","./img/wall-tl.png":"7fqsw","./img/wall-tr.png":"fQWy3","./img/wall-bl.png":"k9FM7","./img/wall-br.png":"elz9g","../../../js/modules":"eVlez","@parcel/transformer-js/src/esmodule-helpers.js":"5gDop","../../../js/modules/itertools":"aDL7D","../../../js/modules/lib":"7Ap0m"}],"i9Vgd":[function(require,module,exports) {
 // @ts-check
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
@@ -832,6 +909,9 @@ parcelHelpers.export(exports, "checks", ()=>checks);
  * @param {V.Vec2 | null} me
  * @param {number} time
  */ parcelHelpers.export(exports, "prepareMapForDraw", ()=>prepareMapForDraw);
+/** @typedef {[V.Vec2, number, BfsStep | null]} BfsStep */ /**
+ * @param {BfsStep} step
+ */ parcelHelpers.export(exports, "toArray", ()=>toArray);
 /**
  * @param {Map2d<string>} map
  * @param {V.Vec2} start
@@ -840,6 +920,14 @@ parcelHelpers.export(exports, "checks", ()=>checks);
  * @param {number} t
  * @returns {V.Vec2[]}
  */ parcelHelpers.export(exports, "getAvailablePositions", ()=>getAvailablePositions);
+/**
+ *
+ * @param {InputType} map
+ * @param {V.Vec2} start
+ * @param {V.Vec2} end
+ * @param {number} startTime
+ * @returns
+ */ parcelHelpers.export(exports, "getShortestPath", ()=>getShortestPath);
 /**
  * @param {InputType} input
  */ parcelHelpers.export(exports, "part1", ()=>part1);
@@ -931,9 +1019,7 @@ function prepareMapForDraw(map, me, time) {
     if (me) drawMap.set(me, "E");
     return (0, _map2DJs.parseMap2d)(drawMap.toString());
 }
-/** @typedef {[V.Vec2, number, BfsStep | null]} BfsStep */ /**
- * @param {BfsStep} step
- */ function toArray(step) {
+function toArray(step) {
     const result = [];
     while(step){
         result.push(step);
@@ -949,14 +1035,7 @@ function getAvailablePositions(map, start, end, pos, t) {
         return !isBlizzard(map, n, t + 1) && ((0, _indexJs.V).eq(n, start) || (0, _indexJs.V).eq(n, end) || map.has(n));
     });
 }
-/**
- *
- * @param {InputType} map
- * @param {V.Vec2} start
- * @param {V.Vec2} end
- * @param {number} startTime
- * @returns
- */ function solve(map, start, end, startTime) {
+function getShortestPath(map, start, end, startTime) {
     while(isBlizzard(map, start, startTime))startTime++;
     /**
    * @param {V.Vec2} start
@@ -992,19 +1071,19 @@ function getAvailablePositions(map, start, end, pos, t) {
     // toArray(result).forEach((pos, i) => {
     //   drawMap(map, pos[0], i + startTime)
     // })
-    return result[1];
+    return result;
 }
 function part1(input) {
     const start = (0, _indexJs.V).vec(0, -1);
     const end = (0, _indexJs.V).vec(input.width - 1, input.height);
-    return solve(input, start, end, 0);
+    return getShortestPath(input, start, end, 0)[1];
 }
 function part2(input) {
     const start = (0, _indexJs.V).vec(0, -1);
     const end = (0, _indexJs.V).vec(input.width - 1, input.height);
-    const first = solve(input, start, end, 0);
-    const second = solve(input, end, start, first);
-    const third = solve(input, start, end, second);
+    const first = getShortestPath(input, start, end, 0);
+    const second = getShortestPath(input, end, start, first[1]);
+    const third = getShortestPath(input, start, end, second[1]);
     return third;
 }
 
