@@ -15,6 +15,8 @@ import wallTR from "./img/wall-tr.png"
 import wallBL from "./img/wall-bl.png"
 import wallBR from "./img/wall-br.png"
 import { V } from "../../../js/modules"
+import { it } from "../../../js/modules/itertools"
+import { mod } from "../../../js/modules/lib"
 
 const example = `#.######
 #>>.<^<#
@@ -22,6 +24,13 @@ const example = `#.######
 #>v.><>#
 #<^v^^>#
 ######.#`
+
+const blizzardToChar = {
+  "<": "⇠",
+  ">": "⇢",
+  "^": "⇡",
+  v: "⇣",
+}
 
 const canvas = document.getElementById("canvas")
 /** @type {CanvasRenderingContext2D} */
@@ -126,10 +135,13 @@ async function startLevel(level) {
   const map = parseInput(level)
   const width = (map.width + 2) * tileSize + padding * 2
   const height = (map.height + 2) * tileSize + padding * 2
+  const blizzards = it(map)
+    .filter((x) => x.value !== ".")
+    .toArray()
 
   const screenWidth = window.innerWidth
   const maxScale = Math.max(Math.min(Math.floor(screenWidth / width), 4), 1)
-  console.log("maxScale", maxScale)
+
   scale = maxScale
 
   scaleCanvasToPixelRatio(ctx, width, height, scale)
@@ -153,49 +165,93 @@ async function startLevel(level) {
   }
 
   ctx.fillStyle = colors.bg
-  ctx.fillRect(0, 0, canvas.width, canvas.height)
+  ctx.fillRect(-padding, -padding, canvas.width, canvas.height)
 
   let playerPos = [0, -1]
   let time = 0
   let lost = false
   let won = false
+  let blizzardsToDraw = blizzards
 
   drawLevel(map, time)
   setButtonsState()
 
-  function showSolution() {
+  async function showSolution() {
     cancelAnimationFrame(handle)
     blockAllButtons()
-    time = 0
-    function step() {
-      if (time >= shortestPath.length) {
-        cancelAnimationFrame(handle)
-        return
-      }
-      playerPos = shortestPath[time][0]
-      drawLevel(map, time)
-      time++
+
+    for (const [pos] of shortestPath) {
+      await movePlayerFromToWithAnimation(playerPos, pos, 100)
     }
-    let lastTime = 0
-    let stepDelay = 100
-    function loop(dt) {
-      if (lastTime === 0) {
-        lastTime = dt
-        step()
-      } else if (dt - lastTime > stepDelay) {
-        const countSteps = Math.floor((dt - lastTime) / stepDelay)
-        lastTime = dt
-        for (let i = 0; i < countSteps; i++) {
-          step()
+  }
+
+  function movePlayerFromToWithAnimation(from, to, duration) {
+    return new Promise((res) => {
+      const [x1, y1] = from
+      const [x2, y2] = to
+      const dx = x2 - x1
+      const dy = y2 - y1
+      let lastTime = 0
+
+      const origPoses = blizzardsToDraw.map((b) => b.pos)
+
+      function loop(dt) {
+        if (lastTime === 0) {
+          lastTime = dt
+        }
+        const dTime = dt - lastTime
+        const progress = Math.min(dTime / duration, 1)
+        const x = x1 + dx * progress
+        const y = y1 + dy * progress
+        playerPos = [x, y]
+
+        blizzardsToDraw.forEach((b, i) => {
+          const dx = b.value === "<" ? -1 : b.value === ">" ? 1 : 0
+          const dy = b.value === "^" ? -1 : b.value === "v" ? 1 : 0
+          blizzardsToDraw[i] = {
+            value: b.value,
+            pos: [
+              origPoses[i][0] + dx * progress,
+              origPoses[i][1] + dy * progress,
+            ],
+          }
+        })
+
+        drawLevel(map, time)
+        if (progress < 1) {
+          handle = requestAnimationFrame(loop)
+        } else {
+          cancelAnimationFrame(handle)
+          playerPos = to
+          time++
+          blizzardsToDraw.forEach((b, i) => {
+            const dx = b.value === "<" ? -1 : b.value === ">" ? 1 : 0
+            const dy = b.value === "^" ? -1 : b.value === "v" ? 1 : 0
+            const x = mod(origPoses[i][0] + dx, map.width)
+            const y = mod(origPoses[i][1] + dy, map.height)
+
+            blizzardsToDraw[i] = {
+              value: b.value,
+              pos: [x, y],
+            }
+          })
+          drawLevel(map, time)
+          res()
         }
       }
-
-      handle = requestAnimationFrame(loop)
-    }
-    loop(0)
+      loop(0)
+    })
   }
 
   function drawLevel(map, time) {
+    ctx.fillStyle = colors.bg
+    ctx.fillRect(
+      -padding * scale,
+      -padding * scale,
+      canvas.width,
+      canvas.height,
+    )
+
     let drawMap = new Map2d()
     for (let i = -1; i <= map.width; i++) {
       drawMap.set([i, -1], "#")
@@ -210,20 +266,7 @@ async function startLevel(level) {
     drawMap = parseMap2d(drawMap.toString())
 
     for (const { pos, value } of drawMap) {
-      const origPos = [pos[0] - 1, pos[1] - 1]
-      const blizzards = []
-      if (map.has(origPos)) {
-        if (checks.u(map, origPos, time)) blizzards.push("⇡")
-        if (checks.d(map, origPos, time)) blizzards.push("⇣")
-        if (checks.l(map, origPos, time)) blizzards.push("⇠")
-        if (checks.r(map, origPos, time)) blizzards.push("⇢")
-      }
-
-      if (blizzards.length > 0) {
-        blizzards.forEach((blizzard, i) =>
-          drawChar(pos, blizzard, colors.blizzard, i === 0),
-        )
-      } else if (value === "#") {
+      if (value === "#") {
         const isWallOnLeft = drawMap.get([pos[0] - 1, pos[1]]) === "#"
         const isWallOnRight = drawMap.get([pos[0] + 1, pos[1]]) === "#"
         const isWallOnTop = drawMap.get([pos[0], pos[1] - 1]) === "#"
@@ -249,9 +292,18 @@ async function startLevel(level) {
           drawSprite(pos, sprites.wallV)
         }
       } else {
-        drawSprite(pos, sprites.grass)
+        // drawSprite(pos, sprites.grass)
       }
     }
+
+    blizzardsToDraw.forEach((blizzard) => {
+      drawChar(
+        V.add(blizzard.pos, V.vec(1, 1)),
+        blizzardToChar[blizzard.value],
+        colors.blizzard,
+        false,
+      )
+    })
 
     drawElf([playerPos[0] + 1, playerPos[1] + 1])
     drawElf2([drawMap.width - 2, drawMap.height - 1])
@@ -298,18 +350,7 @@ async function startLevel(level) {
     }
   }
 
-  function handleMove(direction) {
-    time++
-    if (direction === "up") {
-      playerPos[1]--
-    } else if (direction === "down") {
-      playerPos[1]++
-    } else if (direction === "left") {
-      playerPos[0]--
-    } else if (direction === "right") {
-      playerPos[0]++
-    }
-    drawLevel(map, time)
+  function checkWinLose() {
     if (V.eq(playerPos, [map.width - 1, map.height])) {
       won = true
       drawWinScreen()
@@ -322,6 +363,21 @@ async function startLevel(level) {
       lost = true
       drawLoseScreen()
     }
+  }
+
+  async function handleMove(direction) {
+    let nextPos = [...playerPos]
+    if (direction === "up") {
+      nextPos[1]--
+    } else if (direction === "down") {
+      nextPos[1]++
+    } else if (direction === "left") {
+      nextPos[0]--
+    } else if (direction === "right") {
+      nextPos[0]++
+    }
+    await movePlayerFromToWithAnimation(playerPos, nextPos, 300)
+    checkWinLose()
     setButtonsState()
   }
 
